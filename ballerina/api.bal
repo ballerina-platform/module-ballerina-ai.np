@@ -31,3 +31,7 @@ public isolated function call(Prompt prompt, typedesc<anydata> td = <>)
 } external;
 
 public const annotation LlmCall on source external;
+
+public const annotation record {|
+    string prompt;
+|} GenerateCode on source external;

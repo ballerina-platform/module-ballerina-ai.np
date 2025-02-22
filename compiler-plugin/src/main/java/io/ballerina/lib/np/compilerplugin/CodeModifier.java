@@ -29,6 +29,8 @@ public class CodeModifier extends io.ballerina.projects.plugins.CodeModifier {
 
     @Override
     public void init(CodeModifierContext modifierContext) {
-        modifierContext.addSourceModifierTask(new PromptAsCodeCodeModificationTask());
+        modifierContext.addSourceModifierTask(new RuntimePromptAsCodeCodeModificationTask());
+        // TODO: Add conditionally maybe.
+        modifierContext.addSourceModifierTask(new CompileTimePromptAsCodeCodeModificationTask());
     }
 }
