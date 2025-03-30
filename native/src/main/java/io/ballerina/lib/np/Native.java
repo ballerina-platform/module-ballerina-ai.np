@@ -158,7 +158,18 @@ public class Native {
     // Simple, simple, SIMPLE implementation for now.
     public static void populateFieldInfo(BTypedesc typedesc, BArray names, BArray required,
                                          BArray types, BArray nilable) {
-        RecordType recordType = (RecordType) TypeUtils.getImpliedType(typedesc.getDescribingType());
+        Type impliedType = TypeUtils.getImpliedType(typedesc.getDescribingType());
+
+        RecordType recordType;
+        if (impliedType instanceof UnionType unionType) {
+            // Temporary
+            recordType = (RecordType) unionType.getMemberTypes().stream()
+                    .map(TypeUtils::getImpliedType)
+                    .filter(type -> type instanceof RecordType).findFirst().get();
+        } else {
+            recordType = (RecordType) impliedType;
+        }
+
         for (Field field : recordType.getFields().values()) {
             names.append(StringUtils.fromString(field.getFieldName()));
             long flags = field.getFlags();
