@@ -21,9 +21,11 @@ import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExternalFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 
 import java.util.Optional;
 
@@ -41,6 +43,11 @@ class Commons {
 
     static boolean hasNaturalFunctionAnnotation(ExternalFunctionBodyNode functionBody, String modulePrefix) {
         return hasAnnotation(functionBody, modulePrefix, NATURAL_FUNCTION_ANNOT);
+    }
+
+    static boolean isRuntimeNaturalExpression(ExpressionNode expressionNode) {
+        // TODO: check not const once const natural expressions are added
+        return expressionNode.kind() == SyntaxKind.NATURAL_EXPRESSION;
     }
 
     static boolean hasAnnotation(ExternalFunctionBodyNode functionBody, String modulePrefix,
