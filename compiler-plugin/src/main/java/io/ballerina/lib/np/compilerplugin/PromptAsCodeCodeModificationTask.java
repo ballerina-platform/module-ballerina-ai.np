@@ -25,6 +25,7 @@ import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
+import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.ExpressionFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
@@ -35,8 +36,10 @@ import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.ImportPrefixNode;
+import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
@@ -103,12 +106,14 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static final Token COLON = createToken(SyntaxKind.COLON_TOKEN);
     private static final Token COMMA = createToken(SyntaxKind.COMMA_TOKEN);
     private static final Token BACKTICK = createToken(SyntaxKind.BACKTICK_TOKEN);
+    private static final Token INTERPOLATION_START = createToken(SyntaxKind.INTERPOLATION_START_TOKEN);
     private static final Token MODEL = createIdentifierToken("model");
     private static final String SCHEMA_ANNOTATION_IDENTIFIER = "Schema";
     private static final String CALL_LLM = "callLlm";
     private static final String STRING = "string";
     private static final String BYTE = "byte";
     private static final String NUMBER = "number";
+    private static final String ESCAPED_BACKTICK = "\"`\"";
 
     private static final SimpleNameReferenceNode PROMPT_NAME_REF_NODE =
             NodeFactory.createSimpleNameReferenceNode(NodeFactory.createIdentifierToken(PROMPT_VAR));
@@ -308,11 +313,9 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
 
     private static FunctionCallExpressionNode createNPCallFunctionCallExpression(
             String npPrefix, NaturalExpressionNode naturalExpressionNode) {
-        NodeList<Node> prompt = naturalExpressionNode.prompt();
+        NodeList<Node> prompt = getRawTemplateContent(naturalExpressionNode.prompt());
         TemplateExpressionNode promptRawTemplate = NodeFactory.createTemplateExpressionNode(
-                SyntaxKind.RAW_TEMPLATE_EXPRESSION, null, BACKTICK,
-                // TODO: escape especially allowed characters
-                prompt, BACKTICK);
+                SyntaxKind.RAW_TEMPLATE_EXPRESSION, null, BACKTICK, prompt, BACKTICK);
 
         Optional<NaturalModelNode> naturalModelNode = naturalExpressionNode.naturalModel();
 
@@ -332,6 +335,61 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
                 arguments,
                 CLOSE_PAREN
         );
+    }
+
+    private static NodeList<Node> getRawTemplateContent(NodeList<Node> prompt) {
+        List<Node> modifiedNodes = new ArrayList<>();
+        boolean modified = false;
+        MinutiaeList emptyMinutiaeList = AbstractNodeFactory.createEmptyMinutiaeList();
+
+        for (Node node : prompt) {
+            if (!(node instanceof LiteralValueToken literalValueToken)) {
+                modifiedNodes.add(node);
+                continue;
+            }
+
+            SyntaxKind kind = literalValueToken.kind();
+            String text = literalValueToken.text();
+
+            if (text.isEmpty()) {
+                modifiedNodes.add(node);
+                continue;
+            }
+
+            String updatedText = text.replace("\\}", "}");
+            updatedText = updatedText.replace("`", ESCAPED_BACKTICK);
+            if (!text.equals(updatedText)) {
+                modified = true;
+            }
+
+            String[] split = updatedText.split(ESCAPED_BACKTICK);
+
+            int length = split.length;
+            for (int i = 0; i < length - 1; i++) {
+                String part = split[i];
+                modifiedNodes.add(
+                        NodeFactory.createLiteralValueToken(kind, part, emptyMinutiaeList, emptyMinutiaeList));
+                modifiedNodes.add(
+                        NodeFactory.createInterpolationNode(
+                                INTERPOLATION_START, NodeParser.parseExpression(ESCAPED_BACKTICK), CLOSE_BRACE)
+                );
+            }
+
+            modifiedNodes.add(
+                    NodeFactory.createLiteralValueToken(kind, split[length - 1], emptyMinutiaeList, emptyMinutiaeList));
+
+            if (updatedText.endsWith(ESCAPED_BACKTICK)) {
+                modifiedNodes.add(
+                        NodeFactory.createInterpolationNode(
+                                INTERPOLATION_START, NodeParser.parseExpression(ESCAPED_BACKTICK), CLOSE_BRACE)
+                );
+            }
+        }
+
+        if (modified) {
+            return NodeFactory.createNodeList(modifiedNodes);
+        }
+        return prompt;
     }
 
     private static MappingConstructorExpressionNode createContextMappingExpressionNode(ExpressionNode model) {
