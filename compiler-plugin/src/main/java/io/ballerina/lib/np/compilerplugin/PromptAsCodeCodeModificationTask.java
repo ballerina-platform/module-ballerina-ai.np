@@ -20,7 +20,10 @@ package io.ballerina.lib.np.compilerplugin;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
+import io.ballerina.compiler.api.symbols.FunctionSymbol;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -90,6 +93,7 @@ import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.PROMPT_VAR;
 import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
+import static io.ballerina.lib.np.compilerplugin.Commons.isNPModule;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
 /**
@@ -243,6 +247,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         private final ModifierData modifierData;
         private final SemanticModel semanticModel;
         private final Document document;
+        private final SemanticModel semanticModel;
         private final TypeMapper typeMapper;
         private final List<ModuleMemberDeclarationNode> modifiedMembers;
 
@@ -301,13 +306,38 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
 
         @Override
         public FunctionCallExpressionNode transform(FunctionCallExpressionNode functionCallExpressionNode) {
-            Optional<TypeSymbol> typeSymbol = this.semanticModel.expectedType(
-                    this.document, functionCallExpressionNode.lineRange().startLine());
+            if (isNotNPCallCall(functionCallExpressionNode, this.semanticModel)) {
+                return functionCallExpressionNode;
+            }
+
+            Optional<TypeSymbol> typeSymbol =
+                              semanticModel.expectedType(document, functionCallExpressionNode.lineRange().startLine());
             if (typeSymbol.isEmpty()) {
                 return functionCallExpressionNode;
             }
             getTypeSchema(typeSymbol.get(), this.typeMapper, this.modifierData.typeSchemas);
             return functionCallExpressionNode;
+        }
+
+        private boolean isNotNPCallCall(FunctionCallExpressionNode functionCallExpressionNode,
+                                        SemanticModel semanticModel) {
+            Optional<Symbol> symbolOptional = semanticModel.symbol(functionCallExpressionNode);
+            if (symbolOptional.isEmpty()) {
+                return true;
+            }
+
+            Symbol symbol = symbolOptional.get();
+            if (!(symbol instanceof FunctionSymbol functionSymbol)) {
+                return true;
+            }
+
+            Optional<ModuleSymbol> moduleOptional = functionSymbol.getModule();
+            Optional<String> nameOptional = functionSymbol.getName();
+            if (moduleOptional.isEmpty() || nameOptional.isEmpty()) {
+                return true;
+            }
+
+            return !(isNPModule(moduleOptional.get()) && CALL_LLM.equals(nameOptional.get()));
         }
     }
 
