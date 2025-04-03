@@ -30,6 +30,7 @@ import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.BaseNodeModifier;
 import io.ballerina.compiler.syntax.tree.ExpressionFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
@@ -46,13 +47,12 @@ import io.ballerina.compiler.syntax.tree.MinutiaeList;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
-import io.ballerina.compiler.syntax.tree.NaturalModelNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
-import io.ballerina.compiler.syntax.tree.NodeTransformer;
-import io.ballerina.compiler.syntax.tree.NonTerminalNode;
+import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
+import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
@@ -88,10 +88,8 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.lib.np.compilerplugin.Commons.CONTEXT_VAR;
 import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
-import static io.ballerina.lib.np.compilerplugin.Commons.PROMPT_VAR;
 import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
 import static io.ballerina.lib.np.compilerplugin.Commons.isNPModule;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
@@ -118,11 +116,6 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static final String BYTE = "byte";
     private static final String NUMBER = "number";
     private static final String ESCAPED_BACKTICK = "\"`\"";
-
-    private static final SimpleNameReferenceNode PROMPT_NAME_REF_NODE =
-            NodeFactory.createSimpleNameReferenceNode(NodeFactory.createIdentifierToken(PROMPT_VAR));
-    private static final SimpleNameReferenceNode CONTEXT_NAME_REF_NODE =
-            NodeFactory.createSimpleNameReferenceNode(NodeFactory.createIdentifierToken(CONTEXT_VAR));
 
     private final ModifierData modifierData;
     private final CodeModifier.AnalysisData analysisData;
@@ -197,16 +190,14 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
                                                TypeMapper typeMapper) {
         ModulePartNode modulePartNode = document.syntaxTree().rootNode();
 
-        List<ModuleMemberDeclarationNode> modifiedMembers = new ArrayList<>();
         NaturalProgrammingCodeModifier naturalProgrammingCodeModifier =
                 new NaturalProgrammingCodeModifier(
-                        modifierData, modifierContext, moduleId, document, typeMapper, modifiedMembers);
+                        modifierData, modifierContext, moduleId, document, typeMapper);
         TypeDefinitionModifier typeDefinitionModifier =
                 new TypeDefinitionModifier(modifierData.typeSchemas, modifierData);
 
         ModulePartNode modifiedRoot = (ModulePartNode) modulePartNode.apply(naturalProgrammingCodeModifier);
-        modifiedRoot = modifiedRoot.modify(modifiedRoot.imports(), NodeFactory.createNodeList(modifiedMembers),
-                modifiedRoot.eofToken());
+        modifiedRoot = modifiedRoot.modify(modifiedRoot.imports(), modifiedRoot.members(), modifiedRoot.eofToken());
 
         ModulePartNode finalRoot = (ModulePartNode) modifiedRoot.apply(typeDefinitionModifier);
         finalRoot = finalRoot.modify(updateImports(finalRoot, modifierData), finalRoot.members(), finalRoot.eofToken());
@@ -242,47 +233,19 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         }
     }
 
-    private static class NaturalProgrammingCodeModifier extends NodeTransformer<Node> {
+    private static class NaturalProgrammingCodeModifier extends BaseNodeModifier {
 
         private final ModifierData modifierData;
         private final SemanticModel semanticModel;
         private final Document document;
-        private final SemanticModel semanticModel;
         private final TypeMapper typeMapper;
-        private final List<ModuleMemberDeclarationNode> modifiedMembers;
 
         NaturalProgrammingCodeModifier(ModifierData modifierData, SourceModifierContext modifierContext,
-                                       ModuleId moduleId, Document document, TypeMapper typeMapper,
-                                       List<ModuleMemberDeclarationNode> modifiedMembers) {
+                                       ModuleId moduleId, Document document, TypeMapper typeMapper) {
             this.modifierData = modifierData;
             this.semanticModel = modifierContext.compilation().getSemanticModel(moduleId);
             this.document = document;
             this.typeMapper = typeMapper;
-            this.modifiedMembers = modifiedMembers;
-        }
-
-        @Override
-        protected Node transformSyntaxNode(Node node) {
-            boolean modulePartNode = node instanceof ModulePartNode;
-            NonTerminalNode nonTerminalNode = (NonTerminalNode) node;
-            for (Node child : nonTerminalNode.children()) {
-                if (modulePartNode && child instanceof ImportDeclarationNode) {
-                    continue;
-                }
-
-                Node modifiedNode = (Node) child.apply(this);
-
-                if (modifiedNode == null) {
-                    continue;
-                }
-
-                if (modulePartNode) {
-                    this.modifiedMembers.add((ModuleMemberDeclarationNode) modifiedNode);
-                } else  if (child != modifiedNode) {
-                    nonTerminalNode = nonTerminalNode.replace(child, modifiedNode);
-                }
-            }
-            return nonTerminalNode;
         }
 
         @Override
@@ -347,14 +310,27 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         TemplateExpressionNode promptRawTemplate = NodeFactory.createTemplateExpressionNode(
                 SyntaxKind.RAW_TEMPLATE_EXPRESSION, null, BACKTICK, prompt, BACKTICK);
 
-        Optional<NaturalModelNode> naturalModelNode = naturalExpressionNode.naturalModel();
+        Optional<ExpressionNode> naturalModelArg = Optional.empty();
+
+        Optional<ParenthesizedArgList> parenthesizedArgListOptional = naturalExpressionNode.parenthesizedArgList();
+        if (parenthesizedArgListOptional.isPresent()) {
+            ParenthesizedArgList parenthesizedArgList = parenthesizedArgListOptional.get();
+            SeparatedNodeList<FunctionArgumentNode> arguments = parenthesizedArgList.arguments();
+            if (!arguments.isEmpty()) {
+                FunctionArgumentNode functionArgumentNode = arguments.get(0);
+                if (functionArgumentNode instanceof PositionalArgumentNode positionalArgumentNode) {
+                    // TODO: validation to be done first
+                    naturalModelArg = Optional.of(positionalArgumentNode.expression());
+                }
+            }
+        }
 
         SeparatedNodeList<FunctionArgumentNode> arguments =
-                naturalModelNode.isPresent() ?
+                naturalModelArg.isPresent() ?
                         NodeFactory.createSeparatedNodeList(
                                 promptRawTemplate,
                                 COMMA,
-                                createContextMappingExpressionNode(naturalModelNode.get().expression())
+                                createContextMappingExpressionNode(naturalModelArg.get())
                         ) :
                         NodeFactory.createSeparatedNodeList(
                                 promptRawTemplate

@@ -25,7 +25,7 @@ import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExternalFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 
 import java.util.Optional;
 
@@ -46,8 +46,8 @@ class Commons {
     }
 
     static boolean isRuntimeNaturalExpression(ExpressionNode expressionNode) {
-        // TODO: check not const once const natural expressions are added
-        return expressionNode.kind() == SyntaxKind.NATURAL_EXPRESSION;
+        return expressionNode instanceof NaturalExpressionNode naturalExpressionNode &&
+                naturalExpressionNode.constKeyword().isEmpty();
     }
 
     static boolean hasAnnotation(ExternalFunctionBodyNode functionBody, String modulePrefix,
