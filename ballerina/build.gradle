@@ -23,7 +23,7 @@ plugins {
 
 description = 'Ballerina - Natural Programming Module'
 
-def packageOrg = "ballerinax"
+def packageOrg = "ballerina"
 def packageName = "np"
 
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")

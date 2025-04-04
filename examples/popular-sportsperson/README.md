@@ -60,7 +60,7 @@ Use a natural function to find a popular sportsperson who has the specified name
     E.g., add the following for Azure OpenAI in the Config.toml file
 
     ```toml
-    [ballerinax.np.defaultModelConfig]
+    [ballerina.np.defaultModelConfig]
     serviceUrl = "<SERVICE_URL>"
     deploymentId = "<DEPLOYMENT_ID>"
     apiVersion = "<API_VERSION>"

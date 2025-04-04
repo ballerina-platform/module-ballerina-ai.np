@@ -52,7 +52,7 @@ public class Native {
         SchemaGenerationContext schemaGenerationContext = new SchemaGenerationContext();
         Object jsonSchema = generateJsonSchemaForType(targetType.getDescribingType(), schemaGenerationContext);
         return env.getRuntime().callFunction(
-                new Module("ballerinax", "np", "0"), "callLlmGeneric", null, prompt, context, targetType,
+                new Module("ballerina", "np", "0"), "callLlmGeneric", null, prompt, context, targetType,
                 schemaGenerationContext.isSchemaGeneratedAtCompileTime ? jsonSchema : null);
     }
 
@@ -132,7 +132,7 @@ public class Native {
     private static Object generateJsonSchemaForRecordType(RecordType recordType,
                                                           SchemaGenerationContext schemaGenerationContext) {
         for (Map.Entry<BString, Object> entry : recordType.getAnnotations().entrySet()) {
-            if ("ballerinax/np:0:Schema".equals(entry.getKey().getValue())) {
+            if ("ballerina/np:0:Schema".equals(entry.getKey().getValue())) {
                 return entry.getValue();
             }
         }

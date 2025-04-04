@@ -430,7 +430,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         return (MappingConstructorExpressionNode) NodeParser.parseExpression(jsonSchema);
     }
 
-    private static boolean containsBallerinaxNPImport(NodeList<ImportDeclarationNode> imports) {
+    private static boolean containsBallerinaNPImport(NodeList<ImportDeclarationNode> imports) {
         for (ImportDeclarationNode importDeclarationNode : imports) {
             Optional<ImportOrgNameNode> importOrgNameNode = importDeclarationNode.orgName();
             if (importOrgNameNode.isPresent() && importOrgNameNode.get().orgName().text().equals(ORG_NAME)
@@ -444,7 +444,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static NodeList<ImportDeclarationNode> updateImports(ModulePartNode modulePartNode) {
         NodeList<ImportDeclarationNode> imports = modulePartNode.imports();
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
-        if (containsBallerinaxNPImport(imports)) {
+        if (containsBallerinaNPImport(imports)) {
             return imports;
         }
 

@@ -33,7 +33,7 @@ import java.util.Optional;
  * @since 0.3.0
  */
 class Commons {
-    static final String ORG_NAME = "ballerinax";
+    static final String ORG_NAME = "ballerina";
     static final String MODULE_NAME = "np";
     static final String PROMPT_VAR = "prompt";
     static final String CONTEXT_VAR = "context";

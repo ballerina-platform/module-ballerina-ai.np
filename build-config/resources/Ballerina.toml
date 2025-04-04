@@ -1,10 +1,10 @@
 [package]
-org = "ballerinax"
+org = "ballerina"
 name = "np"
 version = "@toml.version@"
 authors = ["Ballerina"]
 keywords = ["natural programming", "ai"]
-repository = "https://github.com/ballerina-platform/module-ballerinax-np"
+repository = "https://github.com/ballerina-platform/module-ballerina-np"
 license = ["Apache-2.0"]
 distribution = "2201.11.0"
 
