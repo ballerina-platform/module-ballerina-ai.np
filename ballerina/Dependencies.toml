@@ -239,6 +239,22 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "np"
+version = "0.8.2"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "test"},
+	{org = "ballerinai", name = "observe"},
+	{org = "ballerinax", name = "azure.openai.chat"},
+	{org = "ballerinax", name = "openai.chat"}
+]
+modules = [
+	{org = "ballerina", packageName = "np", moduleName = "np"}
+]
+
+[[package]]
+org = "ballerina"
 name = "oauth2"
 version = "2.14.0"
 dependencies = [
@@ -330,22 +346,6 @@ dependencies = [
 ]
 modules = [
 	{org = "ballerinax", packageName = "azure.openai.chat", moduleName = "azure.openai.chat"}
-]
-
-[[package]]
-org = "ballerinax"
-name = "np"
-version = "0.8.2"
-dependencies = [
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "test"},
-	{org = "ballerinai", name = "observe"},
-	{org = "ballerinax", name = "azure.openai.chat"},
-	{org = "ballerinax", name = "openai.chat"}
-]
-modules = [
-	{org = "ballerinax", packageName = "np", moduleName = "np"}
 ]
 
 [[package]]
