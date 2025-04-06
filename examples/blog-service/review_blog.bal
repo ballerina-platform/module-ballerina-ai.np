@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/np;
+import ballerina/np;
 
 public isolated function reviewBlog(
     Blog blog,

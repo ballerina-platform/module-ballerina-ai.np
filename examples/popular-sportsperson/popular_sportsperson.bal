@@ -1,5 +1,5 @@
 import ballerina/io;
-import ballerinax/np;
+import ballerina/np;
 
 # Represents a person who plays a sport.
 type SportsPerson record {|
