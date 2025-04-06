@@ -1,0 +1,21 @@
+[package]
+org = "ballerina"
+name = "np"
+version = "0.1.0"
+authors = ["Ballerina"]
+keywords = ["natural programming", "ai"]
+repository = "https://github.com/ballerina-platform/module-ballerina-np"
+license = ["Apache-2.0"]
+distribution = "2201.11.0"
+
+[platform.java21]
+graalvmCompatible = true
+
+[build-options]
+observabilityIncluded = false
+
+[[platform.java21.dependency]]
+groupId = "io.ballerina.lib"
+artifactId = "np-native"
+version = "0.1.0"
+path = "../native/build/libs/np-native-0.1.0-SNAPSHOT.jar"
