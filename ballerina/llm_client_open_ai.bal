@@ -14,12 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/openai.chat as openAIChat;
+import ballerina/http;
 
 # Configuration for OpenAI model.
 public type OpenAIModelConfig record {|
     # Connection configuration for the OpenAI model.
-    openAIChat:ConnectionConfig connectionConfig;
+    OpenAIConnectionConfig connectionConfig;
     # Service URL for the OpenAI model.
     string serviceUrl?;
 |};
@@ -28,28 +28,30 @@ public type OpenAIModelConfig record {|
 public isolated distinct client class OpenAIModel {
     *Model;
 
-    private final openAIChat:Client cl;
+    private final http:Client cl;
     private final string model;
 
-    public isolated function init(openAIChat:Client|OpenAIModelConfig openAI, string model) returns error? {
-        self.cl = openAI is openAIChat:Client ?
-            openAI :
-            let string? serviceUrl = openAI?.serviceUrl in
-                    serviceUrl is () ?
-                    check new (openAI.connectionConfig) :
-                    check new (openAI.connectionConfig, serviceUrl);
-        self.model = model;
+    public isolated function init(OpenAIModelConfig openAIModelConfig, string model) returns error? {
+        OpenAIConnectionConfig connectionConfig = openAIModelConfig.connectionConfig;
+        http:ClientConfiguration httpClientConfig = buildHttpClientConfig(connectionConfig);
+        httpClientConfig.auth = connectionConfig.auth;
+        self.cl = check new (openAIModelConfig.serviceUrl ?: "https://api.openai.com/v1", httpClientConfig);
+        self.model = model;        
+    }
+
+    isolated remote function chat(OpenAICreateChatCompletionRequest chatBody) 
+            returns OpenAICreateChatCompletionResponse|error {
+        return self.cl->/chat/completions.post(chatBody);
     }
 
     isolated remote function call(string prompt, map<json> expectedResponseSchema) returns json|error {
-        openAIChat:CreateChatCompletionRequest chatBody = {
+        OpenAICreateChatCompletionRequest chatBody = {
             messages: [{role: "user", "content": getPromptWithExpectedResponseSchema(prompt, expectedResponseSchema)}],
             model: self.model
         };
 
-        openAIChat:CreateChatCompletionResponse chatResult =
-            check self.cl->/chat/completions.post(chatBody);
-        openAIChat:CreateChatCompletionResponse_choices[] choices = chatResult.choices;
+        OpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
+        OpenAICreateChatCompletionResponse_choices[] choices = chatResult.choices;
 
         string? resp = choices[0].message?.content;
         if resp is () {
