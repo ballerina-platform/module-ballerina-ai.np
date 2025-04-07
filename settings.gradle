@@ -45,11 +45,13 @@ include(':checkstyle')
 include(':np-native')
 include(':np-ballerina')
 include(':np-compiler-plugin')
+include(':np-ballerina-tests')
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':np-native').projectDir = file('native')
 project(':np-ballerina').projectDir = file('ballerina')
 project(':np-compiler-plugin').projectDir = file('compiler-plugin')
+project(':np-ballerina-tests').projectDir = file('ballerina-tests')
 
 gradleEnterprise {
     buildScan {

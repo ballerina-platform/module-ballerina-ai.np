@@ -24,6 +24,10 @@ plugins {
 
 description = 'Ballerina - Natural Programming Compiler Plugin'
 
+configurations {
+    externalJars
+}
+
 dependencies {
     checkstyle project(':checkstyle')
     checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
@@ -36,6 +40,8 @@ dependencies {
     implementation group: 'io.ballerina.openapi', name: 'ballerina-to-openapi', version: "${ballerinaToOpenApiVersion}"
     implementation group: 'io.swagger.core.v3', name: 'swagger-core', version: "${swaggerVersion}"
     implementation group: 'io.swagger.core.v3', name: 'swagger-models', version: "${swaggerVersion}"
+
+    externalJars group: 'io.ballerina.openapi', name: 'ballerina-to-openapi', version: "${ballerinaToOpenApiVersion}"
 }
 
 def excludePattern = '**/module-info.java'
@@ -80,3 +86,12 @@ compileJava {
         classpath = files()
     }
 }
+
+task copyOpenApiJar(type: Copy) {
+    from {
+        configurations.externalJars.collect { it }
+    }
+    into "${buildDir}/libs"
+}
+
+build.dependsOn copyOpenApiJar
