@@ -1,18 +1,16 @@
 import ballerina/http;
-import ballerinax/azure.openai.chat as azureOpenAIChat;
-import ballerinax/openai.chat as openAIChat;
 import ballerina/test;
 
 service /llm on new http:Listener(8080) {
     resource function post azureopenai/deployments/gpt4onew/chat/completions(
-            string api\-version, azureOpenAIChat:CreateChatCompletionRequest payload)
+            string api\-version, AzureOpenAICreateChatCompletionRequest payload)
                 returns json|error {
         test:assertEquals(api\-version, "2023-08-01-preview");
-        azureOpenAIChat:ChatCompletionRequestMessage[]? messages = payload.messages;
+        AzureOpenAIChatCompletionRequestMessage[]? messages = payload.messages;
         if messages is () {
             test:assertFail("Expected messages in the payload");
         }
-        azureOpenAIChat:ChatCompletionRequestMessage message = messages[0];
+        AzureOpenAIChatCompletionRequestMessage message = messages[0];
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
@@ -32,10 +30,10 @@ service /llm on new http:Listener(8080) {
         };
     }
 
-    resource function post openai/chat/completions(openAIChat:CreateChatCompletionRequest payload)
+    resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
             returns json|error {
 
-        azureOpenAIChat:ChatCompletionRequestMessage message = payload.messages[0];
+        OpenAIChatCompletionRequestUserMessage message = payload.messages[0];
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");

@@ -14,47 +14,55 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/azure.openai.chat;
+import ballerina/http;
 
 # Configuration for Azure OpenAI model.
-public type AzureOpenAIModelConfig record {|
+type AzureOpenAIModelConfig record {|
     # Connection configuration for the Azure OpenAI model.
-    chat:ConnectionConfig connectionConfig;
+    AzureOpenAIConnectionConfig connectionConfig;
     # Service URL for the Azure OpenAI model.
     string serviceUrl;
 |};
 
 # Azure OpenAI model chat completion client.
-public isolated distinct client class AzureOpenAIModel {
+isolated distinct client class AzureOpenAIModel {
     *Model;
 
-    private final chat:Client cl;
+    private final http:Client cl;
     private final string deploymentId;
     private final string apiVersion;
+    private final readonly & map<string> headers;
 
-    public isolated function init(chat:Client|AzureOpenAIModelConfig azureOpenAI,
+    isolated function init(AzureOpenAIModelConfig azureOpenAIModelConfig,
             string deploymentId,
             string apiVersion) returns error? {
-        self.cl = azureOpenAI is chat:Client ?
-            azureOpenAI :
-            check new (azureOpenAI.connectionConfig, azureOpenAI.serviceUrl);
+        AzureOpenAIConnectionConfig connectionConfig = azureOpenAIModelConfig.connectionConfig;
+        http:ClientConfiguration httpClientConfig = buildHttpClientConfig(connectionConfig);
+
+        http:BearerTokenConfig|ApiKeysConfig auth = connectionConfig.auth;
+        self.headers = auth is ApiKeysConfig ? {"api-key": auth?.apiKey} : {};
+        
+        self.cl = check new (azureOpenAIModelConfig.serviceUrl, httpClientConfig);
+
         self.deploymentId = deploymentId;
         self.apiVersion = apiVersion;
     }
 
+    isolated remote function chat(AzureOpenAICreateChatCompletionRequest chatBody) 
+            returns AzureOpenAICreateChatCompletionResponse|error {
+        string resourcePath = string `/deployments/${check getEncodedUri(self.deploymentId)}/chat/completions`;
+        resourcePath = string `${resourcePath}?${check getEncodedUri("api-version")}=${self.apiVersion}`;
+        return self.cl->post(resourcePath, chatBody, self.headers);
+    }
+
     isolated remote function call(string prompt, map<json> expectedResponseSchema) returns json|error {
-        chat:CreateChatCompletionRequest chatBody = {
-            messages: [{role: "user", "content": getPromptWithExpectedResponseSchema(prompt, expectedResponseSchema)}]
+        AzureOpenAICreateChatCompletionRequest chatBody = {
+            messages: [{role: "user", content: getPromptWithExpectedResponseSchema(prompt, expectedResponseSchema)}]
         };
 
-        chat:Client cl = self.cl;
-        chat:CreateChatCompletionResponse chatResult =
-            check cl->/deployments/[self.deploymentId]/chat/completions.post(self.apiVersion, chatBody);
+        AzureOpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
         record {
-            chat:ChatCompletionResponseMessage message?;
-            chat:ContentFilterChoiceResults content_filter_results?;
-            int index?;
-            string finish_reason?;
+            AzureOpenAIChatCompletionResponseMessage message?;
         }[]? choices = chatResult.choices;
 
         if choices is () {

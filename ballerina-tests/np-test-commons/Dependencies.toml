@@ -307,35 +307,9 @@ name = "np_test_commons"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "test"},
-	{org = "ballerinax", name = "openai.chat"}
+	{org = "ballerina", name = "test"}
 ]
 modules = [
 	{org = "ballerina_np", packageName = "np_test_commons", moduleName = "np_test_commons"}
-]
-
-[[package]]
-org = "ballerinai"
-name = "observe"
-version = "0.0.0"
-dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "observe"}
-]
-
-[[package]]
-org = "ballerinax"
-name = "openai.chat"
-version = "4.0.0"
-dependencies = [
-	{org = "ballerina", name = "constraint"},
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "os"},
-	{org = "ballerina", name = "url"},
-	{org = "ballerinai", name = "observe"}
-]
-modules = [
-	{org = "ballerinax", packageName = "openai.chat", moduleName = "openai.chat"}
 ]
 

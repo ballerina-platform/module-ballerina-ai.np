@@ -16,12 +16,11 @@
 
 import ballerina/http;
 import ballerina/test;
-import ballerinax/openai.chat as openAIChat;
 
 service /llm on new http:Listener(8080) {
-    resource function post openai/chat/completions(openAIChat:CreateChatCompletionRequest payload)
+    resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
             returns json|error {
-        openAIChat:ChatCompletionRequestMessage message = payload.messages[0];
+        OpenAIChatCompletionRequestUserMessage message = payload.messages[0];
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
