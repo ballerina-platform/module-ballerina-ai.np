@@ -76,3 +76,35 @@ function testJsonContentWithoutJsonAfterBackticks() returns error? {
     string result = check callLlm(`Which country is known as the pearl of the Indian Ocean?`);
     test:assertEquals(result, "Sri Lanka");
 }
+
+# Represents a person who plays a sport.
+type SportsPerson record {|
+    # First name of the person
+    string firstName;
+    # Middle name of the person
+    string? middleName;
+    # Last name of the person
+    string lastName;
+    # Year the person was born
+    int yearOfBirth;
+    # Sport that the person plays
+    string sport;
+|};
+
+type SportsPersonOptional SportsPerson?;
+
+@test:Config
+function testSchemaGeneratedForComplexTypeAtRuntime() returns error? {
+    typedesc<json> td = SportsPersonOptional;
+    int decadeStart = 1990;
+    string nameSegment = "Simone";
+    json result = check callLlm(`Who is a popular sportsperson that was born in the decade starting
+            from ${decadeStart} with ${nameSegment} in their name?`, targetType = td);
+    test:assertEquals(result, <SportsPerson> {
+        firstName: "Simone",
+        lastName: "Biles",
+        middleName: (),
+        sport: "Gymnastics",
+        yearOfBirth: 1997
+    });
+}
