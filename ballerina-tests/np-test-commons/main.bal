@@ -48,9 +48,13 @@ service /llm on new http:Listener(8080) {
     }
 }
 
-isolated function getExpectedPrompt(string promptStart) returns string {
-    if promptStart.startsWith("Which country") {
-        return  string `Which country is known as the pearl of the Indian Ocean?.  
+isolated function getExpectedPrompt(string prompt) returns string {
+    string trimmedPrompt = prompt.trim();
+
+    if trimmedPrompt.startsWith("Which country") {
+        return  string `Which country is known as the pearl of the Indian Ocean?
+        ---
+
         The output should be a JSON value that satisfies the following JSON schema, 
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         
@@ -58,10 +62,12 @@ isolated function getExpectedPrompt(string promptStart) returns string {
         {"type":"string"}`;
     }
 
-    if promptStart.startsWith("For each string value ") {
+    if trimmedPrompt.startsWith("For each string value ") {
         return string `For each string value in the given array if the value can be parsed
-        as an integer give an integer, if not give the same string value. Please preserve the order.
-        Array value: ["foo","1","bar","2.3","4"].  
+    as an integer give an integer, if not give the same string value. Please preserve the order.
+    Array value: ["foo","1","bar","2.3","4"]
+        ---
+
         The output should be a JSON value that satisfies the following JSON schema, 
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         
@@ -69,9 +75,11 @@ isolated function getExpectedPrompt(string promptStart) returns string {
         {"type":"array", "items":{"type":"object", "anyOf":[{"type":"string"}, {"type":"integer"}]}}`;
     }
 
-    if promptStart.startsWith("Who is a popular sportsperson") {
+    if trimmedPrompt.startsWith("Who is a popular sportsperson") {
         return string `Who is a popular sportsperson that was born in the decade starting
-            from 1990 with Simone in their name?.  
+    from 1990 with Simone in their name?
+        ---
+
         The output should be a JSON value that satisfies the following JSON schema, 
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         
@@ -79,7 +87,7 @@ isolated function getExpectedPrompt(string promptStart) returns string {
         {"type":"object", "anyOf":[{"required":["firstName", "lastName", "sport", "yearOfBirth"], "type":"object", "properties":{"firstName":{"type":"string", "description":"First name of the person"}, "lastName":{"type":"string", "description":"Last name of the person"}, "yearOfBirth":{"type":"integer", "description":"Year the person was born", "format":"int64"}, "sport":{"type":"string", "description":"Sport that the person plays"}}}, {"type":null}]}`;
     }
 
-    test:assertFail("Unexpected prompt");
+    test:assertFail("Unexpected prompt: " + trimmedPrompt);
 }
 
 isolated function getMockLLMResponse(string message) returns string? {

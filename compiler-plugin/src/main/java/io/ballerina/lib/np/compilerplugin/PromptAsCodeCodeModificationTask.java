@@ -78,9 +78,11 @@ import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
@@ -172,7 +174,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
                 continue;
             }
 
-            modifierData.shouldImportNP = true;
+            modifierData.documentsRequiringNPImport.add(document);
             FunctionDefinitionNode functionDefinition = (FunctionDefinitionNode) memberNode;
             extractAndStoreSchemas(semanticModel, functionDefinition, modifierData.typeSchemas,
                                    this.analysisData.typeMapper);
@@ -194,13 +196,14 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
                 new NaturalProgrammingCodeModifier(
                         modifierData, modifierContext, moduleId, document, typeMapper);
         TypeDefinitionModifier typeDefinitionModifier =
-                new TypeDefinitionModifier(modifierData.typeSchemas, modifierData);
+                new TypeDefinitionModifier(modifierData.typeSchemas, modifierData, document);
 
         ModulePartNode modifiedRoot = (ModulePartNode) modulePartNode.apply(naturalProgrammingCodeModifier);
         modifiedRoot = modifiedRoot.modify(modifiedRoot.imports(), modifiedRoot.members(), modifiedRoot.eofToken());
 
         ModulePartNode finalRoot = (ModulePartNode) modifiedRoot.apply(typeDefinitionModifier);
-        finalRoot = finalRoot.modify(updateImports(finalRoot, modifierData), finalRoot.members(), finalRoot.eofToken());
+        finalRoot = finalRoot.modify(
+                updateImports(document, finalRoot, modifierData), finalRoot.members(), finalRoot.eofToken());
 
         return document.syntaxTree().modifyWith(finalRoot).textDocument();
     }
@@ -256,7 +259,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             if (npPrefixIfImported.isPresent()) {
                 npPrefix = npPrefixIfImported.get();
             } else {
-                modifierData.shouldImportNP = true;
+                modifierData.documentsRequiringNPImport.add(document);
                 npPrefix = MODULE_NAME;
             }
 
@@ -419,15 +422,18 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
 
         private final Map<String, String> typeSchemas;
         private final ModifierData modifierData;
+        private final Document document;
 
-        TypeDefinitionModifier(Map<String, String> typeSchemas, ModifierData modifierData) {
+        TypeDefinitionModifier(Map<String, String> typeSchemas, ModifierData modifierData, Document document) {
             this.typeSchemas = typeSchemas;
             this.modifierData = modifierData;
+            this.document = document;
         }
 
         @Override
         public TypeDefinitionNode transform(TypeDefinitionNode typeDefinitionNode) {
-            if (modifierData.npPrefixIfImported.isEmpty() && !modifierData.shouldImportNP) {
+            if (modifierData.npPrefixIfImported.isEmpty() &&
+                    !modifierData.documentsRequiringNPImport.contains(this.document)) {
                 return typeDefinitionNode;
             }
             String typeName = typeDefinitionNode.typeName().text();
@@ -494,7 +500,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         return false;
     }
 
-    private static NodeList<ImportDeclarationNode> updateImports(ModulePartNode modulePartNode,
+    private static NodeList<ImportDeclarationNode> updateImports(Document document, ModulePartNode modulePartNode,
                                                                  ModifierData modifierData) {
         NodeList<ImportDeclarationNode> imports = modulePartNode.imports();
         NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
@@ -502,7 +508,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             return imports;
         }
 
-        if (modifierData.shouldImportNP) {
+        if (modifierData.documentsRequiringNPImport.contains(document)) {
             return imports.add(createImportDeclarationForNPModule());
         }
 
@@ -688,7 +694,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
 
     static final class ModifierData {
         Optional<String> npPrefixIfImported = Optional.empty();
-        boolean shouldImportNP = false;
+        Set<Document> documentsRequiringNPImport = new HashSet<>(0);
         Map<String, String> typeSchemas = new HashMap<>();
     }
 }
