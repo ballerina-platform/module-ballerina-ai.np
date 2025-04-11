@@ -17,7 +17,7 @@
 import ballerina/http;
 
 # Configuration for OpenAI model.
-public type OpenAIModelConfig record {|
+type OpenAIModelConfig record {|
     # Connection configuration for the OpenAI model.
     OpenAIConnectionConfig connectionConfig;
     # Service URL for the OpenAI model.
@@ -25,13 +25,13 @@ public type OpenAIModelConfig record {|
 |};
 
 # OpenAI model chat completion client.
-public isolated distinct client class OpenAIModel {
+isolated distinct client class OpenAIModel {
     *Model;
 
     private final http:Client cl;
     private final string model;
 
-    public isolated function init(OpenAIModelConfig openAIModelConfig, string model) returns error? {
+    isolated function init(OpenAIModelConfig openAIModelConfig, string model) returns error? {
         OpenAIConnectionConfig connectionConfig = openAIModelConfig.connectionConfig;
         http:ClientConfiguration httpClientConfig = buildHttpClientConfig(connectionConfig);
         httpClientConfig.auth = connectionConfig.auth;
