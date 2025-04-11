@@ -21,11 +21,18 @@ import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExternalFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
+import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.RestParameterNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 
 import java.util.Optional;
 
@@ -76,5 +83,23 @@ class Commons {
     static boolean isNPModule(ModuleSymbol moduleSymbol) {
         ModuleID moduleId = moduleSymbol.id();
         return ORG_NAME.equals(moduleId.orgName()) && MODULE_NAME.equals(moduleId.moduleName());
+    }
+
+    static Node getParameterType(ParameterNode parameter, SyntaxKind kind) {
+        return switch (kind) {
+            case REQUIRED_PARAM -> ((RequiredParameterNode) parameter).typeName();
+            case DEFAULTABLE_PARAM -> ((DefaultableParameterNode) parameter).typeName();
+            case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).typeName();
+            default -> ((RestParameterNode) parameter).typeName();
+        };
+    }
+
+    static String getParameterName(ParameterNode parameter, SyntaxKind kind) {
+        return switch (kind) {
+            case REQUIRED_PARAM -> ((RequiredParameterNode) parameter).paramName().get().text();
+            case DEFAULTABLE_PARAM -> ((DefaultableParameterNode) parameter).paramName().get().text();
+            case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).paramName().get().text();
+            default -> ((RestParameterNode) parameter).paramName().get().text();
+        };
     }
 }

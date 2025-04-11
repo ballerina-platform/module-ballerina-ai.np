@@ -31,11 +31,13 @@ import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BaseNodeModifier;
+import io.ballerina.compiler.syntax.tree.ChildNodeList;
 import io.ballerina.compiler.syntax.tree.ExpressionFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
@@ -51,6 +53,8 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
+import io.ballerina.compiler.syntax.tree.NonTerminalNode;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
@@ -88,12 +92,16 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.DEFAULTABLE_PARAM;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
+import static io.ballerina.compiler.syntax.tree.SyntaxKind.REQUIRED_PARAM;
 import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
-import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
+import static io.ballerina.lib.np.compilerplugin.Commons.getParameterName;
+import static io.ballerina.lib.np.compilerplugin.Commons.getParameterType;
 import static io.ballerina.lib.np.compilerplugin.Commons.isNPModule;
+import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
 /**
@@ -264,7 +272,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             }
 
             if (isRuntimeNaturalExpression(naturalExpressionNode)) {
-                return createNPCallFunctionCallExpression(npPrefix, naturalExpressionNode);
+                return createNPCallFunctionCallExpression(npPrefix, naturalExpressionNode, this.semanticModel);
             }
 
             throw new UnsupportedOperationException("Const natural expression not yet supported!");
@@ -308,8 +316,8 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     }
 
     private static FunctionCallExpressionNode createNPCallFunctionCallExpression(
-            String npPrefix, NaturalExpressionNode naturalExpressionNode) {
-        NodeList<Node> prompt = getRawTemplateContent(naturalExpressionNode.prompt());
+            String npPrefix, NaturalExpressionNode naturalExpressionNode, SemanticModel semanticModel) {
+        NodeList<Node> prompt = getRawTemplateContent(naturalExpressionNode, semanticModel);
         TemplateExpressionNode promptRawTemplate = NodeFactory.createTemplateExpressionNode(
                 SyntaxKind.RAW_TEMPLATE_EXPRESSION, null, BACKTICK, prompt, BACKTICK);
 
@@ -346,14 +354,18 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         );
     }
 
-    private static NodeList<Node> getRawTemplateContent(NodeList<Node> prompt) {
+    private static NodeList<Node> getRawTemplateContent(NaturalExpressionNode naturalExpressionNode,
+                                                        SemanticModel semanticModel) {
+        NodeList<Node> prompt = naturalExpressionNode.prompt();
         List<Node> modifiedNodes = new ArrayList<>();
         boolean modified = false;
         MinutiaeList emptyMinutiaeList = AbstractNodeFactory.createEmptyMinutiaeList();
 
+        boolean hasInsertions = false;
         for (Node node : prompt) {
             if (!(node instanceof LiteralValueToken literalValueToken)) {
                 modifiedNodes.add(node);
+                hasInsertions = true;
                 continue;
             }
 
@@ -395,10 +407,83 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             }
         }
 
+        if (!hasInsertions) {
+            Optional<FunctionSignatureNode> functionSignatureIfInNaturalFunction =
+                    getFunctionSignatureIfInNaturalFunction(naturalExpressionNode);
+            if (functionSignatureIfInNaturalFunction.isPresent()) {
+                Optional<List<Node>> parameterInjectionTemplateNodes =
+                        getParameterInjectionTemplateNodes(semanticModel, functionSignatureIfInNaturalFunction.get());
+                if (parameterInjectionTemplateNodes.isPresent()) {
+                    modified = true;
+                    modifiedNodes.addAll(0, parameterInjectionTemplateNodes.get());
+                }
+            }
+        }
+
         if (modified) {
             return NodeFactory.createNodeList(modifiedNodes);
         }
         return prompt;
+    }
+
+    private static Optional<List<Node>> getParameterInjectionTemplateNodes(
+            SemanticModel semanticModel, FunctionSignatureNode functionSignatureNode) {
+        SeparatedNodeList<ParameterNode> parameters = functionSignatureNode.parameters();
+
+        List<String> parametersToInclude = new ArrayList<>(parameters.size());
+        for (ParameterNode parameter : parameters) {
+            SyntaxKind kind = parameter.kind();
+            if (kind != REQUIRED_PARAM && kind != DEFAULTABLE_PARAM) {
+                continue;
+            }
+
+            Node parameterType = getParameterType(parameter, kind);
+            Optional<TypeSymbol> symbol = semanticModel.type(parameterType.lineRange());
+            if (symbol.isEmpty()) {
+                continue;
+            }
+
+            if (symbol.get().subtypeOf(semanticModel.types().ANYDATA)) {
+                parametersToInclude.add(getParameterName(parameter, kind));
+            }
+        }
+
+        if (parametersToInclude.isEmpty()) {
+            return Optional.empty();
+        }
+
+        StringBuilder sb = new StringBuilder("`You have been given the following input:\n\n");
+
+        for (String str : parametersToInclude) {
+            sb.append(str).append(": \n${\"```\"}\n${").append(str).append("}\n${\"```\"}").append("\n\n");
+        }
+        sb.append("`");
+
+        ChildNodeList children = NodeParser.parseExpression(sb.toString()).children();
+        int size = children.size();
+        List<Node> parameterInjectionTemplateNodes = new ArrayList<>(size - 2);
+        for (int i = 1; i < size - 1; i++) {
+            parameterInjectionTemplateNodes.add(children.get(i));
+        }
+        return Optional.of(parameterInjectionTemplateNodes);
+    }
+
+    private static Optional<FunctionSignatureNode> getFunctionSignatureIfInNaturalFunction(
+            NaturalExpressionNode naturalExpressionNode) {
+        NonTerminalNode parent = naturalExpressionNode.parent();
+        while (parent != null) {
+            if (parent instanceof ExpressionNode) {
+                parent = parent.parent();
+                continue;
+            }
+
+            if (parent instanceof ExpressionFunctionBodyNode) {
+                return Optional.of(((FunctionDefinitionNode) parent.parent()).functionSignature());
+            }
+
+            return Optional.empty();
+        }
+        return Optional.empty();
     }
 
     private static MappingConstructorExpressionNode createContextMappingExpressionNode(ExpressionNode model) {
