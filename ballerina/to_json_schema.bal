@@ -30,8 +30,9 @@ type JsonArraySchema record {|
 |};
 
 isolated function generateJsonSchemaForTypedescAsJson(typedesc<json> targetType) returns map<json> =>
-    let map<json>? ann = targetType.@Schema in 
-        ann ?: generateJsonSchemaForTypedesc(targetType, containsNil(targetType));
+    let map<json>? ann = targetType.@Schema in ann ?:
+         (generateJsonSchemaForTypedescNative(targetType) 
+                ?: generateJsonSchemaForTypedesc(targetType, containsNil(targetType)));
 
 isolated function generateJsonSchemaForTypedesc(typedesc<json> targetType, boolean nilableType) returns JsonSchema|JsonArraySchema|map<json> {
     if isSimpleType(targetType) {
@@ -158,3 +159,7 @@ isolated function getStringRepresentation(typedesc<json> fieldType) returns stri
 
     panic error("JSON schema generation is not yet supported for type: " + fieldType.toString());
 }
+
+isolated function generateJsonSchemaForTypedescNative(typedesc<anydata> td) returns map<json>? = @java:Method {
+    'class: "io.ballerina.lib.np.Native"
+} external;

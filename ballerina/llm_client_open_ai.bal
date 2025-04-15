@@ -44,9 +44,9 @@ isolated distinct client class OpenAIModel {
         return self.cl->/chat/completions.post(chatBody);
     }
 
-    isolated remote function call(string prompt, map<json> expectedResponseSchema) returns json|error {
+    isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
         OpenAICreateChatCompletionRequest chatBody = {
-            messages: [{role: "user", "content": getPromptWithExpectedResponseSchema(prompt, expectedResponseSchema)}],
+            messages: [{role: "user", "content": getPromptWithExpectedResponseSchema(prompt, expectedResponseTypedesc)}],
             model: self.model
         };
 
@@ -57,6 +57,6 @@ isolated distinct client class OpenAIModel {
         if resp is () {
             return error("No completion message");
         }
-        return parseResponseAsJson(resp);
+        return parseResponseAsType(resp, expectedResponseTypedesc);
     }
 }
