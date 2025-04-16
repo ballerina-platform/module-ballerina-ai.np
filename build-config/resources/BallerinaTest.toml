@@ -1,0 +1,10 @@
+[package]
+org = "ballerina_np"
+name = "@package.name@"
+version = "@toml.version@"
+
+[[dependency]]
+org = "ballerina_np"
+name = "@test.common@"
+repository = "local"
+version = "@toml.version@"
