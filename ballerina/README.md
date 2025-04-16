@@ -136,13 +136,13 @@ The model to use can be set either by configuration or by specifying the model a
 
 The `ballerinax/np` package provides implementations of `np:Model` for different LLM providers:
 
-- `np:OpenAIModel` for Open AI
-- `np:AzureOpenAIModel` for Azure Open AI
+- `np.openai:Model` for Open AI
+- `np.azure.openai:Model` for Azure Open AI
 
 A model of these types can be initialized and provided as an argument for the `model` parameter.
 
 ```ballerina
-import ballerinax/np.model.azure.openai as azureOpenAI;
+import ballerinax/np.azure.openai as azureOpenAI;
 
 configurable string apiKey = ?;
 configurable string serviceUrl = ?;
