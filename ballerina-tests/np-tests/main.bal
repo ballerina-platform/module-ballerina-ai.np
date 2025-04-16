@@ -85,3 +85,17 @@ function getPopularSportsPersonWithUnusedParams(string nameSegment,
     Who is a popular sportsperson that was born in the decade starting
     from ${decadeStart} with ${nameSegment} in their name?
 };
+
+function getResultOfBallerinaProgram(int x, int y) returns int|error => natural {
+    What's the output of the Ballerina code below?
+
+    ```ballerina
+    import ballerina/io;
+
+    public function main() {
+        int x = ${x};
+        int y = ${y};
+        io:println(x + y);
+    \}
+    ```
+};

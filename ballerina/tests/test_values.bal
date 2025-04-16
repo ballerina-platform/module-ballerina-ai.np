@@ -81,7 +81,7 @@ final string expectedPromptStringForBalProgram = string `What's the output of th
         int x = 10;
         int y = 20;
         io:println(x + y);
-    \}
+    }
     ${"```"}
         ---
 

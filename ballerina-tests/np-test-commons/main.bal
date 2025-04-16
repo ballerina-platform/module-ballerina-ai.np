@@ -149,6 +149,27 @@ ${"```"}
         {"type":"array", "items":{"required":["city", "country", "description", "name"], "type":"object", "properties":{"name":{"type":"string", "description":"Name of the place."}, "city":{"type":"string", "description":"City in which the place is located."}, "country":{"type":"string", "description":"Country in which the place is located."}, "description":{"type":"string", "description":"One-liner description of the place."}}}}`;
     }
 
+    if trimmedPrompt.startsWith("What's the output of the Ballerina code below") {
+        return string `What's the output of the Ballerina code below?
+
+    ${"```"}ballerina
+    import ballerina/io;
+
+    public function main() {
+        int x = 10;
+        int y = 20;
+        io:println(x + y);
+    }
+    ${"```"}
+        ---
+
+        The output should be a JSON value that satisfies the following JSON schema, 
+        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
+        
+        Schema:
+        {"type":"integer"}`;
+    }
+
     test:assertFail("Unexpected prompt: " + trimmedPrompt);
 }
 
@@ -171,6 +192,10 @@ isolated function getMockLLMResponse(string message) returns string? {
 
     if message.includes("Tell me about places in the specified country") && message.includes("UAE") {
         return "```\n[{\"name\":\"Burj Khalifa\",\"city\":\"Dubai\",\"country\":\"UAE\",\"description\":\"The tallest building in the world, offering panoramic views of the city.\"},{\"name\":\"Ain Dubai\",\"city\":\"Dubai\",\"country\":\"UAE\",\"description\":\"The world's tallest observation wheel, providing breathtaking views of the Dubai skyline.\"}]\n```";
+    }
+
+    if message.startsWith("What's the output of the Ballerina code below?") {
+        return string `The output of the provided Ballerina code calculates the sum of ${"`"}x${"`"} and ${"`"}y${"`"}, which is ${"`"}10 + 20${"`"}. Therefore, the result will be ${"`"}30${"`"}. \n\nHere is the output formatted as a JSON value that satisfies your specified schema:${"\n\n```"}json${"\n"}30${"\n```"}`;
     }
 
     test:assertFail("Unexpected prompt");

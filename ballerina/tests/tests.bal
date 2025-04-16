@@ -66,7 +66,7 @@ function testJsonContentAfterTextDescription() returns error? {
         int x = 10;
         int y = 20;
         io:println(x + y);
-    \}
+    }
     ${"```"}`);
     test:assertEquals(result, 30);
 }

@@ -69,3 +69,9 @@ function testParametersNotBeingInjectedWhenThereAreInterpolations() returns erro
         yearOfBirth: 1997
     });
 }
+
+@test:Config
+function testPromptWithSpecialCharacters() returns error? {
+    int res = check getResultOfBallerinaProgram(10, 20);
+    test:assertEquals(res, 30);
+}
