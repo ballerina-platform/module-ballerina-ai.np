@@ -126,6 +126,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static final String BYTE = "byte";
     private static final String NUMBER = "number";
     private static final String ESCAPED_BACKTICK = "\"`\"";
+    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     private final ModifierData modifierData;
     private final CodeModifier.AnalysisData analysisData;
@@ -453,10 +454,22 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             return Optional.empty();
         }
 
-        StringBuilder sb = new StringBuilder("`You have been given the following input:\n\n");
+        StringBuilder sb = new StringBuilder("`You have been given the following input:");
+        sb.append(LINE_SEPARATOR).append(LINE_SEPARATOR);
 
         for (String str : parametersToInclude) {
-            sb.append(str).append(": \n${\"```\"}\n${").append(str).append("}\n${\"```\"}").append("\n\n");
+            sb.append(str)
+                    .append(": ")
+                    .append(LINE_SEPARATOR)
+                    .append("${\"```\"}")
+                    .append(LINE_SEPARATOR)
+                    .append("${")
+                    .append(str)
+                    .append("}")
+                    .append(LINE_SEPARATOR)
+                    .append("${\"```\"}")
+                    .append(LINE_SEPARATOR)
+                    .append(LINE_SEPARATOR);
         }
         sb.append("`");
 
