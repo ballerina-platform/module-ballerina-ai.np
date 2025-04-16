@@ -1,5 +1,4 @@
 import ballerina/io;
-import ballerina/np;
 
 # Represents a person who plays a sport.
 type SportsPerson record {|
@@ -15,10 +14,11 @@ type SportsPerson record {|
 
 function getPopularSportsPerson(
         string nameSegment, 
-        int decadeStart, 
-        np:Prompt prompt = `Who is a popular sportsperson that was born in the decade starting 
-            from ${decadeStart} with ${nameSegment} in their name?`) 
-    returns SportsPerson|error? = @np:NaturalFunction external;
+        int decadeStart) 
+      returns SportsPerson|error? => natural {
+    Who is a popular sportsperson that was born in the decade starting 
+    from ${decadeStart} with ${nameSegment} in their name?
+};
 
 public function main() returns error? {
     string nameSegment = "Simone";

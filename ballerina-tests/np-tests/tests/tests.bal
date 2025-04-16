@@ -42,7 +42,7 @@ function testComplexTypeWithDocsWithNaturalFunctionAnnotation() returns error? {
 
 @test:Config
 function testParameterInjectionToNaturalFunctionWhenThereAreNoInterpolations() returns error? {
-    PlaceOfInterest[] places = check getPlacesOfInterset("Sri Lanka", "beach");
+    PlaceOfInterest[] places = check getPlacesOfInterest("Sri Lanka", "beach");
     test:assertEquals(places, <PlaceOfInterest[]> [
         {"name":"Unawatuna Beach","city":"Galle","country":"Sri Lanka","description":"A popular beach known for its golden sands and vibrant nightlife."},
         {"name":"Mirissa Beach","city":"Mirissa","country":"Sri Lanka","description":"Famous for its stunning sunsets and opportunities for whale watching."},
@@ -52,7 +52,7 @@ function testParameterInjectionToNaturalFunctionWhenThereAreNoInterpolations() r
 
 @test:Config
 function testParameterInjectionToNaturalFunctionWhenThereAreNonAnydataParams() returns error? {
-    PlaceOfInterest[] places = check getPlacesOfIntersetWithNonAnydataParams("UAE", "skyscrapers", new Obj(), 2);
+    PlaceOfInterest[] places = check getPlacesOfInterestWithNonAnydataParams("UAE", "skyscrapers", new Obj(), 2);
     test:assertEquals(places, <PlaceOfInterest[]> [
         {"name":"Burj Khalifa","city":"Dubai","country":"UAE","description":"The tallest building in the world, offering panoramic views of the city."},
         {"name":"Ain Dubai","city":"Dubai","country":"UAE","description":"The world's tallest observation wheel, providing breathtaking views of the Dubai skyline."}

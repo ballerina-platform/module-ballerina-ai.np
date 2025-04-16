@@ -28,10 +28,6 @@ type DbConfig record {|
 |};
 
 configurable DbConfig dbConfig = ?;
-configurable string apiKey = ?;
-configurable string serviceUrl = ?;
-configurable string deploymentId = ?;
-configurable string apiVersion = ?;
 
 final mysql:Client db = check new (...dbConfig);
 

@@ -17,8 +17,7 @@
 import ballerina/jballerina.java;
 
 # Configuration for the model to default to if not explicitly
-# specified in the call to function `callLlm` or an external
-# function annotated with annotation `NaturalFunction`.
+# specified in the natural expression.
 configurable DefaultModelConfig? defaultModelConfig = ();
 
 # Raw template type for prompts.

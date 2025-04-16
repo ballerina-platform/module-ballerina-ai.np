@@ -14,11 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/np;
-
-public isolated function reviewBlog(
-    Blog blog,
-    np:Prompt prompt = `You are an expert content reviewer for a blog site that 
+public isolated function reviewBlog(Blog blog) returns Review|error => natural {
+    You are an expert content reviewer for a blog site that 
         categorizes posts under the following categories: ${categories}
 
         Your tasks are:
@@ -35,4 +32,5 @@ public isolated function reviewBlog(
         Here is the blog post content:
 
         Title: ${blog.title}
-        Content: ${blog.content}`) returns Review|error = @np:NaturalFunction external;
+        Content: ${blog.content}
+};
