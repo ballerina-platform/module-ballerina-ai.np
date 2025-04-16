@@ -30,7 +30,7 @@ type JsonArraySchema record {|
 |};
 
 isolated function generateJsonSchemaForTypedescAsJson(typedesc<json> targetType) returns map<json> =>
-    let map<json>? ann = targetType.@Schema in ann ?:
+    let map<json>? ann = targetType.@JsonSchema in ann ?:
          (generateJsonSchemaForTypedescNative(targetType) 
                 ?: generateJsonSchemaForTypedesc(targetType, containsNil(targetType)));
 
@@ -47,7 +47,7 @@ isolated function generateJsonSchemaForTypedesc(typedesc<json> targetType, boole
 
     if isArray {
         typedesc<json> arrayMemberType = getArrayMemberType(<typedesc<json[]>>targetType);
-        map<json>? ann = arrayMemberType.@Schema;
+        map<json>? ann = arrayMemberType.@JsonSchema;
         if ann !is () {
             return ann;
         }
@@ -104,7 +104,7 @@ isolated function generateJsonSchema(string[] names, boolean[] required,
 
     foreach int i in 0 ..< names.length() {
         string fieldName = names[i];
-        map<json>? ann = types[i].@Schema;
+        map<json>? ann = types[i].@JsonSchema;
         JsonSchema|JsonArraySchema|map<json> fieldSchema = ann is () ? getJsonSchemaType(types[i], nilable[i]) : ann;
         properties[fieldName] = fieldSchema;
         if required[i] {

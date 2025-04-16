@@ -120,7 +120,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static final Token BACKTICK = createToken(SyntaxKind.BACKTICK_TOKEN);
     private static final Token INTERPOLATION_START = createToken(SyntaxKind.INTERPOLATION_START_TOKEN);
     private static final Token MODEL = createIdentifierToken("model");
-    private static final String SCHEMA_ANNOTATION_IDENTIFIER = "Schema";
+    private static final String SCHEMA_ANNOTATION_IDENTIFIER = "JsonSchema";
     private static final String CALL_LLM = "callLlm";
     private static final String STRING = "string";
     private static final String BYTE = "byte";

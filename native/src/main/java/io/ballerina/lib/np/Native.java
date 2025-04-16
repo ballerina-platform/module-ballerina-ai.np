@@ -135,7 +135,7 @@ public class Native {
     private static Object generateJsonSchemaForRecordType(RecordType recordType,
                                                           SchemaGenerationContext schemaGenerationContext) {
         for (Map.Entry<BString, Object> entry : recordType.getAnnotations().entrySet()) {
-            if ("ballerina/np:0:Schema".equals(entry.getKey().getValue())) {
+            if ("ballerina/np:0:JsonSchema".equals(entry.getKey().getValue())) {
                 return entry.getValue();
             }
         }

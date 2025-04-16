@@ -31,7 +31,7 @@ type DefaultOpenAIModelConfig record {|
     string model;
 |};
 
-public annotation map<json> Schema on type;
+public annotation map<json> JsonSchema on type;
 
 final Model? defaultModel;
 
@@ -105,7 +105,6 @@ isolated function callLlmGeneric(Prompt prompt, Context context,
     return result;
 }
 
-// TODO: call from model clients
 isolated function parseResponseAsJson(string resp) returns json|error {
     int startDelimLength = 7;
     int? startIndex = resp.indexOf("```json");
