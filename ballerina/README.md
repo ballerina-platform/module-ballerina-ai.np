@@ -30,7 +30,7 @@ type Review record {|
 public function main() returns error? {
     Blog blog = {
         title: "The Future of Ballerina",
-        content: "Ballerina is a programming language designed for cloud-native applications."
+        content: "Ballerina is an open source, cloud-native programming language optimized for integration."
     };
 
     Review review = check natural {
@@ -87,7 +87,7 @@ public isolated function reviewBlog(Blog blog) returns Review|error => natural {
 public function main() returns error? {
     Blog blog = {
         title: "The Future of Ballerina",
-        content: "Ballerina is a programming language designed for cloud-native applications."
+        content: "Ballerina is an open source, cloud-native programming language optimized for integration."
     };
 
     Review review = check reviewBlog(blog);
