@@ -17,8 +17,7 @@
 import ballerina/jballerina.java;
 
 # Configuration for the model to default to if not explicitly
-# specified in the call to function `callLlm` or an external
-# function annotated with annotation `NaturalFunction`.
+# specified in the natural expression.
 configurable DefaultModelConfig? defaultModelConfig = ();
 
 # Raw template type for prompts.
@@ -45,15 +44,6 @@ public isolated function callLlm(Prompt prompt, Context context = {}, typedesc<j
         returns targetType|error = @java:Method {
     'class: "io.ballerina.lib.np.Native"
 } external;
-
-# Annotation to indicate that the implementation of a function should be
-# a call to an LLM with the prompt specified as a parameter and using the 
-# return type as the schema for the expected response.
-# If function has a `context` parameter, the model specified in the 
-# context will be used as the model to call.
-# If not, defaults to the default model configured via the configurable 
-# variable `defaultModelConfig`
-public const annotation NaturalFunction on source external;
 
 # Context for Large Language Model (LLM) usage.
 public type Context record {|

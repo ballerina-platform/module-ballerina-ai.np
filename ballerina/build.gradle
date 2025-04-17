@@ -35,15 +35,9 @@ def compilerPluginTomlFile = new File("$project.projectDir/CompilerPlugin.toml")
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
         def splitVersion = extVersion.split('-');
-        if (splitVersion.length > 3) {
-            def strippedValues = splitVersion[0..-4]
-            return strippedValues.join('-')
-        } else {
-            return extVersion
-        }
-    } else {
-        return extVersion.replace("${project.ext.snapshotVersion}", "")
+        return splitVersion.length > 3 ? splitVersion[0..-4].join('-') : extVersion
     }
+    return extVersion.replace("${project.ext.snapshotVersion}", "")
 }
 
 ballerina {

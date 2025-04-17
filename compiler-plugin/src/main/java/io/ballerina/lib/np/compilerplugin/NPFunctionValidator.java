@@ -25,18 +25,14 @@ import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExternalFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
-import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.RestParameterNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.AnalysisTask;
@@ -51,6 +47,8 @@ import static io.ballerina.lib.np.compilerplugin.Commons.CONTEXT_VAR;
 import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.PROMPT_VAR;
 import static io.ballerina.lib.np.compilerplugin.Commons.findNPModule;
+import static io.ballerina.lib.np.compilerplugin.Commons.getParameterName;
+import static io.ballerina.lib.np.compilerplugin.Commons.getParameterType;
 import static io.ballerina.lib.np.compilerplugin.Commons.hasNaturalFunctionAnnotation;
 
 /**
@@ -172,24 +170,6 @@ public class NPFunctionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
         if (kind != SyntaxKind.REQUIRED_PARAM && kind != SyntaxKind.DEFAULTABLE_PARAM) {
             reportDiagnostic(ctx, location, diagnosticCode);
         }
-    }
-
-    private String getParameterName(ParameterNode parameter, SyntaxKind kind) {
-        return switch (kind) {
-            case REQUIRED_PARAM -> ((RequiredParameterNode) parameter).paramName().get().text();
-            case DEFAULTABLE_PARAM -> ((DefaultableParameterNode) parameter).paramName().get().text();
-            case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).paramName().get().text();
-            default -> ((RestParameterNode) parameter).paramName().get().text();
-        };
-    }
-
-    private Node getParameterType(ParameterNode parameter, SyntaxKind kind) {
-        return switch (kind) {
-            case REQUIRED_PARAM -> ((RequiredParameterNode) parameter).typeName();
-            case DEFAULTABLE_PARAM -> ((DefaultableParameterNode) parameter).typeName();
-            case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).typeName();
-            default -> ((RestParameterNode) parameter).typeName();
-        };
     }
 
     private void validateReturnType(SemanticModel semanticModel,

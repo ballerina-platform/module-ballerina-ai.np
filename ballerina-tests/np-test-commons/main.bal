@@ -48,9 +48,13 @@ service /llm on new http:Listener(8080) {
     }
 }
 
-isolated function getExpectedPrompt(string promptStart) returns string {
-    if promptStart.startsWith("Which country") {
-        return  string `Which country is known as the pearl of the Indian Ocean?.  
+isolated function getExpectedPrompt(string prompt) returns string {
+    string trimmedPrompt = prompt.trim();
+
+    if trimmedPrompt.startsWith("Which country") {
+        return  string `Which country is known as the pearl of the Indian Ocean?
+        ---
+
         The output should be a JSON value that satisfies the following JSON schema, 
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         
@@ -58,10 +62,12 @@ isolated function getExpectedPrompt(string promptStart) returns string {
         {"type":"string"}`;
     }
 
-    if promptStart.startsWith("For each string value ") {
+    if trimmedPrompt.startsWith("For each string value ") {
         return string `For each string value in the given array if the value can be parsed
-        as an integer give an integer, if not give the same string value. Please preserve the order.
-        Array value: ["foo","1","bar","2.3","4"].  
+    as an integer give an integer, if not give the same string value. Please preserve the order.
+    Array value: ["foo","1","bar","2.3","4"]
+        ---
+
         The output should be a JSON value that satisfies the following JSON schema, 
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         
@@ -69,9 +75,11 @@ isolated function getExpectedPrompt(string promptStart) returns string {
         {"type":"array", "items":{"type":"object", "anyOf":[{"type":"string"}, {"type":"integer"}]}}`;
     }
 
-    if promptStart.startsWith("Who is a popular sportsperson") {
+    if trimmedPrompt.startsWith("Who is a popular sportsperson") {
         return string `Who is a popular sportsperson that was born in the decade starting
-            from 1990 with Simone in their name?.  
+    from 1990 with Simone in their name?
+        ---
+
         The output should be a JSON value that satisfies the following JSON schema, 
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         
@@ -79,7 +87,90 @@ isolated function getExpectedPrompt(string promptStart) returns string {
         {"type":"object", "anyOf":[{"required":["firstName", "lastName", "sport", "yearOfBirth"], "type":"object", "properties":{"firstName":{"type":"string", "description":"First name of the person"}, "lastName":{"type":"string", "description":"Last name of the person"}, "yearOfBirth":{"type":"integer", "description":"Year the person was born", "format":"int64"}, "sport":{"type":"string", "description":"Sport that the person plays"}}}, {"type":null}]}`;
     }
 
-    test:assertFail("Unexpected prompt");
+    if trimmedPrompt.includes("Tell me about places in the specified country") && trimmedPrompt.includes("Sri Lanka") {
+        return string `You have been given the following input:
+
+country: 
+${"```"}
+Sri Lanka
+${"```"}
+
+interest: 
+${"```"}
+beach
+${"```"}
+
+count: 
+${"```"}
+3
+${"```"}
+
+    Tell me about places in the specified country that could be a good destination 
+    to someone who has the specified interest.
+
+    Include only the number of places specified by the count parameter.
+        ---
+
+        The output should be a JSON value that satisfies the following JSON schema, 
+        returned within a markdown snippet enclosed within ${"```"}json and ${"```"}
+        
+        Schema:
+        {"type":"array", "items":{"required":["city", "country", "description", "name"], "type":"object", "properties":{"name":{"type":"string", "description":"Name of the place."}, "city":{"type":"string", "description":"City in which the place is located."}, "country":{"type":"string", "description":"Country in which the place is located."}, "description":{"type":"string", "description":"One-liner description of the place."}}}}`;
+    }
+
+    if trimmedPrompt.includes("Tell me about places in the specified country") && trimmedPrompt.includes("UAE") {
+        return string `You have been given the following input:
+
+country: 
+${"```"}
+UAE
+${"```"}
+
+interest: 
+${"```"}
+skyscrapers
+${"```"}
+
+count: 
+${"```"}
+2
+${"```"}
+
+    Tell me about places in the specified country that could be a good destination 
+    to someone who has the specified interest.
+
+    Include only the number of places specified by the count parameter.
+        ---
+
+        The output should be a JSON value that satisfies the following JSON schema, 
+        returned within a markdown snippet enclosed within ${"```"}json and ${"```"}
+        
+        Schema:
+        {"type":"array", "items":{"required":["city", "country", "description", "name"], "type":"object", "properties":{"name":{"type":"string", "description":"Name of the place."}, "city":{"type":"string", "description":"City in which the place is located."}, "country":{"type":"string", "description":"Country in which the place is located."}, "description":{"type":"string", "description":"One-liner description of the place."}}}}`;
+    }
+
+    if trimmedPrompt.startsWith("What's the output of the Ballerina code below") {
+        return string `What's the output of the Ballerina code below?
+
+    ${"```"}ballerina
+    import ballerina/io;
+
+    public function main() {
+        int x = 10;
+        int y = 20;
+        io:println(x + y);
+    }
+    ${"```"}
+        ---
+
+        The output should be a JSON value that satisfies the following JSON schema, 
+        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
+        
+        Schema:
+        {"type":"integer"}`;
+    }
+
+    test:assertFail("Unexpected prompt: " + trimmedPrompt);
 }
 
 isolated function getMockLLMResponse(string message) returns string? {
@@ -93,6 +184,18 @@ isolated function getMockLLMResponse(string message) returns string? {
 
     if message.startsWith("Who is a popular sportsperson") {
         return "```\n{\"firstName\":\"Simone\",\"lastName\":\"Biles\",\"yearOfBirth\":1997,\"sport\":\"Gymnastics\"}\n```";
+    }
+
+    if message.includes("Tell me about places in the specified country") && message.includes("Sri Lanka") {
+        return "```\n[{\"name\":\"Unawatuna Beach\",\"city\":\"Galle\",\"country\":\"Sri Lanka\",\"description\":\"A popular beach known for its golden sands and vibrant nightlife.\"},{\"name\":\"Mirissa Beach\",\"city\":\"Mirissa\",\"country\":\"Sri Lanka\",\"description\":\"Famous for its stunning sunsets and opportunities for whale watching.\"},{\"name\":\"Hikkaduwa Beach\",\"city\":\"Hikkaduwa\",\"country\":\"Sri Lanka\",\"description\":\"A great destination for snorkeling and surfing, lined with lively restaurants.\"}]\n```";
+    }
+
+    if message.includes("Tell me about places in the specified country") && message.includes("UAE") {
+        return "```\n[{\"name\":\"Burj Khalifa\",\"city\":\"Dubai\",\"country\":\"UAE\",\"description\":\"The tallest building in the world, offering panoramic views of the city.\"},{\"name\":\"Ain Dubai\",\"city\":\"Dubai\",\"country\":\"UAE\",\"description\":\"The world's tallest observation wheel, providing breathtaking views of the Dubai skyline.\"}]\n```";
+    }
+
+    if message.startsWith("What's the output of the Ballerina code below?") {
+        return string `The output of the provided Ballerina code calculates the sum of ${"`"}x${"`"} and ${"`"}y${"`"}, which is ${"`"}10 + 20${"`"}. Therefore, the result will be ${"`"}30${"`"}. \n\nHere is the output formatted as a JSON value that satisfies your specified schema:${"\n\n```"}json${"\n"}30${"\n```"}`;
     }
 
     test:assertFail("Unexpected prompt");
