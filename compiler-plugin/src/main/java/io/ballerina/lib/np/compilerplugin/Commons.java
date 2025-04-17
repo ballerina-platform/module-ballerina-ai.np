@@ -44,8 +44,6 @@ import java.util.Optional;
 class Commons {
     static final String ORG_NAME = "ballerina";
     static final String MODULE_NAME = "np";
-    static final String PROMPT_VAR = "prompt";
-    static final String CONTEXT_VAR = "context";
     static final String NATURAL_FUNCTION_ANNOT = "NaturalFunction";
 
     static boolean hasNaturalFunctionAnnotation(ExternalFunctionBodyNode functionBody, String modulePrefix) {

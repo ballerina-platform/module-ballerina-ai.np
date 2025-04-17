@@ -28,21 +28,12 @@ import static io.ballerina.tools.diagnostics.DiagnosticSeverity.ERROR;
  * @since 0.3.0
  */
 public enum DiagnosticCode {
-    PROMPT_PARAM_IS_REQUIRED("NP_ERROR_001", "a natural function must contain the ''prompt'' parameter", ERROR),
-    PROMPT_PARAM_MUST_BE_REQUIRED_OR_DEFAULTABLE("NP_ERROR_002",
-            "the ''prompt'' parameter must be a required or defaultable parameter", ERROR),
-    CONTEXT_PARAM_MUST_BE_REQUIRED_OR_DEFAULTABLE("NP_ERROR_003",
-            "the ''context'' parameter must be a required or defaultable parameter", ERROR),
-    TYPE_OF_PROMPT_PARAM_MUST_BE_A_SUBTYPE_OF_NP_PROMPT("NP_ERROR_004",
-            "the type of the ''prompt'' parameter must be a subtype of ''ballerina/np:Prompt''", ERROR),
-    TYPE_OF_CONTEXT_PARAM_MUST_BE_A_SUBTYPE_OF_NP_CONTEXT("NP_ERROR_005",
-            "the type of the ''context'' parameter must be a subtype of ''ballerina/np:Context''", ERROR),
-    RETURN_TYPE_MUST_CONTAIN_ERROR("NP_ERROR_006",
-            "the return type of a natural function must contain ''error''", ERROR),
-    RETURN_TYPE_MUST_CONTAIN_A_UNION_OF_NON_ERROR_AND_ERROR("NP_ERROR_007",
-            "the return type of a natural function must contain both a non-''error'' type and ''error''", ERROR),
-    NON_ERROR_RETURN_TYPE_MUST_BE_A_SUBTYPE_OF_JSON("NP_ERROR_008",
-            "non-''error'' return type of a natural function must be a subtype of ''json''", ERROR);
+    NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED("NP_ERROR_001",
+            "subtypes of ''anydata'' that are not subtypes of ''json'' are not yet supported as " +
+                    "the expected type of a natural expression", ERROR),
+    UNEXPECTED_ARGUMENTS("NP_ERROR_002", "expected only one argument", ERROR),
+    EXPECTED_A_SUBTYPE_OF_NP_MODEL("NP_ERROR_003",
+            "expected a subtype of ''ballerina/np:Model''", ERROR);
 
     private final String code;
     private final String message;
