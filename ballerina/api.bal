@@ -36,12 +36,14 @@ public type Prompt object {
 #
 # + prompt - The prompt to send to the LLM
 # + context - The context to use, including the LLM to use
-# + targetType - The expected response type. The JSON schema corresponding to this type 
+# + expectedResponseTypedesc - The expected response type. The schema corresponding to this type 
 #  is generated to inlcude in the request to the LLM
 # + return - The LLM response parsed according to the specified type, or an error if the call 
 # fails or parsing fails
-public isolated function callLlm(Prompt prompt, Context context = {}, typedesc<json> targetType = <>)
-        returns targetType|error = @java:Method {
+public isolated function callLlm(Prompt prompt, 
+                                 Context context = {}, 
+                                 typedesc<anydata> expectedResponseTypedesc = <>)
+        returns expectedResponseTypedesc|error = @java:Method {
     'class: "io.ballerina.lib.np.Native"
 } external;
 

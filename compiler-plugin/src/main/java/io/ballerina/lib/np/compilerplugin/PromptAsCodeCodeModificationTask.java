@@ -20,10 +20,7 @@ package io.ballerina.lib.np.compilerplugin;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
-import io.ballerina.compiler.api.symbols.FunctionSymbol;
-import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -96,11 +93,12 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.DEFAULTABLE_PARAM;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.REQUIRED_PARAM;
+import static io.ballerina.lib.np.compilerplugin.Commons.CALL_LLM;
 import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.getParameterName;
 import static io.ballerina.lib.np.compilerplugin.Commons.getParameterType;
-import static io.ballerina.lib.np.compilerplugin.Commons.isNPModule;
+import static io.ballerina.lib.np.compilerplugin.Commons.isNotNPCallCall;
 import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
@@ -121,7 +119,6 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static final Token INTERPOLATION_START = createToken(SyntaxKind.INTERPOLATION_START_TOKEN);
     private static final Token MODEL = createIdentifierToken("model");
     private static final String SCHEMA_ANNOTATION_IDENTIFIER = "JsonSchema";
-    private static final String CALL_LLM = "callLlm";
     private static final String STRING = "string";
     private static final String BYTE = "byte";
     private static final String NUMBER = "number";
@@ -294,27 +291,6 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             }
             getTypeSchema(typeSymbol.get(), this.typeMapper, this.modifierData.typeSchemas);
             return functionCallExpressionNode;
-        }
-
-        private boolean isNotNPCallCall(FunctionCallExpressionNode functionCallExpressionNode,
-                                        SemanticModel semanticModel) {
-            Optional<Symbol> symbolOptional = semanticModel.symbol(functionCallExpressionNode);
-            if (symbolOptional.isEmpty()) {
-                return true;
-            }
-
-            Symbol symbol = symbolOptional.get();
-            if (!(symbol instanceof FunctionSymbol functionSymbol)) {
-                return true;
-            }
-
-            Optional<ModuleSymbol> moduleOptional = functionSymbol.getModule();
-            Optional<String> nameOptional = functionSymbol.getName();
-            if (moduleOptional.isEmpty() || nameOptional.isEmpty()) {
-                return true;
-            }
-
-            return !(isNPModule(moduleOptional.get()) && CALL_LLM.equals(nameOptional.get()));
         }
     }
 

@@ -48,9 +48,9 @@ import static io.ballerina.runtime.api.creators.ValueCreator.createMapValue;
  */
 public class Native {
 
-    public static Object callLlm(Environment env, BObject prompt, BMap context, BTypedesc targetType) {
+    public static Object callLlm(Environment env, BObject prompt, BMap context, BTypedesc expectedResponseTypedesc) {
         return env.getRuntime().callFunction(
-                new Module("ballerina", "np", "0"), "callLlmGeneric", null, prompt, context, targetType);
+                new Module("ballerina", "np", "0"), "callLlmGeneric", null, prompt, context, expectedResponseTypedesc);
     }
 
     public static Object generateJsonSchemaForTypedescNative(BTypedesc td) {
@@ -196,13 +196,13 @@ public class Native {
         }
     }
 
-    public static BTypedesc getArrayMemberType(BTypedesc targetType) {
+    public static BTypedesc getArrayMemberType(BTypedesc expectedResponseTypedesc) {
         return ValueCreator.createTypedescValue(
-                ((ArrayType) TypeUtils.getImpliedType(targetType.getDescribingType())).getElementType());
+                ((ArrayType) TypeUtils.getImpliedType(expectedResponseTypedesc.getDescribingType())).getElementType());
     }
 
-    public static boolean containsNil(BTypedesc targetType) {
-        return targetType.getDescribingType().isNilable();
+    public static boolean containsNil(BTypedesc expectedResponseTypedesc) {
+        return expectedResponseTypedesc.getDescribingType().isNilable();
     }
 
     private static class SchemaGenerationContext {

@@ -99,7 +99,7 @@ function testSchemaGeneratedForComplexTypeAtRuntime() returns error? {
     int decadeStart = 1990;
     string nameSegment = "Simone";
     json result = check callLlm(`Who is a popular sportsperson that was born in the decade starting
-            from ${decadeStart} with ${nameSegment} in their name?`, targetType = td);
+            from ${decadeStart} with ${nameSegment} in their name?`, expectedResponseTypedesc = td);
     test:assertEquals(result, <SportsPerson> {
         firstName: "Simone",
         lastName: "Biles",

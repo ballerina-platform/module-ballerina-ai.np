@@ -19,12 +19,10 @@
 package io.ballerina.lib.np.compilerplugin;
 
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.Types;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
-import io.ballerina.compiler.api.symbols.TypeDescKind;
-import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
@@ -44,6 +42,7 @@ import java.util.Optional;
 import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.VERSION;
+import static io.ballerina.lib.np.compilerplugin.Commons.isNotNPCallCall;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.EXPECTED_A_SUBTYPE_OF_NP_MODEL;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.UNEXPECTED_ARGUMENTS;
@@ -55,8 +54,10 @@ import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.reportError;
  * @since 0.3.0
  */
 public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisContext> {
-    private final CodeModifier.AnalysisData analysisData;
     private static final String MODEL_TYPE = "Model";
+
+    private final CodeModifier.AnalysisData analysisData;
+    private Optional<TypeSymbol> jsonOrErrorType = Optional.empty();
 
     ExpressionValidator(CodeModifier.AnalysisData analysisData) {
         this.analysisData = analysisData;
@@ -65,8 +66,9 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
         SemanticModel semanticModel = ctx.semanticModel();
-        Optional<Symbol> modelSymbol = semanticModel.types().getTypeByName(ORG_NAME, MODULE_NAME, VERSION, MODEL_TYPE);
-        TypeSymbol jsonType = semanticModel.types().JSON;
+        Types types = semanticModel.types();
+        Optional<Symbol> modelSymbol = types.getTypeByName(ORG_NAME, MODULE_NAME, VERSION, MODEL_TYPE);
+        TypeSymbol jsonType = types.JSON;
 
         Package currentPackage = ctx.currentPackage();
         ModuleId moduleId = ctx.moduleId();
@@ -75,21 +77,22 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
 
         Node node = ctx.node();
         if (node instanceof NaturalExpressionNode naturalExpressionNode) {
-            validateNaturalExpression(semanticModel, document, naturalExpressionNode, jsonType, modelSymbol, ctx);
+            validateNaturalExpression(semanticModel, types, document, naturalExpressionNode, modelSymbol, ctx);
             return;
         }
 
-        validateLlmCallExpression((FunctionCallExpressionNode) node, jsonType, ctx);
+        validateLlmCallExpression(semanticModel, types, document, (FunctionCallExpressionNode) node, ctx);
     }
 
     private void validateNaturalExpression(SemanticModel semanticModel,
-                                           Document document,
+                                           Types types, Document document,
                                            NaturalExpressionNode naturalExpressionNode,
-                                           TypeSymbol jsonType, Optional<Symbol> modelSymbol,
+                                           Optional<Symbol> modelSymbol,
                                            SyntaxNodeAnalysisContext ctx) {
         validateArguments(ctx, semanticModel, naturalExpressionNode.parenthesizedArgList(), modelSymbol);
         validateExpectedType(naturalExpressionNode.location(),
-                semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()), jsonType, ctx);
+                semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get(),
+                types, ctx);
     }
 
     private void validateArguments(SyntaxNodeAnalysisContext ctx,
@@ -128,32 +131,39 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
         }
     }
 
-    private void validateLlmCallExpression(FunctionCallExpressionNode functionCall, TypeSymbol jsonType,
+    private void validateLlmCallExpression(SemanticModel semanticModel, Types types, Document document,
+                                           FunctionCallExpressionNode functionCallExpressionNode,
                                            SyntaxNodeAnalysisContext ctx) {
-    }
-
-    private void validateExpectedType(Location location, Optional<TypeSymbol> expectedType, TypeSymbol jsonType,
-                                      SyntaxNodeAnalysisContext ctx) {
-        TypeSymbol expectedTypeSymbol = expectedType.get();
-        if (expectedTypeSymbol instanceof TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
-            expectedTypeSymbol = typeReferenceTypeSymbol.typeDescriptor();
-        }
-
-        if (!(expectedTypeSymbol instanceof UnionTypeSymbol unionTypeSymbol)) {
-            if (expectedTypeSymbol.typeKind() != TypeDescKind.ERROR && expectedTypeSymbol.subtypeOf(jsonType)) {
-                reportError(ctx, this.analysisData, location, NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED);
-            }
+        if (isNotNPCallCall(functionCallExpressionNode, semanticModel)) {
             return;
         }
 
-        for (TypeSymbol memberTypeDescriptor : unionTypeSymbol.memberTypeDescriptors()) {
-            if (memberTypeDescriptor instanceof TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
-                memberTypeDescriptor = typeReferenceTypeSymbol.typeDescriptor();
-            }
-
-            if (memberTypeDescriptor.typeKind() != TypeDescKind.ERROR && !memberTypeDescriptor.subtypeOf(jsonType)) {
-                reportError(ctx, this.analysisData, location, NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED);
-            }
+        Optional<TypeSymbol> typeSymbol = semanticModel.typeOf(functionCallExpressionNode);
+        if (typeSymbol.isEmpty()) {
+            return;
         }
+
+        if (!typeSymbol.get().subtypeOf(getJsonOrErrorType(types))) {
+            reportError(ctx, this.analysisData, functionCallExpressionNode.location(),
+                    NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED, "'ballerina/np:callLlm' expressions");
+        }
+    }
+
+    private void validateExpectedType(Location location, TypeSymbol expectedType, Types types,
+                                      SyntaxNodeAnalysisContext ctx) {
+        if (!expectedType.subtypeOf(getJsonOrErrorType(types))) {
+            reportError(ctx, this.analysisData, location, NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED,
+                    "natural expressions");
+        }
+    }
+
+    private TypeSymbol getJsonOrErrorType(Types types) {
+        if (this.jsonOrErrorType.isPresent()) {
+            return this.jsonOrErrorType.get();
+        }
+
+        TypeSymbol jsonOrErrorType = types.builder().UNION_TYPE.withMemberTypes(types.JSON, types.ERROR).build();
+        this.jsonOrErrorType = Optional.of(jsonOrErrorType);
+        return jsonOrErrorType;
     }
 }

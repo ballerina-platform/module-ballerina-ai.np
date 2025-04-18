@@ -18,9 +18,13 @@
 package io.ballerina.lib.np.compilerplugin;
 
 import io.ballerina.compiler.api.ModuleID;
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.FunctionSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -28,6 +32,8 @@ import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.RestParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
+
+import java.util.Optional;
 
 /**
  * Class containing common constants and functionality.
@@ -38,6 +44,7 @@ class Commons {
     static final String ORG_NAME = "ballerina";
     static final String MODULE_NAME = "np";
     static final String VERSION = "0.1.0";
+    static final String CALL_LLM = "callLlm";
 
     static boolean isRuntimeNaturalExpression(ExpressionNode expressionNode) {
         return expressionNode instanceof NaturalExpressionNode naturalExpressionNode &&
@@ -65,5 +72,25 @@ class Commons {
             case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).paramName().get().text();
             default -> ((RestParameterNode) parameter).paramName().get().text();
         };
+    }
+
+    static boolean isNotNPCallCall(FunctionCallExpressionNode functionCallExpressionNode, SemanticModel semanticModel) {
+        Optional<Symbol> symbolOptional = semanticModel.symbol(functionCallExpressionNode);
+        if (symbolOptional.isEmpty()) {
+            return true;
+        }
+
+        Symbol symbol = symbolOptional.get();
+        if (!(symbol instanceof FunctionSymbol functionSymbol)) {
+            return true;
+        }
+
+        Optional<ModuleSymbol> moduleOptional = functionSymbol.getModule();
+        Optional<String> nameOptional = functionSymbol.getName();
+        if (moduleOptional.isEmpty() || nameOptional.isEmpty()) {
+            return true;
+        }
+
+        return !(isNPModule(moduleOptional.get()) && CALL_LLM.equals(nameOptional.get()));
     }
 }
