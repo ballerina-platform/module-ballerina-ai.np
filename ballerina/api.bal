@@ -57,7 +57,8 @@ public type Model distinct isolated client object {
     # Makes a call to the Large Language Model (LLM) with the given prompt and returns the result.
     #
     # + prompt - The prompt to be sent to the LLM
-    # + expectedResponseSchema - The schema for the expected response from the LLM 
-    # + return - The JSON value extracted/parsed from the LLM's response or an error if the call fails
-    isolated remote function call(string prompt, map<json> expectedResponseSchema) returns json|error;
+    # + expectedResponseTypedesc - The schema for the expected response from the LLM 
+    # + return - The value extracted/parsed from the LLM's response or an error if the call or parsing fails
+    // Note: once dependently-typed functions can be implemented in Ballerina, the return type can change
+    isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error;
 };

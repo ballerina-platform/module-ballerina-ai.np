@@ -49,20 +49,23 @@ import static io.ballerina.runtime.api.creators.ValueCreator.createMapValue;
 public class Native {
 
     public static Object callLlm(Environment env, BObject prompt, BMap context, BTypedesc targetType) {
-        SchemaGenerationContext schemaGenerationContext = new SchemaGenerationContext();
-        Object jsonSchema = generateJsonSchemaForType(targetType.getDescribingType(), schemaGenerationContext);
         return env.getRuntime().callFunction(
-                new Module("ballerina", "np", "0"), "callLlmGeneric", null, prompt, context, targetType,
-                schemaGenerationContext.isSchemaGeneratedAtCompileTime ? jsonSchema : null);
+                new Module("ballerina", "np", "0"), "callLlmGeneric", null, prompt, context, targetType);
     }
 
-    public static Object generateJsonSchemaForType(Type td, SchemaGenerationContext schemaGenerationContext) {
-        Type type = TypeUtils.getReferredType(td);
-        if (isSimpleType(type)) {
-            return createSimpleTypeSchema(type);
+    public static Object generateJsonSchemaForTypedescNative(BTypedesc td) {
+        SchemaGenerationContext schemaGenerationContext = new SchemaGenerationContext();
+        Object schema = generateJsonSchemaForType(td.getDescribingType(), schemaGenerationContext);
+        return schemaGenerationContext.isSchemaGeneratedAtCompileTime ? schema : null;
+    }
+
+    private static Object generateJsonSchemaForType(Type t, SchemaGenerationContext schemaGenerationContext) {
+        Type impliedType = TypeUtils.getImpliedType(t);
+        if (isSimpleType(impliedType)) {
+            return createSimpleTypeSchema(impliedType);
         }
 
-        return switch (type) {
+        return switch (impliedType) {
             case RecordType recordType -> generateJsonSchemaForRecordType(recordType, schemaGenerationContext);
             case JsonType ignored -> generateJsonSchemaForJson();
             case ArrayType arrayType -> generateJsonSchemaForArrayType(arrayType, schemaGenerationContext);
@@ -94,7 +97,7 @@ public class Native {
     private static Object generateJsonSchemaForArrayType(ArrayType arrayType,
                                                          SchemaGenerationContext schemaGenerationContext) {
         BMap<BString, Object> schemaMap = createMapValue(TypeCreator.createMapType(PredefinedTypes.TYPE_JSON));
-        Type elementType = TypeUtils.getReferredType(arrayType.getElementType());
+        Type elementType = TypeUtils.getImpliedType(arrayType.getElementType());
         schemaMap.put(StringUtils.fromString("type"), StringUtils.fromString("array"));
         schemaMap.put(StringUtils.fromString("items"), generateJsonSchemaForType(elementType,
                                                                                     schemaGenerationContext));
@@ -132,7 +135,7 @@ public class Native {
     private static Object generateJsonSchemaForRecordType(RecordType recordType,
                                                           SchemaGenerationContext schemaGenerationContext) {
         for (Map.Entry<BString, Object> entry : recordType.getAnnotations().entrySet()) {
-            if ("ballerina/np:0:Schema".equals(entry.getKey().getValue())) {
+            if ("ballerina/np:0:JsonSchema".equals(entry.getKey().getValue())) {
                 return entry.getValue();
             }
         }
