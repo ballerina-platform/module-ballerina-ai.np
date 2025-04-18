@@ -124,9 +124,9 @@ isolated function parseResponseAsJson(string resp) returns json|error {
     return result;
 }
 
-isolated function parseResponseAsType(string resp, typedesc<anydata> targetType) returns anydata|error {
+isolated function parseResponseAsType(string resp, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
     json respJson = check parseResponseAsJson(resp);
-    anydata|error result = trap respJson.fromJsonWithType(targetType);
+    anydata|error result = trap respJson.fromJsonWithType(expectedResponseTypedesc);
     if result is error {
         return handleParseResponseError(result);
     }

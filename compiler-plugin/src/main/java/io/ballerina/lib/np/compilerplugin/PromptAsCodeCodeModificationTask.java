@@ -20,10 +20,7 @@ package io.ballerina.lib.np.compilerplugin;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
-import io.ballerina.compiler.api.symbols.FunctionSymbol;
-import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.RecordTypeSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
@@ -60,7 +57,6 @@ import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
@@ -96,11 +92,12 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.DEFAULTABLE_PARAM;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.REQUIRED_PARAM;
+import static io.ballerina.lib.np.compilerplugin.Commons.CALL_LLM;
 import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.getParameterName;
 import static io.ballerina.lib.np.compilerplugin.Commons.getParameterType;
-import static io.ballerina.lib.np.compilerplugin.Commons.isNPModule;
+import static io.ballerina.lib.np.compilerplugin.Commons.isNotNPCallCall;
 import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
@@ -121,7 +118,6 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static final Token INTERPOLATION_START = createToken(SyntaxKind.INTERPOLATION_START_TOKEN);
     private static final Token MODEL = createIdentifierToken("model");
     private static final String SCHEMA_ANNOTATION_IDENTIFIER = "JsonSchema";
-    private static final String CALL_LLM = "callLlm";
     private static final String STRING = "string";
     private static final String BYTE = "byte";
     private static final String NUMBER = "number";
@@ -140,7 +136,8 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     public void modify(SourceModifierContext modifierContext) {
         Package currentPackage = modifierContext.currentPackage();
 
-        if (this.analysisData.analysisTaskErrored ||
+        if (// https://github.com/ballerina-platform/ballerina-lang/issues/44020
+            // this.analysisData.analysisTaskErrored ||
                 modifierContext.compilation().diagnosticResult().errorCount() > 0) {
             return;
         }
@@ -291,29 +288,8 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             if (typeSymbol.isEmpty()) {
                 return functionCallExpressionNode;
             }
-            getTypeSchema(typeSymbol.get(), this.typeMapper, this.modifierData.typeSchemas);
+            populateTypeSchema(typeSymbol.get(), this.typeMapper, this.modifierData.typeSchemas);
             return functionCallExpressionNode;
-        }
-
-        private boolean isNotNPCallCall(FunctionCallExpressionNode functionCallExpressionNode,
-                                        SemanticModel semanticModel) {
-            Optional<Symbol> symbolOptional = semanticModel.symbol(functionCallExpressionNode);
-            if (symbolOptional.isEmpty()) {
-                return true;
-            }
-
-            Symbol symbol = symbolOptional.get();
-            if (!(symbol instanceof FunctionSymbol functionSymbol)) {
-                return true;
-            }
-
-            Optional<ModuleSymbol> moduleOptional = functionSymbol.getModule();
-            Optional<String> nameOptional = functionSymbol.getName();
-            if (moduleOptional.isEmpty() || nameOptional.isEmpty()) {
-                return true;
-            }
-
-            return !(isNPModule(moduleOptional.get()) && CALL_LLM.equals(nameOptional.get()));
         }
     }
 
@@ -330,9 +306,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             ParenthesizedArgList parenthesizedArgList = parenthesizedArgListOptional.get();
             SeparatedNodeList<FunctionArgumentNode> arguments = parenthesizedArgList.arguments();
             if (!arguments.isEmpty()) {
-                FunctionArgumentNode functionArgumentNode = arguments.get(0);
-                if (functionArgumentNode instanceof PositionalArgumentNode positionalArgumentNode) {
-                    // TODO: validation to be done first
+                if (arguments.get(0) instanceof PositionalArgumentNode positionalArgumentNode) {
                     naturalModelArg = Optional.of(positionalArgumentNode.expression());
                 }
             }
@@ -602,7 +576,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static NodeList<ImportDeclarationNode> updateImports(Document document, ModulePartNode modulePartNode,
                                                                  ModifierData modifierData) {
         NodeList<ImportDeclarationNode> imports = modulePartNode.imports();
-        NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
+
         if (containsBallerinaNPImport(imports)) {
             return imports;
         }
@@ -610,29 +584,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         if (modifierData.documentsRequiringNPImport.contains(document)) {
             return imports.add(createImportDeclarationForNPModule());
         }
-
-        for (ModuleMemberDeclarationNode memberNode : members) {
-            if (memberNode.kind() != SyntaxKind.TYPE_DEFINITION) {
-                continue;
-            }
-
-            TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) memberNode;
-            NodeList<AnnotationNode> annotations = getMetadataNode(typeDefinitionNode).annotations();
-            for (AnnotationNode annotation: annotations) {
-                // TODO: change to use shouldImportNP
-                if (isNPSchemaAnnotationAvailable(annotation)) {
-                    return imports.add(createImportDeclarationForNPModule());
-                }
-            }
-        }
         return imports;
-    }
-
-    private static boolean isNPSchemaAnnotationAvailable(AnnotationNode annotationNode) {
-        if (annotationNode.annotReference() instanceof SimpleNameReferenceNode refNode) {
-            return refNode.name().text().equals(MODULE_NAME + ":" + SCHEMA_ANNOTATION_IDENTIFIER);
-        }
-        return false;
     }
 
     private static ImportDeclarationNode createImportDeclarationForNPModule() {
@@ -663,26 +615,27 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         TypeSymbol typeSymbol = typeSymbolOpt.get();
         if (typeSymbol instanceof UnionTypeSymbol unionTypeSymbol) {
             for (TypeSymbol memberType : unionTypeSymbol.memberTypeDescriptors()) {
-                getTypeSchema(memberType, typeMapper, typeSchemas);
+                populateTypeSchema(memberType, typeMapper, typeSchemas);
             }
         }
     }
 
-    private static void getTypeSchema(TypeSymbol memberType, TypeMapper typeMapper, Map<String, String> typeSchemas) {
+    private static void populateTypeSchema(TypeSymbol memberType, TypeMapper typeMapper,
+                                           Map<String, String> typeSchemas) {
         switch (memberType) {
             case TypeReferenceTypeSymbol typeReference ->
                     typeSchemas.put(typeReference.definition().getName().get(),
                             getJsonSchema(typeMapper.getSchema(typeReference)));
             case ArrayTypeSymbol arrayType ->
-                            getTypeSchema(arrayType.memberTypeDescriptor(), typeMapper, typeSchemas);
+                            populateTypeSchema(arrayType.memberTypeDescriptor(), typeMapper, typeSchemas);
             case TupleTypeSymbol tupleType ->
                     tupleType.members().forEach(member ->
-                            getTypeSchema(member.typeDescriptor(), typeMapper, typeSchemas));
+                            populateTypeSchema(member.typeDescriptor(), typeMapper, typeSchemas));
             case RecordTypeSymbol recordType ->
                     recordType.fieldDescriptors().values().forEach(field ->
-                            getTypeSchema(field.typeDescriptor(), typeMapper, typeSchemas));
+                            populateTypeSchema(field.typeDescriptor(), typeMapper, typeSchemas));
             case UnionTypeSymbol unionTypeSymbol -> unionTypeSymbol.memberTypeDescriptors().forEach(member ->
-                            getTypeSchema(member, typeMapper, typeSchemas));
+                            populateTypeSchema(member, typeMapper, typeSchemas));
             default -> { }
         }
     }
