@@ -48,9 +48,10 @@ class DiagnosticLog {
     }
 
     enum DiagnosticCode {
-        NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED("NP_ERROR_001", "non.json.expected.type.not.yet.supported"),
-        UNEXPECTED_ARGUMENTS("NP_ERROR_002", "unexpected.arguments"),
-        EXPECTED_A_SUBTYPE_OF_NP_MODEL("NP_ERROR_003", "expected.a.subtype.of.np.model");
+        UNEXPECTED_ARGUMENTS("NP_ERROR_001", "unexpected.arguments"),
+        EXPECTED_A_SUBTYPE_OF_NP_MODEL("NP_ERROR_002", "expected.a.subtype.of.np.model"),
+        NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED("NP_ERROR_003", "non.json.expected.type.not.yet.supported"),
+        NON_JSON_TYPEDESC_ARGUMENT_NOT_YET_SUPPORTED("NP_ERROR_004", "non.json.typedesc.argument.not.yet.supported");
 
         private final String code;
         private final String message;
