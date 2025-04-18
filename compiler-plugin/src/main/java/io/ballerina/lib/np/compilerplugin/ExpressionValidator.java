@@ -68,7 +68,6 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
         SemanticModel semanticModel = ctx.semanticModel();
         Types types = semanticModel.types();
         Optional<Symbol> modelSymbol = types.getTypeByName(ORG_NAME, MODULE_NAME, VERSION, MODEL_TYPE);
-        TypeSymbol jsonType = types.JSON;
 
         Package currentPackage = ctx.currentPackage();
         ModuleId moduleId = ctx.moduleId();

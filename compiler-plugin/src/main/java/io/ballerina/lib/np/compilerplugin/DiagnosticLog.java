@@ -39,8 +39,6 @@ class DiagnosticLog {
 
     static void reportError(SyntaxNodeAnalysisContext ctx, CodeModifier.AnalysisData analysisData, Location location,
                             DiagnosticLog.DiagnosticCode diagnosticsCode, Object... args) {
-//        String errorMessage = MessageFormat.format(
-//                MESSAGES.getString(ERROR_PREFIX + "." + diagnosticsCode.getMessage()), args);
         String errorMessage = MESSAGES.getString(ERROR_PREFIX + "." + diagnosticsCode.getMessage());
         DiagnosticInfo diagnosticInfo =
                 new DiagnosticInfo(diagnosticsCode.getCode(), errorMessage, DiagnosticSeverity.ERROR);

@@ -57,7 +57,6 @@ import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.SyntaxTree;
 import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
@@ -289,7 +288,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             if (typeSymbol.isEmpty()) {
                 return functionCallExpressionNode;
             }
-            getTypeSchema(typeSymbol.get(), this.typeMapper, this.modifierData.typeSchemas);
+            populateTypeSchema(typeSymbol.get(), this.typeMapper, this.modifierData.typeSchemas);
             return functionCallExpressionNode;
         }
     }
@@ -577,7 +576,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static NodeList<ImportDeclarationNode> updateImports(Document document, ModulePartNode modulePartNode,
                                                                  ModifierData modifierData) {
         NodeList<ImportDeclarationNode> imports = modulePartNode.imports();
-        NodeList<ModuleMemberDeclarationNode> members = modulePartNode.members();
+
         if (containsBallerinaNPImport(imports)) {
             return imports;
         }
@@ -585,29 +584,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         if (modifierData.documentsRequiringNPImport.contains(document)) {
             return imports.add(createImportDeclarationForNPModule());
         }
-
-        for (ModuleMemberDeclarationNode memberNode : members) {
-            if (memberNode.kind() != SyntaxKind.TYPE_DEFINITION) {
-                continue;
-            }
-
-            TypeDefinitionNode typeDefinitionNode = (TypeDefinitionNode) memberNode;
-            NodeList<AnnotationNode> annotations = getMetadataNode(typeDefinitionNode).annotations();
-            for (AnnotationNode annotation: annotations) {
-                // TODO: change to use shouldImportNP
-                if (isNPSchemaAnnotationAvailable(annotation)) {
-                    return imports.add(createImportDeclarationForNPModule());
-                }
-            }
-        }
         return imports;
-    }
-
-    private static boolean isNPSchemaAnnotationAvailable(AnnotationNode annotationNode) {
-        if (annotationNode.annotReference() instanceof SimpleNameReferenceNode refNode) {
-            return refNode.name().text().equals(MODULE_NAME + ":" + SCHEMA_ANNOTATION_IDENTIFIER);
-        }
-        return false;
     }
 
     private static ImportDeclarationNode createImportDeclarationForNPModule() {
@@ -638,26 +615,27 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         TypeSymbol typeSymbol = typeSymbolOpt.get();
         if (typeSymbol instanceof UnionTypeSymbol unionTypeSymbol) {
             for (TypeSymbol memberType : unionTypeSymbol.memberTypeDescriptors()) {
-                getTypeSchema(memberType, typeMapper, typeSchemas);
+                populateTypeSchema(memberType, typeMapper, typeSchemas);
             }
         }
     }
 
-    private static void getTypeSchema(TypeSymbol memberType, TypeMapper typeMapper, Map<String, String> typeSchemas) {
+    private static void populateTypeSchema(TypeSymbol memberType, TypeMapper typeMapper,
+                                           Map<String, String> typeSchemas) {
         switch (memberType) {
             case TypeReferenceTypeSymbol typeReference ->
                     typeSchemas.put(typeReference.definition().getName().get(),
                             getJsonSchema(typeMapper.getSchema(typeReference)));
             case ArrayTypeSymbol arrayType ->
-                            getTypeSchema(arrayType.memberTypeDescriptor(), typeMapper, typeSchemas);
+                            populateTypeSchema(arrayType.memberTypeDescriptor(), typeMapper, typeSchemas);
             case TupleTypeSymbol tupleType ->
                     tupleType.members().forEach(member ->
-                            getTypeSchema(member.typeDescriptor(), typeMapper, typeSchemas));
+                            populateTypeSchema(member.typeDescriptor(), typeMapper, typeSchemas));
             case RecordTypeSymbol recordType ->
                     recordType.fieldDescriptors().values().forEach(field ->
-                            getTypeSchema(field.typeDescriptor(), typeMapper, typeSchemas));
+                            populateTypeSchema(field.typeDescriptor(), typeMapper, typeSchemas));
             case UnionTypeSymbol unionTypeSymbol -> unionTypeSymbol.memberTypeDescriptors().forEach(member ->
-                            getTypeSchema(member, typeMapper, typeSchemas));
+                            populateTypeSchema(member, typeMapper, typeSchemas));
             default -> { }
         }
     }
