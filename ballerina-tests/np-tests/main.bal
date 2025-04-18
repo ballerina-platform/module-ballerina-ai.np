@@ -99,3 +99,15 @@ function getResultOfBallerinaProgram(int x, int y) returns int|error => natural 
     \}
     ```
 };
+
+function getSum(int a, int b = 2, int... c) returns int|error => natural {
+    What's the sum of these values?
+};
+
+type IntRecord record {|
+    int val;
+|};
+
+function getSumWithIncludedRecordParam(int d, *IntRecord e, int... f) returns int|error => natural {
+    Give me the sum of these values
+};
