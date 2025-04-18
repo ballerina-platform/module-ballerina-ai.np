@@ -99,8 +99,8 @@ isolated function callLlmGeneric(Prompt prompt, Context context,
     anydata response = check model->call(prompt, expectedResponseTypedesc);
     anydata|error result = response.ensureType(expectedResponseTypedesc);
     if result is error {
-        return error(string `Invalid value returned from the LLM Client, expected: ${
-            expectedResponseTypedesc.toBalString()}, found ${(typeof response).toBalString()}`);
+        return error(string `Invalid value returned from the LLM Client, expected: '${
+            expectedResponseTypedesc.toBalString()}', found '${(typeof response).toBalString()}'`);
     }
     return result;
 }
