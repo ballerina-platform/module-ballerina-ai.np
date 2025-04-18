@@ -46,6 +46,14 @@ service /llm on new http:Listener(8080) {
             ]
         };
     }
+
+    resource function post 'default/chat/complete(@http:Payload string contentStr)
+            returns json|error {
+        test:assertEquals(contentStr, getExpectedPrompt(contentStr.toString()));
+        return {
+            content: [getMockLLMResponse(contentStr)]
+        };
+    }
 }
 
 isolated function getExpectedPrompt(string prompt) returns string {
