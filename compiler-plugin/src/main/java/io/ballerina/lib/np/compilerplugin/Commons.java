@@ -18,23 +18,16 @@
 package io.ballerina.lib.np.compilerplugin;
 
 import io.ballerina.compiler.api.ModuleID;
-import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.ExternalFunctionBodyNode;
-import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.RestParameterNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-
-import java.util.Optional;
 
 /**
  * Class containing common constants and functionality.
@@ -44,38 +37,11 @@ import java.util.Optional;
 class Commons {
     static final String ORG_NAME = "ballerina";
     static final String MODULE_NAME = "np";
-    static final String NATURAL_FUNCTION_ANNOT = "NaturalFunction";
-
-    static boolean hasNaturalFunctionAnnotation(ExternalFunctionBodyNode functionBody, String modulePrefix) {
-        return hasAnnotation(functionBody, modulePrefix, NATURAL_FUNCTION_ANNOT);
-    }
+    static final String VERSION = "0.1.0";
 
     static boolean isRuntimeNaturalExpression(ExpressionNode expressionNode) {
         return expressionNode instanceof NaturalExpressionNode naturalExpressionNode &&
                 naturalExpressionNode.constKeyword().isEmpty();
-    }
-
-    static boolean hasAnnotation(ExternalFunctionBodyNode functionBody, String modulePrefix,
-                                 String annotation) {
-        final String annotationRef = modulePrefix + ":" + annotation;
-        return functionBody.annotations().stream().
-                anyMatch(annotationNode -> annotationNode.annotReference().toString().trim()
-                        .equals(annotationRef));
-    }
-
-    static Optional<ModuleSymbol> findNPModule(SemanticModel semanticModel, ModulePartNode rootNode) {
-        for (ImportDeclarationNode importDeclarationNode : rootNode.imports()) {
-            Optional<Symbol> symbolOptional = semanticModel.symbol(importDeclarationNode);
-            if (symbolOptional.isEmpty()) {
-                continue;
-            }
-
-            Symbol symbol = symbolOptional.get();
-            if (symbol instanceof ModuleSymbol moduleSymbol && isNPModule(moduleSymbol)) {
-                return Optional.of(moduleSymbol);
-            }
-        }
-        return Optional.empty();
     }
 
     static boolean isNPModule(ModuleSymbol moduleSymbol) {

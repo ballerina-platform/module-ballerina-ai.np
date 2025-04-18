@@ -34,8 +34,8 @@ public class CodeModifier extends io.ballerina.projects.plugins.CodeModifier {
     @Override
     public void init(CodeModifierContext modifierContext) {
         AnalysisData analysisData = new AnalysisData();
-        modifierContext.addSyntaxNodeAnalysisTask(new NaturalExpressionValidator(analysisData),
-                List.of(SyntaxKind.MODULE_PART, SyntaxKind.NATURAL_EXPRESSION));
+        modifierContext.addSyntaxNodeAnalysisTask(new ExpressionValidator(analysisData),
+                List.of(SyntaxKind.NATURAL_EXPRESSION, SyntaxKind.FUNCTION_CALL));
         modifierContext.addSyntaxNodeAnalysisTask(new TypeMapperImplInitializer(analysisData), SyntaxKind.MODULE_PART);
         modifierContext.addSourceModifierTask(new PromptAsCodeCodeModificationTask(analysisData));
     }

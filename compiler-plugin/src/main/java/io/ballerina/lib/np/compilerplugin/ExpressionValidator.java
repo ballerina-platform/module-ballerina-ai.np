@@ -19,14 +19,14 @@
 package io.ballerina.lib.np.compilerplugin;
 
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
@@ -37,80 +37,65 @@ import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
-import io.ballerina.tools.diagnostics.DiagnosticFactory;
-import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.Location;
 
 import java.util.Optional;
 
 import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
-import static io.ballerina.lib.np.compilerplugin.Commons.findNPModule;
+import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
+import static io.ballerina.lib.np.compilerplugin.Commons.VERSION;
+import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.EXPECTED_A_SUBTYPE_OF_NP_MODEL;
+import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED;
+import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.UNEXPECTED_ARGUMENTS;
+import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.reportError;
 
 /**
  * Natural programming function signature validator.
  *
  * @since 0.3.0
  */
-public class NaturalExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisContext> {
+public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisContext> {
     private final CodeModifier.AnalysisData analysisData;
     private static final String MODEL_TYPE = "Model";
-    private Optional<TypeSymbol> modelType = Optional.empty();
 
-    NaturalExpressionValidator(CodeModifier.AnalysisData analysisData) {
+    ExpressionValidator(CodeModifier.AnalysisData analysisData) {
         this.analysisData = analysisData;
     }
 
     @Override
     public void perform(SyntaxNodeAnalysisContext ctx) {
         SemanticModel semanticModel = ctx.semanticModel();
+        Optional<Symbol> modelSymbol = semanticModel.types().getTypeByName(ORG_NAME, MODULE_NAME, VERSION, MODEL_TYPE);
         TypeSymbol jsonType = semanticModel.types().JSON;
-
-        Node node = ctx.node();
-
-        if (node instanceof ModulePartNode rootNode) {
-            Optional<ModuleSymbol> npModule = findNPModule(semanticModel, rootNode);
-            if (npModule.isEmpty()) {
-                this.modelType = Optional.empty();
-                return;
-            }
-
-            ModuleSymbol npModuleSymbol = npModule.get();
-            this.modelType = Optional.of(((TypeDefinitionSymbol) npModuleSymbol.allSymbols().stream()
-                    .filter(
-                            symbol -> symbol instanceof TypeDefinitionSymbol typeDefinitionSymbol &&
-                                    typeDefinitionSymbol.moduleQualifiedName().equals(
-                                            String.format("%s:%s", MODULE_NAME, MODEL_TYPE)))
-                    .findFirst()
-                    .get()).typeDescriptor());
-            return;
-        }
-
-//        // Using the `modelType` to also track if natural expressions have been rewritten.
-//        // Ideally should happen on the natural expression itself, but then we may need several plugin iterations.
-//        if (this.modelType.isEmpty()) {
-//            return;
-//        }
 
         Package currentPackage = ctx.currentPackage();
         ModuleId moduleId = ctx.moduleId();
         Module module = currentPackage.module(moduleId);
         Document document = module.document(ctx.documentId());
 
-        validateNaturalExpression(semanticModel, document, (NaturalExpressionNode) ctx.node(), jsonType, ctx);
+        Node node = ctx.node();
+        if (node instanceof NaturalExpressionNode naturalExpressionNode) {
+            validateNaturalExpression(semanticModel, document, naturalExpressionNode, jsonType, modelSymbol, ctx);
+            return;
+        }
+
+        validateLlmCallExpression((FunctionCallExpressionNode) node, jsonType, ctx);
     }
 
     private void validateNaturalExpression(SemanticModel semanticModel,
                                            Document document,
                                            NaturalExpressionNode naturalExpressionNode,
-                                           TypeSymbol jsonType, SyntaxNodeAnalysisContext ctx) {
-        validateArguments(ctx, semanticModel, naturalExpressionNode.parenthesizedArgList());
-        validateExpectedType(naturalExpressionNode,
+                                           TypeSymbol jsonType, Optional<Symbol> modelSymbol,
+                                           SyntaxNodeAnalysisContext ctx) {
+        validateArguments(ctx, semanticModel, naturalExpressionNode.parenthesizedArgList(), modelSymbol);
+        validateExpectedType(naturalExpressionNode.location(),
                 semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()), jsonType, ctx);
     }
 
     private void validateArguments(SyntaxNodeAnalysisContext ctx,
                                    SemanticModel semanticModel,
-                                   Optional<ParenthesizedArgList> parenthesizedArgListOptional) {
+                                   Optional<ParenthesizedArgList> parenthesizedArgListOptional,
+                                   Optional<Symbol> modelSymbol) {
         if (parenthesizedArgListOptional.isEmpty()) {
             return;
         }
@@ -124,10 +109,10 @@ public class NaturalExpressionValidator implements AnalysisTask<SyntaxNodeAnalys
         }
 
         if (argListSize > 1) {
-            reportDiagnostic(ctx, parenthesizedArgList.location(), DiagnosticCode.UNEXPECTED_ARGUMENTS);
+            reportError(ctx, this.analysisData, parenthesizedArgList.location(), UNEXPECTED_ARGUMENTS, argListSize);
         }
 
-        if (this.modelType.isEmpty()) {
+        if (modelSymbol.isEmpty()) {
             return;
         }
 
@@ -137,16 +122,18 @@ public class NaturalExpressionValidator implements AnalysisTask<SyntaxNodeAnalys
             return;
         }
 
-        if (!argType.get().subtypeOf(this.modelType.get())) {
-            reportDiagnostic(ctx, arg0.location(), DiagnosticCode.EXPECTED_A_SUBTYPE_OF_NP_MODEL);
+        TypeSymbol symbol = argType.get();
+        if (!symbol.subtypeOf(((TypeDefinitionSymbol) modelSymbol.get()).typeDescriptor())) {
+            reportError(ctx, this.analysisData, arg0.location(), EXPECTED_A_SUBTYPE_OF_NP_MODEL, symbol.signature());
         }
     }
 
-    private void validateExpectedType(NaturalExpressionNode naturalExpressionNode,
-                                      Optional<TypeSymbol> expectedType,
-                                      TypeSymbol jsonType,
+    private void validateLlmCallExpression(FunctionCallExpressionNode functionCall, TypeSymbol jsonType,
+                                           SyntaxNodeAnalysisContext ctx) {
+    }
+
+    private void validateExpectedType(Location location, Optional<TypeSymbol> expectedType, TypeSymbol jsonType,
                                       SyntaxNodeAnalysisContext ctx) {
-        Location location = naturalExpressionNode.location();
         TypeSymbol expectedTypeSymbol = expectedType.get();
         if (expectedTypeSymbol instanceof TypeReferenceTypeSymbol typeReferenceTypeSymbol) {
             expectedTypeSymbol = typeReferenceTypeSymbol.typeDescriptor();
@@ -154,7 +141,7 @@ public class NaturalExpressionValidator implements AnalysisTask<SyntaxNodeAnalys
 
         if (!(expectedTypeSymbol instanceof UnionTypeSymbol unionTypeSymbol)) {
             if (expectedTypeSymbol.typeKind() != TypeDescKind.ERROR && expectedTypeSymbol.subtypeOf(jsonType)) {
-                reportDiagnostic(ctx, location, DiagnosticCode.NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED);
+                reportError(ctx, this.analysisData, location, NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED);
             }
             return;
         }
@@ -165,16 +152,8 @@ public class NaturalExpressionValidator implements AnalysisTask<SyntaxNodeAnalys
             }
 
             if (memberTypeDescriptor.typeKind() != TypeDescKind.ERROR && !memberTypeDescriptor.subtypeOf(jsonType)) {
-                reportDiagnostic(ctx, location, DiagnosticCode.NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED);
+                reportError(ctx, this.analysisData, location, NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED);
             }
         }
-    }
-
-    private void reportDiagnostic(SyntaxNodeAnalysisContext ctx, Location location,
-                                  DiagnosticCode diagnosticsCode) {
-        DiagnosticInfo diagnosticInfo = new DiagnosticInfo(diagnosticsCode.getCode(),
-                diagnosticsCode.getMessage(), diagnosticsCode.getSeverity());
-        this.analysisData.analysisTaskErrored = true;
-        ctx.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, location));
     }
 }

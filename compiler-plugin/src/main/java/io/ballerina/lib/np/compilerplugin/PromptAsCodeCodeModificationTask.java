@@ -140,7 +140,8 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     public void modify(SourceModifierContext modifierContext) {
         Package currentPackage = modifierContext.currentPackage();
 
-        if (this.analysisData.analysisTaskErrored ||
+        if (// https://github.com/ballerina-platform/ballerina-lang/issues/44020
+            // this.analysisData.analysisTaskErrored ||
                 modifierContext.compilation().diagnosticResult().errorCount() > 0) {
             return;
         }
@@ -330,9 +331,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
             ParenthesizedArgList parenthesizedArgList = parenthesizedArgListOptional.get();
             SeparatedNodeList<FunctionArgumentNode> arguments = parenthesizedArgList.arguments();
             if (!arguments.isEmpty()) {
-                FunctionArgumentNode functionArgumentNode = arguments.get(0);
-                if (functionArgumentNode instanceof PositionalArgumentNode positionalArgumentNode) {
-                    // TODO: validation to be done first
+                if (arguments.get(0) instanceof PositionalArgumentNode positionalArgumentNode) {
                     naturalModelArg = Optional.of(positionalArgumentNode.expression());
                 }
             }
