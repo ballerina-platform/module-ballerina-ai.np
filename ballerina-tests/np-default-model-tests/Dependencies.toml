@@ -236,6 +236,7 @@ name = "np"
 version = "0.3.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "url"}
 ]
