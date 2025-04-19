@@ -1,6 +1,3 @@
-ignore:
-  - "ballerina-tests"
-
 coverage:
   precision: 2
   round: down
