@@ -45,6 +45,7 @@ import static io.ballerina.lib.np.compilerplugin.Commons.VERSION;
 import static io.ballerina.lib.np.compilerplugin.Commons.isNotNPCallCall;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.EXPECTED_A_SUBTYPE_OF_NP_MODEL;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED;
+import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.NON_JSON_TYPEDESC_ARGUMENT_NOT_YET_SUPPORTED;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.UNEXPECTED_ARGUMENTS;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.reportError;
 
@@ -80,7 +81,7 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
             return;
         }
 
-        validateLlmCallExpression(semanticModel, types, document, (FunctionCallExpressionNode) node, ctx);
+        validateCallLlmExpression(semanticModel, types, document, (FunctionCallExpressionNode) node, ctx);
     }
 
     private void validateNaturalExpression(SemanticModel semanticModel,
@@ -130,7 +131,7 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
         }
     }
 
-    private void validateLlmCallExpression(SemanticModel semanticModel, Types types, Document document,
+    private void validateCallLlmExpression(SemanticModel semanticModel, Types types, Document document,
                                            FunctionCallExpressionNode functionCallExpressionNode,
                                            SyntaxNodeAnalysisContext ctx) {
         if (isNotNPCallCall(functionCallExpressionNode, semanticModel)) {
@@ -144,15 +145,14 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
 
         if (!typeSymbol.get().subtypeOf(getJsonOrErrorType(types))) {
             reportError(ctx, this.analysisData, functionCallExpressionNode.location(),
-                    NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED, "'ballerina/np:callLlm' expressions");
+                    NON_JSON_TYPEDESC_ARGUMENT_NOT_YET_SUPPORTED);
         }
     }
 
     private void validateExpectedType(Location location, TypeSymbol expectedType, Types types,
                                       SyntaxNodeAnalysisContext ctx) {
         if (!expectedType.subtypeOf(getJsonOrErrorType(types))) {
-            reportError(ctx, this.analysisData, location, NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED,
-                    "natural expressions");
+            reportError(ctx, this.analysisData, location, NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED);
         }
     }
 

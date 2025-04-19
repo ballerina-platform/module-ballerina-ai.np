@@ -1,6 +1,6 @@
-// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org).
 //
-// WSO2 LLC. licenses this file to you under the Apache License,
+// WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,10 +14,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function fn() returns anydata|error => natural (1, 2, "foo") {
-    What day was the 18th of April 2025?
-};
+import ballerina_np/np_test_commons as _;
+import ballerina/test;
 
-function fn2() returns string|error => natural () { // OK
-    What day was the 18th of April 2025?
-};
+@test:Config
+function testComplexTypeWithDocsWithNaturalFunctionAnnotation() returns error? {
+    SportsPerson? person = check getPopularSportsPerson("Simone", 1990);
+    test:assertEquals(person, <SportsPerson> {
+        firstName: "Simone",
+        lastName: "Biles",
+        sport: "Gymnastics",
+        yearOfBirth: 1997
+    });
+}

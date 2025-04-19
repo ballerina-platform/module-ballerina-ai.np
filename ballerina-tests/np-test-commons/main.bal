@@ -46,6 +46,14 @@ service /llm on new http:Listener(8080) {
             ]
         };
     }
+
+    resource function post 'default/chat/complete(@http:Payload string contentStr)
+            returns json|error {
+        test:assertEquals(contentStr, getExpectedPrompt(contentStr.toString()));
+        return {
+            content: [getMockLLMResponse(contentStr)]
+        };
+    }
 }
 
 isolated function getExpectedPrompt(string prompt) returns string {
@@ -170,6 +178,122 @@ ${"```"}
         {"type":"integer"}`;
     }
 
+    if trimmedPrompt.includes("What's the sum of these") {
+        if trimmedPrompt.includes("[]") {
+            return string `You have been given the following input:
+
+a: 
+${"```"}
+1
+${"```"}
+
+b: 
+${"```"}
+2
+${"```"}
+
+c: 
+${"```"}
+[]
+${"```"}
+
+    What's the sum of these values?
+        ---
+
+        The output should be a JSON value that satisfies the following JSON schema, 
+        returned within a markdown snippet enclosed within ${"```"}json and ${"```"}
+        
+        Schema:
+        {"type":"integer"}`;
+        }
+
+        if trimmedPrompt.includes("[40,50]") {
+            return string `You have been given the following input:
+
+a: 
+${"```"}
+20
+${"```"}
+
+b: 
+${"```"}
+30
+${"```"}
+
+c: 
+${"```"}
+[40,50]
+${"```"}
+
+    What's the sum of these values?
+        ---
+
+        The output should be a JSON value that satisfies the following JSON schema, 
+        returned within a markdown snippet enclosed within ${"```"}json and ${"```"}
+        
+        Schema:
+        {"type":"integer"}`;
+        }
+    }
+
+    if trimmedPrompt.includes("Give me the sum of these values") {
+        if trimmedPrompt.includes("[]") {
+            return string `You have been given the following input:
+
+d: 
+${"```"}
+100
+${"```"}
+
+e: 
+${"```"}
+{"val":200}
+${"```"}
+
+f: 
+${"```"}
+[]
+${"```"}
+
+    Give me the sum of these values
+        ---
+
+        The output should be a JSON value that satisfies the following JSON schema, 
+        returned within a markdown snippet enclosed within ${"```"}json and ${"```"}
+        
+        Schema:
+        {"type":"integer"}`;
+        }
+
+        if trimmedPrompt.includes("[500]") {
+            return string `You have been given the following input:
+
+d: 
+${"```"}
+300
+${"```"}
+
+e: 
+${"```"}
+{"val":400}
+${"```"}
+
+f: 
+${"```"}
+[500]
+${"```"}
+
+    Give me the sum of these values
+        ---
+
+        The output should be a JSON value that satisfies the following JSON schema, 
+        returned within a markdown snippet enclosed within ${"```"}json and ${"```"}
+        
+        Schema:
+        {"type":"integer"}`;
+        }
+    }
+
     test:assertFail("Unexpected prompt: " + trimmedPrompt);
 }
 
@@ -196,6 +320,26 @@ isolated function getMockLLMResponse(string message) returns string? {
 
     if message.startsWith("What's the output of the Ballerina code below?") {
         return string `The output of the provided Ballerina code calculates the sum of ${"`"}x${"`"} and ${"`"}y${"`"}, which is ${"`"}10 + 20${"`"}. Therefore, the result will be ${"`"}30${"`"}. \n\nHere is the output formatted as a JSON value that satisfies your specified schema:${"\n\n```"}json${"\n"}30${"\n```"}`;
+    }
+
+    if message.includes("What's the sum of these") {
+        if message.includes("[]") {
+            return "```\n3\n```";
+        }
+
+        if message.includes("[40,50]") {
+            return "```\n140\n```";
+        }
+    }
+
+    if message.includes("Give me the sum of these values") {
+        if message.includes("[]") {
+            return "```\n300\n```";
+        }
+
+        if message.includes("[500]") {
+            return "```\n1200\n```";
+        }
     }
 
     test:assertFail("Unexpected prompt");

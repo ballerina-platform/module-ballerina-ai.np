@@ -68,14 +68,12 @@ public class CompilerPluginTest {
         Package callLlmNegativePackage = loadPackage("call-llm-negative");
         DiagnosticResult diagnosticResult = callLlmNegativePackage.runCodeGenAndModifyPlugins();
         List<Diagnostic> errorDiagnosticsList = diagnosticResult.diagnostics().stream().toList();
-        assertDiagnostic(errorDiagnosticsList, index++,
-                "subtypes of 'anydata' that are not subtypes of 'json' are not yet supported" +
-                        " as the expected type for 'ballerina/np:callLlm' expressions",
-                19, 25);
-        assertDiagnostic(errorDiagnosticsList, index++,
-                "subtypes of 'anydata' that are not subtypes of 'json' are not yet supported" +
-                        " as the expected type for 'ballerina/np:callLlm' expressions",
-                22, 14);
+        String expectedErrorMessage = "subtypes of 'typedesc<anydata>' that are not subtypes of 'typedesc<json>' " +
+                "are not yet supported as the argument to 'ballerina/np:callLlm'";
+        assertDiagnostic(errorDiagnosticsList, index++, expectedErrorMessage, 19, 25);
+        assertDiagnostic(errorDiagnosticsList, index++, expectedErrorMessage, 22, 14);
+        assertDiagnostic(errorDiagnosticsList, index++, expectedErrorMessage, 28, 19);
+        assertDiagnostic(errorDiagnosticsList, index++, expectedErrorMessage, 29, 19);
         Assert.assertEquals(index, errorDiagnosticsList.size());
     }
 

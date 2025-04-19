@@ -88,10 +88,8 @@ import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdenti
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.DEFAULTABLE_PARAM;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.REQUIRED_PARAM;
 import static io.ballerina.lib.np.compilerplugin.Commons.CALL_LLM;
 import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
@@ -409,10 +407,6 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         List<String> parametersToInclude = new ArrayList<>(parameters.size());
         for (ParameterNode parameter : parameters) {
             SyntaxKind kind = parameter.kind();
-            if (kind != REQUIRED_PARAM && kind != DEFAULTABLE_PARAM) {
-                continue;
-            }
-
             Node parameterType = getParameterType(parameter, kind);
             Optional<TypeSymbol> symbol = semanticModel.type(parameterType.lineRange());
             if (symbol.isEmpty()) {
