@@ -19,11 +19,19 @@ package io.ballerina.lib.np.compilerplugin;
 
 import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.FunctionSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
-import io.ballerina.compiler.syntax.tree.ExternalFunctionBodyNode;
-import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
+import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
+import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
+import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.RestParameterNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 
 import java.util.Optional;
 
@@ -35,39 +43,54 @@ import java.util.Optional;
 class Commons {
     static final String ORG_NAME = "ballerina";
     static final String MODULE_NAME = "np";
-    static final String PROMPT_VAR = "prompt";
-    static final String CONTEXT_VAR = "context";
-    static final String NATURAL_FUNCTION_ANNOT = "NaturalFunction";
+    static final String VERSION = "0.1.0";
+    static final String CALL_LLM = "callLlm";
 
-    static boolean hasNaturalFunctionAnnotation(ExternalFunctionBodyNode functionBody, String modulePrefix) {
-        return hasAnnotation(functionBody, modulePrefix, NATURAL_FUNCTION_ANNOT);
-    }
-
-    static boolean hasAnnotation(ExternalFunctionBodyNode functionBody, String modulePrefix,
-                                 String annotation) {
-        final String annotationRef = modulePrefix + ":" + annotation;
-        return functionBody.annotations().stream().
-                anyMatch(annotationNode -> annotationNode.annotReference().toString().trim()
-                        .equals(annotationRef));
-    }
-
-    static Optional<ModuleSymbol> findNPModule(SemanticModel semanticModel, ModulePartNode rootNode) {
-        for (ImportDeclarationNode importDeclarationNode : rootNode.imports()) {
-            Optional<Symbol> symbolOptional = semanticModel.symbol(importDeclarationNode);
-            if (symbolOptional.isEmpty()) {
-                continue;
-            }
-
-            Symbol symbol = symbolOptional.get();
-            if (symbol instanceof ModuleSymbol moduleSymbol && isNPModule(moduleSymbol)) {
-                return Optional.of(moduleSymbol);
-            }
-        }
-        return Optional.empty();
+    static boolean isRuntimeNaturalExpression(ExpressionNode expressionNode) {
+        return expressionNode instanceof NaturalExpressionNode naturalExpressionNode &&
+                naturalExpressionNode.constKeyword().isEmpty();
     }
 
     static boolean isNPModule(ModuleSymbol moduleSymbol) {
         ModuleID moduleId = moduleSymbol.id();
         return ORG_NAME.equals(moduleId.orgName()) && MODULE_NAME.equals(moduleId.moduleName());
+    }
+
+    static Node getParameterType(ParameterNode parameter, SyntaxKind kind) {
+        return switch (kind) {
+            case REQUIRED_PARAM -> ((RequiredParameterNode) parameter).typeName();
+            case DEFAULTABLE_PARAM -> ((DefaultableParameterNode) parameter).typeName();
+            case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).typeName();
+            default -> ((RestParameterNode) parameter).typeName();
+        };
+    }
+
+    static String getParameterName(ParameterNode parameter, SyntaxKind kind) {
+        return switch (kind) {
+            case REQUIRED_PARAM -> ((RequiredParameterNode) parameter).paramName().get().text();
+            case DEFAULTABLE_PARAM -> ((DefaultableParameterNode) parameter).paramName().get().text();
+            case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).paramName().get().text();
+            default -> ((RestParameterNode) parameter).paramName().get().text();
+        };
+    }
+
+    static boolean isNotNPCallCall(FunctionCallExpressionNode functionCallExpressionNode, SemanticModel semanticModel) {
+        Optional<Symbol> symbolOptional = semanticModel.symbol(functionCallExpressionNode);
+        if (symbolOptional.isEmpty()) {
+            return true;
+        }
+
+        Symbol symbol = symbolOptional.get();
+        if (!(symbol instanceof FunctionSymbol functionSymbol)) {
+            return true;
+        }
+
+        Optional<ModuleSymbol> moduleOptional = functionSymbol.getModule();
+        Optional<String> nameOptional = functionSymbol.getName();
+        if (moduleOptional.isEmpty() || nameOptional.isEmpty()) {
+            return true;
+        }
+
+        return !(isNPModule(moduleOptional.get()) && CALL_LLM.equals(nameOptional.get()));
     }
 }

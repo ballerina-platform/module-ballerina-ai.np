@@ -29,24 +29,25 @@ type JsonArraySchema record {|
     JsonSchema items;
 |};
 
-isolated function generateJsonSchemaForTypedescAsJson(typedesc<json> targetType) returns map<json> =>
-    let map<json>? ann = targetType.@Schema in 
-        ann ?: generateJsonSchemaForTypedesc(targetType, containsNil(targetType));
+isolated function generateJsonSchemaForTypedescAsJson(typedesc<json> expectedResponseTypedesc) returns map<json> =>
+    let map<json>? ann = expectedResponseTypedesc.@JsonSchema in ann ?:
+         (generateJsonSchemaForTypedescNative(expectedResponseTypedesc) 
+                ?: generateJsonSchemaForTypedesc(expectedResponseTypedesc, containsNil(expectedResponseTypedesc)));
 
-isolated function generateJsonSchemaForTypedesc(typedesc<json> targetType, boolean nilableType) returns JsonSchema|JsonArraySchema|map<json> {
-    if isSimpleType(targetType) {
+isolated function generateJsonSchemaForTypedesc(typedesc<json> expectedResponseTypedesc, boolean nilableType) returns JsonSchema|JsonArraySchema|map<json> {
+    if isSimpleType(expectedResponseTypedesc) {
         return <JsonSchema>{
-            'type: getStringRepresentation(<typedesc<json>>targetType)
+            'type: getStringRepresentation(<typedesc<json>>expectedResponseTypedesc)
         };
     }
 
-    boolean isArray = targetType is typedesc<json[]>;
+    boolean isArray = expectedResponseTypedesc is typedesc<json[]>;
 
     typedesc<map<json>?> recTd;
 
     if isArray {
-        typedesc<json> arrayMemberType = getArrayMemberType(<typedesc<json[]>>targetType);
-        map<json>? ann = arrayMemberType.@Schema;
+        typedesc<json> arrayMemberType = getArrayMemberType(<typedesc<json[]>>expectedResponseTypedesc);
+        map<json>? ann = arrayMemberType.@JsonSchema;
         if ann !is () {
             return ann;
         }
@@ -62,7 +63,7 @@ isolated function generateJsonSchemaForTypedesc(typedesc<json> targetType, boole
         }
         recTd = <typedesc<map<json>?>>arrayMemberType;
     } else {
-        recTd = <typedesc<map<json>?>>targetType;
+        recTd = <typedesc<map<json>?>>expectedResponseTypedesc;
     }
 
     string[] names = [];
@@ -73,18 +74,18 @@ isolated function generateJsonSchemaForTypedesc(typedesc<json> targetType, boole
     return generateJsonSchema(names, required, types, nilable, isArray, containsNil(recTd));
 }
 
-isolated function populateFieldInfo(typedesc<json> targetType, string[] names, boolean[] required,
+isolated function populateFieldInfo(typedesc<json> expectedResponseTypedesc, string[] names, boolean[] required,
         typedesc<json>[] types, boolean[] nilable) = @java:Method {
     name: "populateFieldInfo",
     'class: "io.ballerina.lib.np.Native"
 } external;
 
-isolated function getArrayMemberType(typedesc<json> targetType) returns typedesc<json> = @java:Method {
+isolated function getArrayMemberType(typedesc<json> expectedResponseTypedesc) returns typedesc<json> = @java:Method {
     name: "getArrayMemberType",
     'class: "io.ballerina.lib.np.Native"
 } external;
 
-isolated function containsNil(typedesc<json> targetType) returns boolean = @java:Method {
+isolated function containsNil(typedesc<json> expectedResponseTypedesc) returns boolean = @java:Method {
     name: "containsNil",
     'class: "io.ballerina.lib.np.Native"
 } external;
@@ -103,7 +104,7 @@ isolated function generateJsonSchema(string[] names, boolean[] required,
 
     foreach int i in 0 ..< names.length() {
         string fieldName = names[i];
-        map<json>? ann = types[i].@Schema;
+        map<json>? ann = types[i].@JsonSchema;
         JsonSchema|JsonArraySchema|map<json> fieldSchema = ann is () ? getJsonSchemaType(types[i], nilable[i]) : ann;
         properties[fieldName] = fieldSchema;
         if required[i] {
@@ -136,8 +137,8 @@ isolated function getJsonSchemaType(typedesc<json> fieldType, boolean nilable) r
     return generateJsonSchemaForTypedesc(fieldType, nilable);
 }
 
-isolated function isSimpleType(typedesc<json> targetType) returns boolean =>
-    targetType is typedesc<string|int|float|decimal|boolean|()>;
+isolated function isSimpleType(typedesc<json> expectedResponseTypedesc) returns boolean =>
+    expectedResponseTypedesc is typedesc<string|int|float|decimal|boolean|()>;
 
 isolated function getStringRepresentation(typedesc<json> fieldType) returns string {
     if fieldType is typedesc<()> {
@@ -158,3 +159,7 @@ isolated function getStringRepresentation(typedesc<json> fieldType) returns stri
 
     panic error("JSON schema generation is not yet supported for type: " + fieldType.toString());
 }
+
+isolated function generateJsonSchemaForTypedescNative(typedesc<anydata> td) returns map<json>? = @java:Method {
+    'class: "io.ballerina.lib.np.Native"
+} external;

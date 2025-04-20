@@ -25,7 +25,9 @@ isolated function getExpectedPrompt(string message) returns string {
 
     if message.startsWith("Who is a popular sportsperson") {
         return string `Who is a popular sportsperson that was born in the decade starting
-            from 1990 with Simone in their name?.  
+            from 1990 with Simone in their name?
+        ---
+
         The output should be a JSON value that satisfies the following JSON schema, 
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         

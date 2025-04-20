@@ -19,7 +19,7 @@ import ballerina/http;
 const UNAUTHORIZED = 401;
 
 # Configuration for the default Ballerina model.
-public type DefaultBallerinaModelConfig record {|
+type DefaultBallerinaModelConfig record {|
     # LLM service URL
     string url;
     # Access token
@@ -31,12 +31,12 @@ type ChatCompletionResponse record {
 };
 
 # Default Ballerina model chat completion client.
-public isolated distinct client class DefaultBallerinaModel {
+isolated distinct client class DefaultBallerinaModel {
     *Model;
 
     private final http:Client cl;
 
-    public isolated function init(DefaultBallerinaModelConfig config) returns error? {
+    isolated function init(DefaultBallerinaModelConfig config) returns error? {
         var {url, accessToken} = config;
 
         self.cl = check new (url, {
@@ -46,10 +46,10 @@ public isolated distinct client class DefaultBallerinaModel {
         });
     }
 
-    isolated remote function call(string prompt, map<json> expectedResponseSchema) returns json|error {
+    isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
         http:Client cl = self.cl;
         http:Response chatResponse = 
-            check cl->/chat/complete.post(getPromptWithExpectedResponseSchema(prompt, expectedResponseSchema));
+            check cl->/chat/complete.post(getPromptWithExpectedResponseSchema(prompt, expectedResponseTypedesc));
         int statusCode = chatResponse.statusCode;
         if statusCode == UNAUTHORIZED {
             return error("The default Ballerina model is being used. The token has expired and needs to be regenerated.");
@@ -64,6 +64,6 @@ public isolated distinct client class DefaultBallerinaModel {
         if content is () {
             return error("No completion message");
         }
-        return parseResponseAsJson(content[0]);
+        return parseResponseAsType(content[0], expectedResponseTypedesc);
     }
 }

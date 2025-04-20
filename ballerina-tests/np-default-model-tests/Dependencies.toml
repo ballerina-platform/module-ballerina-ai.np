@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.13.0-20250416-064900-6c684282"
+distribution-version = "2201.13.0-20250417-191300-f74cc3c0"
 
 [[package]]
 org = "ballerina"
@@ -95,10 +95,6 @@ dependencies = [
 	{org = "ballerina", name = "time"},
 	{org = "ballerina", name = "url"}
 ]
-modules = [
-	{org = "ballerina", packageName = "http", moduleName = "http"},
-	{org = "ballerina", packageName = "http", moduleName = "http.httpscerr"}
-]
 
 [[package]]
 org = "ballerina"
@@ -151,6 +147,15 @@ dependencies = [
 org = "ballerina"
 name = "lang.decimal"
 version = "0.0.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+
+[[package]]
+org = "ballerina"
+name = "lang.error"
+version = "0.0.0"
+scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -213,9 +218,6 @@ dependencies = [
 	{org = "ballerina", name = "lang.value"},
 	{org = "ballerina", name = "observe"}
 ]
-modules = [
-	{org = "ballerina", packageName = "log", moduleName = "log"}
-]
 
 [[package]]
 org = "ballerina"
@@ -273,22 +275,25 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
-name = "sql"
-version = "1.16.0"
-dependencies = [
-	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "lang.object"},
-	{org = "ballerina", name = "time"}
-]
-
-[[package]]
-org = "ballerina"
 name = "task"
 version = "2.7.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
+]
+
+[[package]]
+org = "ballerina"
+name = "test"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.array"},
+	{org = "ballerina", name = "lang.error"}
+]
+modules = [
+	{org = "ballerina", packageName = "test", moduleName = "test"}
 ]
 
 [[package]]
@@ -308,53 +313,28 @@ dependencies = [
 ]
 
 [[package]]
-org = "ballerinai"
-name = "observe"
-version = "0.0.0"
-dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "observe"}
-]
-modules = [
-	{org = "ballerinai", packageName = "observe", moduleName = "observe"}
-]
-
-[[package]]
-org = "ballerinax"
-name = "mysql"
-version = "1.15.0"
-dependencies = [
-	{org = "ballerina", name = "crypto"},
-	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "sql"},
-	{org = "ballerina", name = "time"}
-]
-modules = [
-	{org = "ballerinax", packageName = "mysql", moduleName = "mysql"}
-]
-
-[[package]]
-org = "ballerinax"
-name = "mysql.driver"
-version = "1.8.0"
-modules = [
-	{org = "ballerinax", packageName = "mysql.driver", moduleName = "mysql.driver"}
-]
-
-[[package]]
-org = "demo"
-name = "blog_service"
+org = "ballerina_np"
+name = "np_default_model_tests"
 version = "0.1.0"
 dependencies = [
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "np"},
-	{org = "ballerinai", name = "observe"},
-	{org = "ballerinax", name = "mysql"},
-	{org = "ballerinax", name = "mysql.driver"}
+	{org = "ballerina", name = "test"},
+	{org = "ballerina_np", name = "np_test_commons"}
 ]
 modules = [
-	{org = "demo", packageName = "blog_service", moduleName = "blog_service"}
+	{org = "ballerina_np", packageName = "np_default_model_tests", moduleName = "np_default_model_tests"}
+]
+
+[[package]]
+org = "ballerina_np"
+name = "np_test_commons"
+version = "0.1.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "test"}
+]
+modules = [
+	{org = "ballerina_np", packageName = "np_test_commons", moduleName = "np_test_commons"}
 ]
 

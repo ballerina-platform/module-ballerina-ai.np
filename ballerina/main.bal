@@ -31,7 +31,7 @@ type DefaultOpenAIModelConfig record {|
     string model;
 |};
 
-public annotation map<json> Schema on type;
+public annotation map<json> JsonSchema on type;
 
 final Model? defaultModel;
 
@@ -80,23 +80,29 @@ isolated function buildPromptString(Prompt prompt) returns string {
     foreach int i in 0 ..< insertions.length() {
         str = str + insertions[i].toString() + prompt.strings[i + 1];
     }
-    return str;
+    return str.trim();
 }
 
-isolated function getPromptWithExpectedResponseSchema(string prompt, map<json> expectedResponseSchema) returns string =>
-    string `${prompt}.  
+isolated function getPromptWithExpectedResponseSchema(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns string =>
+    string `${buildPromptString(prompt)}
+        ---
+
         The output should be a JSON value that satisfies the following JSON schema, 
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         
         Schema:
-        ${expectedResponseSchema.toJsonString()}`;
+        ${getExpectedResponseSchema(expectedResponseTypedesc).toJsonString()}`;
 
-isolated function callLlmGeneric(Prompt prompt, Context context, typedesc<json> targetType,
-                                 map<json>? jsonSchema) returns json|error {
+isolated function callLlmGeneric(Prompt prompt, Context context, 
+                                 typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
     Model model = context.model;
-    json resp =
-         check model->call(buildPromptString(prompt), jsonSchema ?: generateJsonSchemaForTypedescAsJson(targetType));
-    return parseResponseAsType(resp, targetType);
+    anydata response = check model->call(prompt, expectedResponseTypedesc);
+    anydata|error result = response.ensureType(expectedResponseTypedesc);
+    if result is error {
+        return error(string `Invalid value returned from the LLM Client, expected: '${
+            expectedResponseTypedesc.toBalString()}', found '${(typeof response).toBalString()}'`);
+    }
+    return result;
 }
 
 isolated function parseResponseAsJson(string resp) returns json|error {
@@ -113,23 +119,30 @@ isolated function parseResponseAsJson(string resp) returns json|error {
         resp.substring(startIndex + startDelimLength, endIndex).trim();
     json|error result = trap processedResponse.fromJsonString();
     if result is error {
-        return handlepParseResponseError(result);
+        return handleParseResponseError(result);
     }
     return result;
 }
 
-isolated function parseResponseAsType(json resp, typedesc<json> targetType) returns json|error {
-    json|error result = trap resp.fromJsonWithType(targetType);
+isolated function parseResponseAsType(string resp, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+    json respJson = check parseResponseAsJson(resp);
+    anydata|error result = trap respJson.fromJsonWithType(expectedResponseTypedesc);
     if result is error {
-        return handlepParseResponseError(result);
+        return handleParseResponseError(result);
     }
     return result;
 }
 
-isolated function handlepParseResponseError(error chatResponseError) returns error {
+isolated function handleParseResponseError(error chatResponseError) returns error {
     if chatResponseError.message().includes(JSON_CONVERSION_ERROR) 
             || chatResponseError.message().includes(CONVERSION_ERROR) {
         return error(string `${ERROR_MESSAGE}`, detail = chatResponseError);
     }
     return chatResponseError;
+}
+
+isolated function getExpectedResponseSchema(typedesc<anydata> expectedResponseTypedesc) returns map<json> {
+    // Restricted at compile-time for now.
+    typedesc<json> td = checkpanic expectedResponseTypedesc.ensureType();
+    return generateJsonSchemaForTypedescAsJson(td);
 }

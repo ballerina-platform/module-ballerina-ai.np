@@ -31,27 +31,20 @@ def testCommonTomlFilePlaceHolder = new File("${project.rootDir}/build-config/re
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
 def distributionBinPath =  "${ballerinaDist}/bin"
 def testCoverageParam = "--code-coverage --coverage-format=xml --includes=io.ballerina.lib.np.*:ballerina.np*"
-def testSuites = ["np-tests"]
+def testSuites = ["np-tests", "np-default-model-tests"]
 def testCommonPackage = "np-test-commons"
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
         def splitVersion = extVersion.split('-');
-        if (splitVersion.length > 3) {
-            def strippedValues = splitVersion[0..-4]
-            return strippedValues.join('-')
-        } else {
-            return extVersion
-        }
-    } else {
-        return extVersion.replace("${project.ext.snapshotVersion}", "")
+        return splitVersion.length > 3 ? splitVersion[0..-4].join('-') : extVersion
     }
+    return extVersion.replace("${project.ext.snapshotVersion}", "")
 }
 
 dependencies {
     testImplementation project(":np-compiler-plugin")
     testImplementation group: 'io.ballerina.openapi', name: 'ballerina-to-openapi', version: "${ballerinaToOpenApiVersion}"
-
 }
 
 task updateTomlFiles {
@@ -167,9 +160,9 @@ task ballerinaTest {
                     workingDir "${project.projectDir}/${testPackage}"
                     environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
                     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                        commandLine 'cmd', '/c', "${balJavaDebugParam} ${distributionBinPath}/bal.bat test ${graalvmFlag} ${testParams} --offline ${groupParams} ${disableGroups} ${debugParams} && exit %%ERRORLEVEL%%"
+                        commandLine 'cmd', '/c', "${balJavaDebugParam} ${distributionBinPath}/bal.bat test --experimental ${graalvmFlag} ${testParams} --offline ${groupParams} ${disableGroups} ${debugParams} && exit %%ERRORLEVEL%%"
                     } else {
-                        commandLine 'sh', '-c', "BALLERINA_MAX_POOL_SIZE=500 ${balJavaDebugParam} ${distributionBinPath}/bal test ${graalvmFlag} ${testParams} --offline ${groupParams} ${disableGroups} ${debugParams}"
+                        commandLine 'sh', '-c', "BALLERINA_MAX_POOL_SIZE=500 ${balJavaDebugParam} ${distributionBinPath}/bal test --experimental ${graalvmFlag} ${testParams} --offline ${groupParams} ${disableGroups} ${debugParams}"
                     }
                 }
             }

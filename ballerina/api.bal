@@ -17,8 +17,7 @@
 import ballerina/jballerina.java;
 
 # Configuration for the model to default to if not explicitly
-# specified in the call to function `callLlm` or an external
-# function annotated with annotation `NaturalFunction`.
+# specified in the natural expression.
 configurable DefaultModelConfig? defaultModelConfig = ();
 
 # Raw template type for prompts.
@@ -37,23 +36,16 @@ public type Prompt object {
 #
 # + prompt - The prompt to send to the LLM
 # + context - The context to use, including the LLM to use
-# + targetType - The expected response type. The JSON schema corresponding to this type 
+# + expectedResponseTypedesc - The expected response type. The schema corresponding to this type 
 #  is generated to inlcude in the request to the LLM
 # + return - The LLM response parsed according to the specified type, or an error if the call 
 # fails or parsing fails
-public isolated function callLlm(Prompt prompt, Context context = {}, typedesc<json> targetType = <>)
-        returns targetType|error = @java:Method {
+public isolated function callLlm(Prompt prompt, 
+                                 Context context = {}, 
+                                 typedesc<anydata> expectedResponseTypedesc = <>)
+        returns expectedResponseTypedesc|error = @java:Method {
     'class: "io.ballerina.lib.np.Native"
 } external;
-
-# Annotation to indicate that the implementation of a function should be
-# a call to an LLM with the prompt specified as a parameter and using the 
-# return type as the schema for the expected response.
-# If function has a `context` parameter, the model specified in the 
-# context will be used as the model to call.
-# If not, defaults to the default model configured via the configurable 
-# variable `defaultModelConfig`
-public const annotation NaturalFunction on source external;
 
 # Context for Large Language Model (LLM) usage.
 public type Context record {|
@@ -67,7 +59,8 @@ public type Model distinct isolated client object {
     # Makes a call to the Large Language Model (LLM) with the given prompt and returns the result.
     #
     # + prompt - The prompt to be sent to the LLM
-    # + expectedResponseSchema - The schema for the expected response from the LLM 
-    # + return - The JSON value extracted/parsed from the LLM's response or an error if the call fails
-    isolated remote function call(string prompt, map<json> expectedResponseSchema) returns json|error;
+    # + expectedResponseTypedesc - The schema for the expected response from the LLM 
+    # + return - The value extracted/parsed from the LLM's response or an error if the call or parsing fails
+    // Note: once dependently-typed functions can be implemented in Ballerina, the return type can change
+    isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error;
 };

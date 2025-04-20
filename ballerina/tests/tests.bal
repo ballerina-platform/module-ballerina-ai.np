@@ -66,7 +66,7 @@ function testJsonContentAfterTextDescription() returns error? {
         int x = 10;
         int y = 20;
         io:println(x + y);
-    \}
+    }
     ${"```"}`);
     test:assertEquals(result, 30);
 }
@@ -99,7 +99,7 @@ function testSchemaGeneratedForComplexTypeAtRuntime() returns error? {
     int decadeStart = 1990;
     string nameSegment = "Simone";
     json result = check callLlm(`Who is a popular sportsperson that was born in the decade starting
-            from ${decadeStart} with ${nameSegment} in their name?`, targetType = td);
+            from ${decadeStart} with ${nameSegment} in their name?`, expectedResponseTypedesc = td);
     test:assertEquals(result, <SportsPerson> {
         firstName: "Simone",
         lastName: "Biles",
@@ -107,4 +107,31 @@ function testSchemaGeneratedForComplexTypeAtRuntime() returns error? {
         sport: "Gymnastics",
         yearOfBirth: 1997
     });
+}
+
+distinct isolated client class CustomModelWithInvalidReturn {
+    *Model;
+
+    isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+        return <json> {
+            firstName: "Simone",
+            lastName: "Biles",
+            middleName: (),
+            sport: "Gymnastics",
+            yearOfBirth: 1997
+        };
+    }
+};
+
+@test:Config
+function testCustomModelWithInvalidReturn() returns error? {
+    int decadeStart = 1990;
+    string nameSegment = "Simone";
+    SportsPerson|error result = callLlm(`Who is a popular sportsperson that was born in the decade starting
+            from ${decadeStart} with ${nameSegment} in their name?`, {model: new CustomModelWithInvalidReturn()});
+    if result is SportsPerson {
+        test:assertFail("Expected an error, but got a valid SportsPerson");
+    }
+    test:assertEquals(result.message(), 
+        "Invalid value returned from the LLM Client, expected: 'typedesc np:SportsPerson', found 'typedesc map<json>'");
 }
