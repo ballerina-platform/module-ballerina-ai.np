@@ -17,6 +17,7 @@
 const JSON_CONVERSION_ERROR = "FromJsonStringError";
 const CONVERSION_ERROR = "ConversionError";
 const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
+const OBJECT_KEY = "result";
 
 type DefaultModelConfig DefaultAzureOpenAIModelConfig|DefaultOpenAIModelConfig|DefaultBallerinaModelConfig;
 
@@ -83,7 +84,17 @@ isolated function buildPromptString(Prompt prompt) returns string {
     return str.trim();
 }
 
-isolated function getPromptWithExpectedResponseSchema(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns string =>
+// isolated function getPromptWithExpectedResponseSchema(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns string =>
+//     string `${buildPromptString(prompt)}
+//         ---
+
+//         The output should be a JSON value that satisfies the following JSON schema, 
+//         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
+        
+//         Schema:
+//         ${getExpectedResponseSchema(expectedResponseTypedesc).toJsonString()}`;
+
+isolated function getPromptWithExpectedResponseSchema(Prompt prompt, map<json> schema) returns string =>
     string `${buildPromptString(prompt)}
         ---
 
@@ -91,7 +102,7 @@ isolated function getPromptWithExpectedResponseSchema(Prompt prompt, typedesc<an
         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
         
         Schema:
-        ${getExpectedResponseSchema(expectedResponseTypedesc).toJsonString()}`;
+        ${schema.toJsonString()}`;
 
 isolated function callLlmGeneric(Prompt prompt, Context context, 
                                  typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
@@ -124,8 +135,22 @@ isolated function parseResponseAsJson(string resp) returns json|error {
     return result;
 }
 
-isolated function parseResponseAsType(string resp, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+// isolated function parseResponseAsType(string resp, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+//     json respJson = check parseResponseAsJson(resp);
+//     anydata|error result = trap respJson.fromJsonWithType(expectedResponseTypedesc);
+//     if result is error {
+//         return handleParseResponseError(result);
+//     }
+//     return result;
+// }
+
+isolated function parseResponseAsType(string resp, 
+            typedesc<anydata> expectedResponseTypedesc, boolean isJsonObject) returns anydata|error {
     json respJson = check parseResponseAsJson(resp);
+    if !isJsonObject {
+        map<json> respContent = check respJson.fromJsonWithType();
+        respJson = respContent[OBJECT_KEY];
+    }
     anydata|error result = trap respJson.fromJsonWithType(expectedResponseTypedesc);
     if result is error {
         return handleParseResponseError(result);
@@ -141,8 +166,57 @@ isolated function handleParseResponseError(error chatResponseError) returns erro
     return chatResponseError;
 }
 
-isolated function getExpectedResponseSchema(typedesc<anydata> expectedResponseTypedesc) returns map<json> {
+// isolated function getExpectedResponseSchema(typedesc<anydata> expectedResponseTypedesc) returns map<json> {
+//     // Restricted at compile-time for now.
+//     typedesc<json> td = checkpanic expectedResponseTypedesc.ensureType();
+//     return generateJsonSchemaForTypedescAsJson(td);
+// }
+
+isolated function getExpectedResponseSchema(typedesc<anydata> expectedResponseTypedesc) returns SchemaResponse {
     // Restricted at compile-time for now.
     typedesc<json> td = checkpanic expectedResponseTypedesc.ensureType();
-    return generateJsonSchemaForTypedescAsJson(td);
+    return generateJsonObjectSchema(generateJsonSchemaForTypedescAsJson(td));
+}
+
+isolated function generateJsonObjectSchema(map<json> schema) returns SchemaResponse {
+    string[] supportedMetaDataFields = ["$schema", "$id", "$anchor", "$comment", "title", "description"];
+
+    // Check if the schema already has type "object"
+    if schema.hasKey("type") {
+        json typeValue = schema["type"];
+        
+        // If type is already "object", return as-is
+        if typeValue is string && (typeValue.toString() == "object") {
+            return {schema};
+        }
+    }
+    
+    // Create the new wrapper object schema
+    map<json> updatedSchema = {};
+    
+    // Copy all existing schema metadata (except type)
+    foreach var [key, value] in schema.entries() {
+        if supportedMetaDataFields.indexOf(key) is int {
+            updatedSchema[key] = value;
+        }
+    }
+    
+    // Set the type to "object"
+    updatedSchema["type"] = "object";
+    
+    map<json> properties = {};
+    map<json> content = {};
+    
+    // Copy all original schema definitions into content
+    foreach var [key, value] in schema.entries() {
+        if supportedMetaDataFields.indexOf(key) is int {
+            continue; // Skip metadata fields
+        }
+        content[key] = value;
+    }
+    
+    properties[OBJECT_KEY] = content.cloneReadOnly();
+    updatedSchema["properties"] = properties.cloneReadOnly();
+    
+    return {schema: updatedSchema, isJsonObject: false};
 }
