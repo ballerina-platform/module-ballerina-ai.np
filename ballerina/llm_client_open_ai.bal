@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/log;
 
 # Configuration for OpenAI model.
 type OpenAIModelConfig record {|
@@ -45,18 +46,47 @@ isolated distinct client class OpenAIModel {
     }
 
     isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+        SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
         OpenAICreateChatCompletionRequest chatBody = {
-            messages: [{role: "user", "content": getPromptWithExpectedResponseSchema(prompt, expectedResponseTypedesc)}],
-            model: self.model
+            messages: [{role: "user", "content": getPromptWithExpectedResponseSchema(prompt, schemaResponse.schema)}],
+            model: self.model,
+            tools: [
+                {
+                    'type: "function",
+                    'function: {
+                        name: "get_results",
+                        parameters: schemaResponse.schema
+                    }
+                }
+            ],
+            tool_choice: {
+                'type: "function",
+                'function: {
+                    name: "get_results"
+                }
+            }
         };
 
         OpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
         OpenAICreateChatCompletionResponse_choices[] choices = chatResult.choices;
+        ChatCompletionMessageToolCalls? toolCalls = choices[0].message?.tool_calls;
 
-        string? resp = choices[0].message?.content;
+        if toolCalls is () {
+            return error("No completion message");
+        }
+
+        string? resp = toolCalls[0].'function.arguments;
+
+        if resp.toString() == "{}" {
+            log:printInfo("OAI Response choices: " + choices[0].message?.content.toString());
+        } else {
+            log:printInfo("OAI Response: " + resp.toString());
+        }
+
         if resp is () {
             return error("No completion message");
         }
-        return parseResponseAsType(resp, expectedResponseTypedesc);
+
+        return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isJsonObject);
     }
 }

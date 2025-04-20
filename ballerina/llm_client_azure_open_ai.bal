@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/log;
 
 # Configuration for Azure OpenAI model.
 type AzureOpenAIModelConfig record {|
@@ -56,8 +57,25 @@ isolated distinct client class AzureOpenAIModel {
     }
 
     isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+        SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
+        string content = getPromptWithExpectedResponseSchema(prompt, schemaResponse.schema);
         AzureOpenAICreateChatCompletionRequest chatBody = {
-            messages: [{role: "user", content: getPromptWithExpectedResponseSchema(prompt, expectedResponseTypedesc)}]
+            messages: [{role: "user", content}],
+            tools: [
+                {
+                    'type: "function",
+                    'function: {
+                        name: "get_results",
+                        parameters: schemaResponse.schema
+                    }
+                }
+            ],
+            tool_choice: {
+                'type: "function",
+                'function: {
+                    name: "get_results"
+                }
+            }
         };
 
         AzureOpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
@@ -69,10 +87,24 @@ isolated distinct client class AzureOpenAIModel {
             return error("No completion choices");
         }
 
-        string? resp = choices[0].message?.content;
+        ChatCompletionMessageToolCalls? toolCalls = choices[0].message?.tool_calls;
+        
+        if toolCalls is () {
+            return error("No completion message");
+        }
+
+        string? resp = toolCalls[0].'function.arguments;
+
+        if resp == "{}" {
+            log:printInfo("Azure Response messages: " + choices[0].message?.content.toString());
+            return error("No completion message");
+        } else {
+            log:printInfo("Azure Response toool calling: " + resp.toString());
+        }
+
         if resp is () {
             return error("No completion message");
         }
-        return parseResponseAsType(resp, expectedResponseTypedesc);
+        return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isJsonObject);
     }
 }

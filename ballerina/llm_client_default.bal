@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/log;
 
 const UNAUTHORIZED = 401;
 
@@ -48,8 +49,9 @@ isolated distinct client class DefaultBallerinaModel {
 
     isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
         http:Client cl = self.cl;
+        SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
         http:Response chatResponse = 
-            check cl->/chat/complete.post(getPromptWithExpectedResponseSchema(prompt, expectedResponseTypedesc));
+            check cl->/chat/complete.post(getPromptWithExpectedResponseSchema(prompt, schemaResponse.schema));
         int statusCode = chatResponse.statusCode;
         if statusCode == UNAUTHORIZED {
             return error("The default Ballerina model is being used. The token has expired and needs to be regenerated.");
@@ -64,6 +66,13 @@ isolated distinct client class DefaultBallerinaModel {
         if content is () {
             return error("No completion message");
         }
-        return parseResponseAsType(content[0], expectedResponseTypedesc);
+
+        if content[0] == "{}" {
+            return error("No completion message");
+        }
+
+        log:printInfo(string `Default LLM response: ${content[0].toString()}`);
+
+        return parseResponseAsType(content[0], expectedResponseTypedesc, schemaResponse.isJsonObject);
     }
 }
