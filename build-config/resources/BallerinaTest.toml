@@ -1,10 +1,10 @@
 [package]
-org = "ballerina_np"
+org = "ballerina"
 name = "@package.name@"
 version = "@toml.version@"
 
 [[dependency]]
-org = "ballerina_np"
+org = "ballerina"
 name = "@test.common@"
 repository = "local"
 version = "@toml.version@"
