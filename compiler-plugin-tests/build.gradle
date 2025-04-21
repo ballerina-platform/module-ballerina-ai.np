@@ -24,7 +24,17 @@ plugins {
 }
 
 jacoco {
-    reportsDirectory = file("$project.buildDir/reports/jacoco")
+    toolVersion = "${jacocoVersion}"
+    reportsDirectory = file("$buildDir/reports/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = false
+    }
+    sourceSets project(':np-compiler-plugin').sourceSets.main
 }
 
 description = 'Ballerina - Natural Programming Compiler Plugin Tests'
@@ -89,31 +99,24 @@ compileJava {
 }
 
 test {
-    useTestNG() {
-        suites 'src/test/resources/testng.xml'
-    }
-    testLogging.showStandardStreams = true
+    systemProperty "ballerina.offline.flag", "true"
+    systemProperty "ballerina.np.version", project.version
+    useTestNG()
+
     testLogging {
-        events "PASSED", "FAILED", "SKIPPED"
+        exceptionFormat = "full"
         afterSuite { desc, result ->
             if (!desc.parent) { // will match the outermost suite
-                def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                def output = "Compiler Plugin Tests: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
                 def startItem = '|  ', endItem = '  |'
                 def repeatLength = startItem.length() + output.length() + endItem.length()
                 println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
             }
         }
     }
-    finalizedBy jacocoTestReport
-}
-
-jacocoTestReport {
-    dependsOn test
-    reports {
-        xml.required = true
-    }
-    sourceSets project(':np-compiler-plugin').sourceSets.main
 }
 
 test.dependsOn ":np-ballerina:build"
 compileTestJava.dependsOn ":np-compiler-plugin:copyOpenApiJar"
+test.finalizedBy jacocoTestReport
+jacocoTestReport.dependsOn test
