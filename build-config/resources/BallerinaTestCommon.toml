@@ -1,4 +1,4 @@
 [package]
-org = "ballerina_np"
+org = "ballerina"
 name = "@package.name@"
 version = "@toml.version@"

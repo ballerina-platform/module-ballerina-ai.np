@@ -235,6 +235,18 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "np_test_commons"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "test"}
+]
+modules = [
+	{org = "ballerina", packageName = "np_test_commons", moduleName = "np_test_commons"}
+]
+
+[[package]]
+org = "ballerina"
 name = "oauth2"
 version = "2.14.0"
 dependencies = [
@@ -299,17 +311,5 @@ name = "url"
 version = "2.6.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
-]
-
-[[package]]
-org = "ballerina_np"
-name = "np_test_commons"
-version = "0.1.0"
-dependencies = [
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "test"}
-]
-modules = [
-	{org = "ballerina_np", packageName = "np_test_commons", moduleName = "np_test_commons"}
 ]
 
