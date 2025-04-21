@@ -39,6 +39,10 @@ def stripBallerinaExtensionVersion(String extVersion) {
         def splitVersion = extVersion.split('-');
         return splitVersion.length > 3 ? splitVersion[0..-4].join('-') : extVersion
     }
+    // Handle milestone versions like 0.1.0-m1
+    if (extVersion.matches('\\d+\\.\\d+\\.\\d+-m\\d+')) {
+        return extVersion.split('-')[0]
+    }
     return extVersion.replace("${project.ext.snapshotVersion}", "")
 }
 
