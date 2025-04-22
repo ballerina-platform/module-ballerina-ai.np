@@ -157,17 +157,7 @@ public class Validator implements AnalysisTask<SyntaxNodeAnalysisContext> {
             return;
         }
 
-        Optional<Symbol> annotationSymbol = semanticModel.symbol(node);
-        if (annotationSymbol.isEmpty()) {
-            return;
-        }
-
-        Optional<ModuleSymbol> moduleSymbol = annotationSymbol.get().getModule();
-        if (moduleSymbol.isEmpty()) {
-            return;
-        }
-
-        if (isAnnotationsModule(moduleSymbol.get())) {
+        if (isAnnotationsModule(semanticModel.symbol(node).get().getModule().get())) {
             reportError(ctx, this.analysisData, annotationNode.location(), CODE_GEN_WITH_CODE_ANNOT_NOT_YET_SUPPORTED);
         }
     }

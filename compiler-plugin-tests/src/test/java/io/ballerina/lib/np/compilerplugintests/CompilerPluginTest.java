@@ -98,7 +98,7 @@ public class CompilerPluginTest {
                 codeAnnotationNegativePackage.runCodeGenAndModifyPlugins().diagnostics().stream().toList();
         int index = 0;
         assertDiagnostic(projectDiagnosticsList, index++,
-                "code generation with the 'code' annotation is not yet supported", 17, 43);
+                "code generation with the 'code' annotation is not yet supported", 21, 43);
         Assert.assertEquals(index, projectDiagnosticsList.size());
     }
 

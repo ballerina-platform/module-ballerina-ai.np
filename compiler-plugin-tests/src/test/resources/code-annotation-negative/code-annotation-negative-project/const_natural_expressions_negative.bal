@@ -14,6 +14,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function getArray() returns int[]|error = @code {
+import ballerina/jballerina.java;
+
+const annot on source external;
+
+function getArray() returns int[]|error = @code { // error, not yet supported
     prompt: string `Give me an array of integers.`
-} external;
+}
+@java:Method { // OK
+    'class: ""
+}
+@foo // compiler error
+@annot // OK
+external;
