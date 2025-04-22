@@ -1,5 +1,5 @@
 [package]
-org = "ballerina"
-name = "call_llm_negative"
+org = "np_test"
+name = "const_natural_expr_negative"
 version = "0.1.0"
 distribution = "2201.13.0"

@@ -18,17 +18,21 @@
 
 package io.ballerina.lib.np.compilerplugin;
 
+import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.Types;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
 import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleId;
@@ -43,9 +47,12 @@ import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
 import static io.ballerina.lib.np.compilerplugin.Commons.VERSION;
 import static io.ballerina.lib.np.compilerplugin.Commons.isNotNPCallCall;
+import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.CODE_GEN_WITH_CODE_ANNOT_NOT_YET_SUPPORTED;
+import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.CONST_NATURAL_EXPR_NOT_YET_SUPPORTED;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.EXPECTED_A_SUBTYPE_OF_NP_MODEL;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED;
-import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.NON_JSON_TYPEDESC_ARGUMENT_NOT_YET_SUPPORTED;
+import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode
+        .NON_JSON_TYPEDESC_ARGUMENT_NOT_YET_SUPPORTED;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.UNEXPECTED_ARGUMENTS;
 import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.reportError;
 
@@ -54,13 +61,14 @@ import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.reportError;
  *
  * @since 0.3.0
  */
-public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisContext> {
+public class Validator implements AnalysisTask<SyntaxNodeAnalysisContext> {
     private static final String MODEL_TYPE = "Model";
+    private static final String CODE_ANNOTATION = "code";
 
     private final CodeModifier.AnalysisData analysisData;
     private Optional<TypeSymbol> jsonOrErrorType = Optional.empty();
 
-    ExpressionValidator(CodeModifier.AnalysisData analysisData) {
+    Validator(CodeModifier.AnalysisData analysisData) {
         this.analysisData = analysisData;
     }
 
@@ -81,6 +89,11 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
             return;
         }
 
+        if (node instanceof AnnotationNode annotationNode) {
+            validateCompileTimeCodeGenAnnotation(semanticModel, annotationNode, ctx);
+            return;
+        }
+
         validateCallLlmExpression(semanticModel, types, document, (FunctionCallExpressionNode) node, ctx);
     }
 
@@ -89,6 +102,11 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
                                            NaturalExpressionNode naturalExpressionNode,
                                            Optional<Symbol> modelSymbol,
                                            SyntaxNodeAnalysisContext ctx) {
+        if (naturalExpressionNode.constKeyword().isPresent()) {
+            reportError(ctx, this.analysisData, naturalExpressionNode.location(), CONST_NATURAL_EXPR_NOT_YET_SUPPORTED);
+            return;
+        }
+
         validateArguments(ctx, semanticModel, naturalExpressionNode.parenthesizedArgList(), modelSymbol);
         validateExpectedType(naturalExpressionNode.location(),
                 semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get(),
@@ -131,6 +149,29 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
         }
     }
 
+    private void validateCompileTimeCodeGenAnnotation(SemanticModel semanticModel, AnnotationNode annotationNode,
+                                                      SyntaxNodeAnalysisContext ctx) {
+        Node node = annotationNode.annotReference();
+        if (!(node instanceof SimpleNameReferenceNode simpleNameReferenceNode) ||
+                !CODE_ANNOTATION.equals(simpleNameReferenceNode.name().text())) {
+            return;
+        }
+
+        Optional<Symbol> annotationSymbol = semanticModel.symbol(node);
+        if (annotationSymbol.isEmpty()) {
+            return;
+        }
+
+        Optional<ModuleSymbol> moduleSymbol = annotationSymbol.get().getModule();
+        if (moduleSymbol.isEmpty()) {
+            return;
+        }
+
+        if (isAnnotationsModule(moduleSymbol.get())) {
+            reportError(ctx, this.analysisData, annotationNode.location(), CODE_GEN_WITH_CODE_ANNOT_NOT_YET_SUPPORTED);
+        }
+    }
+
     private void validateCallLlmExpression(SemanticModel semanticModel, Types types, Document document,
                                            FunctionCallExpressionNode functionCallExpressionNode,
                                            SyntaxNodeAnalysisContext ctx) {
@@ -164,5 +205,10 @@ public class ExpressionValidator implements AnalysisTask<SyntaxNodeAnalysisConte
         TypeSymbol jsonOrErrorType = types.builder().UNION_TYPE.withMemberTypes(types.JSON, types.ERROR).build();
         this.jsonOrErrorType = Optional.of(jsonOrErrorType);
         return jsonOrErrorType;
+    }
+
+    private static boolean isAnnotationsModule(ModuleSymbol moduleSymbol) {
+        ModuleID moduleId = moduleSymbol.id();
+        return ORG_NAME.equals(moduleId.orgName()) && "lang.annotations".equals(moduleId.moduleName());
     }
 }

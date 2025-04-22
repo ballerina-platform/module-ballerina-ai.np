@@ -1,4 +1,4 @@
-// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org).
+// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,10 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function fn() returns anydata|error => natural (1, 2, "foo") {
-    What day was the 18th of April 2025?
-};
-
-function fn2() returns string|error => natural () { // OK
-    What day was the 18th of April 2025?
-};
+function getArray() returns int[]|error = @code {
+    prompt: string `Give me an array of integers.`
+} external;

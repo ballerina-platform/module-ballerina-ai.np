@@ -14,18 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/np;
-
-anydata|error m = check np:callLlm(`What day is it today?`);
-
-function whichDay(string date, np:Model m) returns string|xml|error
-    => check np:callLlm(`What day was ${date}?`, {model: m});
-
-type Record record {
-    xml x;
+function fn() returns int[]|error => const natural {
+    Give me an array of integers.
 };
-
-anydata n = check np:callLlm(`Give me a stock quote as an XML value`, {}, Record);
-anydata o = check np:callLlm(`Give me a stock quote as an XML value`, expectedResponseTypedesc = Record);
-
-anydata o = check np:callLlm(`Give me a stock quote as an XML value`, expectedResponseTypedesc = string); // OK
