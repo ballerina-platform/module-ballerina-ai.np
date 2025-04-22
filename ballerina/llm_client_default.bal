@@ -32,7 +32,7 @@ type ChatCompletionResponse record {
 
 # Default Ballerina model chat completion client.
 isolated distinct client class DefaultBallerinaModel {
-    *Model;
+    *ModelProvider;
 
     private final http:Client cl;
 

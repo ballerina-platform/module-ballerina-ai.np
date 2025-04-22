@@ -50,11 +50,11 @@ public isolated function callLlm(Prompt prompt,
 # Context for Large Language Model (LLM) usage.
 public type Context record {|
     # The model to use
-    Model model = getDefaultModel();
+    ModelProvider model = getDefaultModel();
 |};
 
 # Abstraction for a Large Language Model (LLM), with chat/completion functionality.
-public type Model distinct isolated client object {
+public type ModelProvider distinct isolated client object {
 
     # Makes a call to the Large Language Model (LLM) with the given prompt and returns the result.
     #

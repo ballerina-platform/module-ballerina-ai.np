@@ -28,7 +28,7 @@ function testPromptAsCodeFunctionWithSimpleExpectedTypeWithDefaultAzureOpenAICli
 
 @test:Config
 function testPromptAsCodeFunctionWithStructuredExpectedTypeWithOpenAIClient() returns error? {
-    Model model = check new OpenAIModel({
+    ModelProvider model = check new OpenAIModel({
         connectionConfig: {
             auth: {token: "not-a-real-token"}
         },
@@ -110,7 +110,7 @@ function testSchemaGeneratedForComplexTypeAtRuntime() returns error? {
 }
 
 distinct isolated client class CustomModelWithInvalidReturn {
-    *Model;
+    *ModelProvider;
 
     isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
         return <json> {

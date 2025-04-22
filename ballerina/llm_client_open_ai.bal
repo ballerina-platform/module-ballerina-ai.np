@@ -26,7 +26,7 @@ type OpenAIModelConfig record {|
 
 # OpenAI model chat completion client.
 isolated distinct client class OpenAIModel {
-    *Model;
+    *ModelProvider;
 
     private final http:Client cl;
     private final string model;

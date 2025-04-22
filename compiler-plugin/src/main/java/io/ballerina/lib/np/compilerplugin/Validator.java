@@ -62,7 +62,7 @@ import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.reportError;
  * @since 0.3.0
  */
 public class Validator implements AnalysisTask<SyntaxNodeAnalysisContext> {
-    private static final String MODEL_TYPE = "Model";
+    private static final String MODEL_PROVIDER_TYPE = "ModelProvider";
     private static final String CODE_ANNOTATION = "code";
 
     private final CodeModifier.AnalysisData analysisData;
@@ -76,7 +76,7 @@ public class Validator implements AnalysisTask<SyntaxNodeAnalysisContext> {
     public void perform(SyntaxNodeAnalysisContext ctx) {
         SemanticModel semanticModel = ctx.semanticModel();
         Types types = semanticModel.types();
-        Optional<Symbol> modelSymbol = types.getTypeByName(ORG_NAME, MODULE_NAME, VERSION, MODEL_TYPE);
+        Optional<Symbol> modelSymbol = types.getTypeByName(ORG_NAME, MODULE_NAME, VERSION, MODEL_PROVIDER_TYPE);
 
         Package currentPackage = ctx.currentPackage();
         ModuleId moduleId = ctx.moduleId();

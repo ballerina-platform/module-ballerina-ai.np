@@ -54,7 +54,7 @@ public class CompilerPluginTest {
         assertDiagnostic(errorDiagnosticsList, index++, "unexpected arguments: expected '1' argument, found '3'",
                 17, 48);
         assertDiagnostic(errorDiagnosticsList, index++,
-                "incompatible expression: expected 'ballerina/np:Model', found 'int'",
+                "incompatible expression: expected 'ballerina/np:ModelProvider', found 'int'",
                 17, 49);
         assertDiagnostic(errorDiagnosticsList, index++,
                 "subtypes of 'anydata' that are not subtypes of 'json' are not yet supported as the" +

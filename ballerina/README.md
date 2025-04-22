@@ -119,7 +119,7 @@ The model to use can be set either by configuration or by specifying the model a
     ```ballerina
     import ballerina/np;
 
-    public isolated function reviewBlog(Blog blog, np:Model model) 
+    public isolated function reviewBlog(Blog blog, np:ModelProvider model) 
             returns Review|error => natural (model) {
         You are an expert content reviewer for a blog site that 
             categorizes posts under the following categories: ${categories}
@@ -134,10 +134,10 @@ The model to use can be set either by configuration or by specifying the model a
     ```
 
 
-The `ballerinax/np` package provides implementations of `np:Model` for different LLM providers:
+The `ballerinax/np` package provides implementations of `np:ModelProvider` for different LLM providers:
 
-- `np.openai:Model` for Open AI
-- `np.azure.openai:Model` for Azure Open AI
+- `np.openai:ModelProvider` for Open AI
+- `np.azure.openai:ModelProvider` for Azure Open AI
 
 A model of these types can be initialized and provided as an argument for the `model` parameter.
 
@@ -149,7 +149,7 @@ configurable string serviceUrl = ?;
 configurable string deploymentId = ?;
 configurable string apiVersion = ?;
 
-final np:Model azureOpenAIModel = check new azureOpenAI:Model({
+final np:ModelProvider azureOpenAIModel = check new azureOpenAI:Model({
        serviceUrl, connectionConfig: {auth: {apiKey}}}, deploymentId, apiVersion);
 
 Review review = check reviewBlog(blog, azureOpenAIModel);
@@ -159,7 +159,7 @@ Review review = check reviewBlog(blog, azureOpenAIModel);
 
 The `np:callLlm` function is an alternative to using a natural expression. The compiler transforms natural expressions to `np:callLlm` calls internally.
 
-The function accepts a prompt of type `np:Prompt` and optionally, an `np:Conext` value with the `model` field of type `np:Model`. If the model is not specified, it has to be configured via the `defaultModelConfig` configurable variable. The function is dependently-typed and uses the inferred typedesc parameter to construct the JSON schema for the required response format and bind the response data to the expected type.
+The function accepts a prompt of type `np:Prompt` and optionally, an `np:Conext` value with the `model` field of type `np:ModelProvider`. If the model is not specified, it has to be configured via the `defaultModelConfig` configurable variable. The function is dependently-typed and uses the inferred typedesc parameter to construct the JSON schema for the required response format and bind the response data to the expected type.
 
 ```ballerina
 // Where `blog` is in scope.

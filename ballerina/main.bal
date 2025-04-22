@@ -33,7 +33,7 @@ type DefaultOpenAIModelConfig record {|
 
 public annotation map<json> JsonSchema on type;
 
-final Model? defaultModel;
+final ModelProvider? defaultModel;
 
 function init() returns error? {
     DefaultModelConfig? defaultModelConfigVar = defaultModelConfig;
@@ -66,8 +66,8 @@ function init() returns error? {
     defaultModel = check new DefaultBallerinaModel(defaultModelConfigVar);
 }
 
-isolated function getDefaultModel() returns Model {
-    final Model? defaultModelVar = defaultModel;
+isolated function getDefaultModel() returns ModelProvider {
+    final ModelProvider? defaultModelVar = defaultModel;
     if defaultModelVar is () {
         panic error("Default model is not initialized");
     }
@@ -95,7 +95,7 @@ isolated function getPromptWithExpectedResponseSchema(Prompt prompt, typedesc<an
 
 isolated function callLlmGeneric(Prompt prompt, Context context, 
                                  typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
-    Model model = context.model;
+    ModelProvider model = context.model;
     anydata response = check model->call(prompt, expectedResponseTypedesc);
     anydata|error result = response.ensureType(expectedResponseTypedesc);
     if result is error {

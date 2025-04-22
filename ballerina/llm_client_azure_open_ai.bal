@@ -26,7 +26,7 @@ type AzureOpenAIModelConfig record {|
 
 # Azure OpenAI model chat completion client.
 isolated distinct client class AzureOpenAIModel {
-    *Model;
+    *ModelProvider;
 
     private final http:Client cl;
     private final string deploymentId;
