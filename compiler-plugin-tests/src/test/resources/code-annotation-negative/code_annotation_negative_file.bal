@@ -14,10 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function fn() returns anydata|error => natural (1, 2, "foo") {
-    What day was the 18th of April 2025?
+type Employee record {
+    int id;
+    string name;
 };
 
-function fn2() returns string|error => natural () { // OK
-    What day was the 18th of April 2025?
-};
+function getEmployees() returns Employee[]|error = @code {
+    prompt: string `Give me 50 employees with distinct data`
+} external;

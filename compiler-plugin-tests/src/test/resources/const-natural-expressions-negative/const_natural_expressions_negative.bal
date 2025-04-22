@@ -14,10 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function fn() returns anydata|error => natural (1, 2, "foo") {
-    What day was the 18th of April 2025?
-};
-
-function fn2() returns string|error => natural () { // OK
-    What day was the 18th of April 2025?
+function fn() returns int[]|error => const natural {
+    Give me an array of integers.
 };

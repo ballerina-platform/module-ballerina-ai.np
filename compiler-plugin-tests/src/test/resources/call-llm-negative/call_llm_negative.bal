@@ -1,4 +1,4 @@
-// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org).
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,7 @@ import ballerina/np;
 
 anydata|error m = check np:callLlm(`What day is it today?`);
 
-function whichDay(string date, np:Model m) returns string|xml|error
+function whichDay(string date, np:ModelProvider m) returns string|xml|error
     => check np:callLlm(`What day was ${date}?`, {model: m});
 
 type Record record {

@@ -268,11 +268,10 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
                 npPrefix = MODULE_NAME;
             }
 
-            if (isRuntimeNaturalExpression(naturalExpressionNode)) {
-                return createNPCallFunctionCallExpression(npPrefix, naturalExpressionNode, this.semanticModel);
-            }
-
-            throw new UnsupportedOperationException("Const natural expression not yet supported!");
+            // Once const expressions are supported, modification has to change.
+//            if (isRuntimeNaturalExpression(naturalExpressionNode)) {
+            return createNPCallFunctionCallExpression(npPrefix, naturalExpressionNode, this.semanticModel);
+//            }
         }
 
         @Override

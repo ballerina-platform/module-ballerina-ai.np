@@ -23,6 +23,7 @@ import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.Package;
 import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.directory.BuildProject;
+import io.ballerina.projects.directory.SingleFileProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
 import io.ballerina.tools.diagnostics.Diagnostic;
@@ -53,7 +54,7 @@ public class CompilerPluginTest {
         assertDiagnostic(errorDiagnosticsList, index++, "unexpected arguments: expected '1' argument, found '3'",
                 17, 48);
         assertDiagnostic(errorDiagnosticsList, index++,
-                "incompatible expression: expected 'ballerina/np:Model', found 'int'",
+                "incompatible expression: expected 'ballerina/np:ModelProvider', found 'int'",
                 17, 49);
         assertDiagnostic(errorDiagnosticsList, index++,
                 "subtypes of 'anydata' that are not subtypes of 'json' are not yet supported as the" +
@@ -63,7 +64,17 @@ public class CompilerPluginTest {
     }
 
     @Test
-    public void testCallLlmNegative() {
+    public void testConstNaturalExpressionsDisallowing() {
+        int index = 0;
+        Package constNaturalExprNegativePackage = loadPackage("const-natural-expressions-negative");
+        DiagnosticResult diagnosticResult = constNaturalExprNegativePackage.runCodeGenAndModifyPlugins();
+        List<Diagnostic> errorDiagnosticsList = diagnosticResult.diagnostics().stream().toList();
+        assertDiagnostic(errorDiagnosticsList, index++, "'const' natural expressions are not yet supported", 17, 38);
+        Assert.assertEquals(index, errorDiagnosticsList.size());
+    }
+
+    @Test
+    public void testCallLlmDisallowedTypes() {
         int index = 0;
         Package callLlmNegativePackage = loadPackage("call-llm-negative");
         DiagnosticResult diagnosticResult = callLlmNegativePackage.runCodeGenAndModifyPlugins();
@@ -77,6 +88,32 @@ public class CompilerPluginTest {
         Assert.assertEquals(index, errorDiagnosticsList.size());
     }
 
+    @Test
+    public void testCodeGenWithCodeAnnotationDisallowingProject() {
+        Package codeAnnotationNegativePackage =
+                loadPackage(RESOURCE_DIRECTORY
+                        .resolve("code-annotation-negative")
+                        .resolve("code-annotation-negative-project"));
+        List<Diagnostic> projectDiagnosticsList =
+                codeAnnotationNegativePackage.runCodeGenAndModifyPlugins().diagnostics().stream().toList();
+        int index = 0;
+        assertDiagnostic(projectDiagnosticsList, index++,
+                "code generation with the 'code' annotation is not yet supported", 21, 43);
+        Assert.assertEquals(index, projectDiagnosticsList.size());
+    }
+
+    @Test
+    public void testCodeGenWithCodeAnnotationDisallowingFile() {
+        Package codeAnnotationNegativeFile =
+                loadSingleFileProject("code-annotation-negative", "code_annotation_negative_file.bal");
+        List<Diagnostic> fileDiagnosticsList =
+                codeAnnotationNegativeFile.runCodeGenAndModifyPlugins().diagnostics().stream().toList();
+        int index = 0;
+        assertDiagnostic(fileDiagnosticsList, index++,
+                "code generation with the 'code' annotation is not yet supported", 22, 52);
+        Assert.assertEquals(index, fileDiagnosticsList.size());
+    }
+
     private static void assertDiagnostic(List<Diagnostic> errorDiagnosticsList, int index, String expectedErrorMessage,
                                          int expectedStartLine, int expectedStartOffset) {
         Diagnostic diagnostic = errorDiagnosticsList.get(index);
@@ -87,11 +124,23 @@ public class CompilerPluginTest {
     }
 
     private static Package loadPackage(String path) {
-        Path projectDirPath = RESOURCE_DIRECTORY.resolve(path);
+        return loadPackage(RESOURCE_DIRECTORY.resolve(path));
+    }
+
+    private static Package loadPackage(Path projectDirPath) {
         Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(DISTRIBUTION_PATH).build();
         ProjectEnvironmentBuilder projectEnvironmentBuilder = ProjectEnvironmentBuilder.getBuilder(environment);
         BuildOptions buildOptions = BuildOptions.builder().setExperimental(true).build();
         BuildProject project = BuildProject.load(projectEnvironmentBuilder, projectDirPath, buildOptions);
+        return project.currentPackage();
+    }
+
+    private static Package loadSingleFileProject(String directory, String fileName) {
+        Path projectDirPath = RESOURCE_DIRECTORY.resolve(directory).resolve(fileName);
+        Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(DISTRIBUTION_PATH).build();
+        ProjectEnvironmentBuilder projectEnvironmentBuilder = ProjectEnvironmentBuilder.getBuilder(environment);
+        BuildOptions buildOptions = BuildOptions.builder().setExperimental(true).build();
+        SingleFileProject project = SingleFileProject.load(projectEnvironmentBuilder, projectDirPath, buildOptions);
         return project.currentPackage();
     }
 }
