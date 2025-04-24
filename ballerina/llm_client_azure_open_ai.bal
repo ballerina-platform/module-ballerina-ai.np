@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
 
 # Configuration for Azure OpenAI model.
 type AzureOpenAIModelConfig record {|
@@ -24,6 +23,11 @@ type AzureOpenAIModelConfig record {|
     # Service URL for the Azure OpenAI model.
     string serviceUrl;
 |};
+
+type SchemaResponse record {
+    map<json> schema;
+    boolean isOriginallyJsonObject = true;
+};
 
 # Azure OpenAI model chat completion client.
 isolated distinct client class AzureOpenAIModel {
@@ -58,14 +62,14 @@ isolated distinct client class AzureOpenAIModel {
 
     isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
         SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
-        string content = getPromptWithExpectedResponseSchema(prompt, schemaResponse.schema);
         AzureOpenAICreateChatCompletionRequest chatBody = {
-            messages: [{role: "user", content}],
+            messages: [{role: "user", content: buildPromptString(prompt)}],
             tools: [
                 {
                     'type: "function",
                     'function: {
                         name: "get_results",
+                        description: getToolCallingDescription(),
                         parameters: schemaResponse.schema
                     }
                 }
@@ -95,16 +99,10 @@ isolated distinct client class AzureOpenAIModel {
 
         string? resp = toolCalls[0].'function.arguments;
 
-        if resp == "{}" {
-            log:printInfo("Azure Response messages: " + choices[0].message?.content.toString());
+        if resp is () || resp == RESPONSE_WITH_EMPTY_PARAMETERS  {
             return error("No completion message");
-        } else {
-            log:printInfo("Azure Response toool calling: " + resp.toString());
         }
 
-        if resp is () {
-            return error("No completion message");
-        }
-        return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isJsonObject);
+        return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isOriginallyJsonObject);
     }
 }
