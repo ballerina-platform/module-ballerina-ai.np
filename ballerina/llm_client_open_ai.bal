@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/log;
 
 # Configuration for OpenAI model.
 type OpenAIModelConfig record {|
@@ -48,14 +47,15 @@ isolated distinct client class OpenAIModel {
     isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
         SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
         OpenAICreateChatCompletionRequest chatBody = {
-            messages: [{role: "user", "content": getPromptWithExpectedResponseSchema(prompt, schemaResponse.schema)}],
+            messages: [{role: "user", "content": buildPromptString(prompt)}],
             model: self.model,
             tools: [
                 {
                     'type: "function",
                     'function: {
                         name: "get_results",
-                        parameters: schemaResponse.schema
+                        parameters: schemaResponse.schema,
+                        description: getToolCallingDescription()
                     }
                 }
             ],
@@ -77,16 +77,10 @@ isolated distinct client class OpenAIModel {
 
         string? resp = toolCalls[0].'function.arguments;
 
-        if resp.toString() == "{}" {
-            log:printInfo("OAI Response choices: " + choices[0].message?.content.toString());
-        } else {
-            log:printInfo("OAI Response: " + resp.toString());
-        }
-
-        if resp is () {
+        if resp is () || resp == RESPONSE_WITH_EMPTY_PARAMETERS {
             return error("No completion message");
         }
 
-        return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isJsonObject);
+        return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isOriginallyJsonObject);
     }
 }

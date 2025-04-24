@@ -18,6 +18,7 @@ const JSON_CONVERSION_ERROR = "FromJsonStringError";
 const CONVERSION_ERROR = "ConversionError";
 const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
 const OBJECT_KEY = "result";
+const RESPONSE_WITH_EMPTY_PARAMETERS = "{}";
 
 type DefaultModelConfig DefaultAzureOpenAIModelConfig|DefaultOpenAIModelConfig|DefaultBallerinaModelConfig;
 
@@ -84,26 +85,6 @@ isolated function buildPromptString(Prompt prompt) returns string {
     return str.trim();
 }
 
-// isolated function getPromptWithExpectedResponseSchema(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns string =>
-//     string `${buildPromptString(prompt)}
-//         ---
-
-//         The output should be a JSON value that satisfies the following JSON schema, 
-//         returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-//         Schema:
-//         ${getExpectedResponseSchema(expectedResponseTypedesc).toJsonString()}`;
-
-isolated function getPromptWithExpectedResponseSchema(Prompt prompt, map<json> schema) returns string =>
-    string `${buildPromptString(prompt)}
-        ---
-
-        The output should be a JSON value that satisfies the following JSON schema, 
-        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-        Schema:
-        ${schema.toJsonString()}`;
-
 isolated function callLlmGeneric(Prompt prompt, Context context, 
                                  typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
     ModelProvider model = context.model;
@@ -135,19 +116,10 @@ isolated function parseResponseAsJson(string resp) returns json|error {
     return result;
 }
 
-// isolated function parseResponseAsType(string resp, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
-//     json respJson = check parseResponseAsJson(resp);
-//     anydata|error result = trap respJson.fromJsonWithType(expectedResponseTypedesc);
-//     if result is error {
-//         return handleParseResponseError(result);
-//     }
-//     return result;
-// }
-
 isolated function parseResponseAsType(string resp, 
-            typedesc<anydata> expectedResponseTypedesc, boolean isJsonObject) returns anydata|error {
+            typedesc<anydata> expectedResponseTypedesc, boolean isOriginallyJsonObject) returns anydata|error {
     json respJson = check parseResponseAsJson(resp);
-    if !isJsonObject {
+    if !isOriginallyJsonObject {
         map<json> respContent = check respJson.fromJsonWithType();
         respJson = respContent[OBJECT_KEY];
     }
@@ -166,12 +138,6 @@ isolated function handleParseResponseError(error chatResponseError) returns erro
     return chatResponseError;
 }
 
-// isolated function getExpectedResponseSchema(typedesc<anydata> expectedResponseTypedesc) returns map<json> {
-//     // Restricted at compile-time for now.
-//     typedesc<json> td = checkpanic expectedResponseTypedesc.ensureType();
-//     return generateJsonSchemaForTypedescAsJson(td);
-// }
-
 isolated function getExpectedResponseSchema(typedesc<anydata> expectedResponseTypedesc) returns SchemaResponse {
     // Restricted at compile-time for now.
     typedesc<json> td = checkpanic expectedResponseTypedesc.ensureType();
@@ -186,7 +152,7 @@ isolated function generateJsonObjectSchema(map<json> schema) returns SchemaRespo
         json typeValue = schema["type"];
         
         // If type is already "object", return as-is
-        if typeValue is string && (typeValue.toString() == "object") {
+        if typeValue == "object" {
             return {schema};
         }
     }
@@ -203,20 +169,14 @@ isolated function generateJsonObjectSchema(map<json> schema) returns SchemaRespo
     
     // Set the type to "object"
     updatedSchema["type"] = "object";
+    map<json> content = map from var [key, value] in schema.entries()
+        where supportedMetaDataFields.indexOf(key) !is int
+        select [key, value];
+    updatedSchema["properties"] = {OBJECT_KEY: content};
     
-    map<json> properties = {};
-    map<json> content = {};
-    
-    // Copy all original schema definitions into content
-    foreach var [key, value] in schema.entries() {
-        if supportedMetaDataFields.indexOf(key) is int {
-            continue; // Skip metadata fields
-        }
-        content[key] = value;
-    }
-    
-    properties[OBJECT_KEY] = content.cloneReadOnly();
-    updatedSchema["properties"] = properties.cloneReadOnly();
-    
-    return {schema: updatedSchema, isJsonObject: false};
+    return {schema: updatedSchema, isOriginallyJsonObject: false};
+}
+
+isolated function getToolCallingDescription() returns string {
+    return string `If the expected schema of this tool is relevant/suitable to the expected output of the user prompt, this tool must be called.`;
 }
