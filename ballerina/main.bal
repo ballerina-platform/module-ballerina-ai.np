@@ -172,7 +172,7 @@ isolated function generateJsonObjectSchema(map<json> schema) returns SchemaRespo
     map<json> content = map from var [key, value] in schema.entries()
         where supportedMetaDataFields.indexOf(key) !is int
         select [key, value];
-    updatedSchema["properties"] = {OBJECT_KEY: content};
+    updatedSchema["properties"] = {[OBJECT_KEY]: content};
     
     return {schema: updatedSchema, isOriginallyJsonObject: false};
 }
