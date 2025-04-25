@@ -23,19 +23,17 @@ Use a natural function to find a popular sportsperson who has the specified name
 2. Define a natural function to retrieve the information.
 
     ```ballerina
-    function getPopularSportsPerson(
-            string nameSegment, 
-            int decadeStart, 
-            np:Prompt prompt = `Who is a popular sportsperson that was born in the decade starting 
-                from ${decadeStart} with ${nameSegment} in their name?`) 
-        returns SportsPerson|error? = @np:NaturalFunction external;
+    function getPopularSportsPerson(string nameSegment, int decadeStart) 
+            returns SportsPerson|error? => natural {
+        Who is a popular sportsperson that was born in the decade starting 
+        from ${decadeStart} with ${nameSegment} in their name?
+    };
     ```
 
-    - Specify the prompt in natural language as a parameter of the function. Note how interpolations in the prompt refer to preceding parameters.
+    - Specify the prompt in natural language in a natural expression. Note how interpolations can refer to in-scope symbols.
     - Use the type defined above (`SportsPerson`) in the return type along with `error` (to allow for failures when calling the LLM or attempting to bind the response to the target type) and optionally nil (`?`, representing `null` to allow for no match).
-    - Use the `@np:NaturalFunction` annotation on `external` to mark this function as a natural function.
 
-3. Call the function with arguments for `nameSegment` and `decadeStart` in the `main` function and access the required fields from the returned `Person` value.
+3. Call the function with arguments for `nameSegment` and `decadeStart` in the `main` function and access the required fields from the returned `SportsPerson` value.
 
     ```ballerina
     public function main() returns error? {
@@ -69,12 +67,24 @@ Use a natural function to find a popular sportsperson who has the specified name
 
     Alternatively, you can use the default model made available via WSO2 Copilot. Log in to WSO2 Copilot, open up the VS Code command palette (`Ctrl + Shift + P` or `command + shift + P`), and run `Configure Default Model for Natural Functions`. This will add configuration for the default model into the Config.toml file. Please note that this will require VS Code being open in the relevant directory.
 
-    You can also configure and set the model in the code, by introducing the [`np:Context context` parameter](../../ballerina/README.md#configuring-the-model) to the function.
+    You can also configure and set the model in the code, by introducing an argument of type `np:ModelProvider` to the natural expression.
 
-5. Run the sample using the Ballerina run command.
+    ```ballerina
+    import ballerina/np;
+
+    function getPopularSportsPerson(string nameSegment, int decadeStart, np:ModelProvider model) 
+        returns SportsPerson|error? => natural (model) {
+        Who is a popular sportsperson that was born in the decade starting 
+        from ${decadeStart} with ${nameSegment} in their name?
+    };
+    ```
+
+    The [ballerinax/np](https://central.ballerina.io/ballerinax/np/0.9.0) package provides implementations of `np:ModelProvider` for commonly-used providers.
+
+5. Run the sample using the Ballerina run command passing the `--experimental` option.
 
     ```cmd
-    $ bal run popular_sportsperson.bal
+    $ bal run --experimental popular_sportsperson.bal
     Compiling source
         popular_sportsperson.bal
 
