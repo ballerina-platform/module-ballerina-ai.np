@@ -6,15 +6,24 @@ service /llm on new http:Listener(8080) {
             string api\-version, AzureOpenAICreateChatCompletionRequest payload)
                 returns json|error {
         test:assertEquals(api\-version, "2023-08-01-preview");
+        string content = payload.messages[0].content;
         AzureOpenAIChatCompletionRequestMessage[]? messages = payload.messages;
         if messages is () {
             test:assertFail("Expected messages in the payload");
         }
         AzureOpenAIChatCompletionRequestMessage message = messages[0];
-        anydata content = message["content"];
-        string contentStr = content.toString();
         test:assertEquals(message.role, "user");
-        test:assertEquals(content, getExpectedPrompt(contentStr));
+        ChatCompletionTool[]? tools = payload?.tools;
+        if tools is () {
+            test:assertFail("No tools in the payload");
+        }
+
+        FunctionParameters? parameters = tools[0].'function.parameters;
+        if parameters is () {
+            test:assertFail("No tools in the payload");
+        }
+        test:assertEquals(parameters, getExpectedParameterSchema(content));
+
         return {
             'object: "chat.completion",
             created: 0,
@@ -22,8 +31,19 @@ service /llm on new http:Listener(8080) {
             id: "",
             choices: [
                 {
+                    finish_reason: "stop",
+                    index: 0,
+                    logprobs: (),
                     message: {
-                        content: getTheMockLLMResult(contentStr)
+                        role: "assistant",
+                        tool_calls: [{
+                            id: "get_results",
+                            'type: "function",
+                            'function: {
+                                name: "get_results",
+                                arguments: getTheMockLLMResult(content)
+                            }
+                        }]
                     }
                 }
             ]
@@ -37,7 +57,16 @@ service /llm on new http:Listener(8080) {
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
-        test:assertEquals(content, getExpectedPrompt(content.toString()));
+        ChatCompletionTool[]? tools = payload?.tools;
+        if tools is () {
+            test:assertFail("No tools in the payload");
+        }
+
+        FunctionParameters? parameters = tools[0].'function.parameters;
+        if parameters is () {
+            test:assertFail("No tools in the payload");
+        }
+        test:assertEquals(parameters, getExpectedParameterSchema(contentStr));
 
         test:assertEquals(payload.model, "gpt4o");
         return {
@@ -52,8 +81,14 @@ service /llm on new http:Listener(8080) {
                     logprobs: (),
                     message: {
                         role: "assistant",
-                        content: getTheMockLLMResult(contentStr),
-                        refusal: ()
+                        tool_calls: [{
+                            id: "get_results",
+                            'type: "function",
+                            'function: {
+                                name: "get_results",
+                                arguments: getTheMockLLMResult(contentStr)
+                            }
+                        }]
                     }
                 }
             ]
