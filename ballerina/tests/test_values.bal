@@ -32,71 +32,21 @@ final readonly & Review review2 = {
     comment: "Talks about essential aspects of sports performance including warm-up, form, equipment, and nutrition."
 };
 
-final string expectedPromptStringForRateBlog = string `Rate this blog out of 10.
-        Title: ${blog1.title}
-        Content: ${blog1.content}
-        ---
+final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog 
+    = {"type": "object", "properties":{"result":{"type":"integer"}}};
 
-        The output should be a JSON value that satisfies the following JSON schema, 
-        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-        Schema:
-        {"type":"integer"}`;
+final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog2 
+    = {"$schema":"https://json-schema.org/draft/2020-12/schema", "type":"object", "properties":{"rating":{"type":"integer"}, "comment":{"type":"string"}}, "required":["rating", "comment"]};
 
-final string expectedPromptStringForRateBlog2 = string `Please rate this blog out of 10.
-        Title: ${blog2.title}
-        Content: ${blog2.content}
-        ---
+final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog3 
+    = {"type": "object", "properties":{"result":{"type":"boolean"}}};
 
-        The output should be a JSON value that satisfies the following JSON schema, 
-        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-        Schema:
-        {"$schema":"https://json-schema.org/draft/2020-12/schema", "type":"object", "properties":{"rating":{"type":"integer"}, "comment":{"type":"string"}}, "required":["rating", "comment"]}`;
+final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog4 
+    = {"$schema":"https://json-schema.org/draft/2020-12/schema", "type": "object", "properties":{"result":{"type":"array", "items":{"$schema":"https://json-schema.org/draft/2020-12/schema", "type":"object", "properties":{"name":{"type":"string"}}, "required":["name"]}}}};
 
-final string expectedPromptStringForRateBlog3 = string `What is 1 + 1?
-        ---
+final readonly & FunctionParameters expectedParamterSchemaStringForBalProgram 
+    = {"type": "object", "properties":{"result":{"type":"integer"}}};
 
-        The output should be a JSON value that satisfies the following JSON schema, 
-        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-        Schema:
-        {"type":"boolean"}`;
-
-final string expectedPromptStringForRateBlog4 = string `Tell me name and the age of the top 10 world class cricketers
-        ---
-
-        The output should be a JSON value that satisfies the following JSON schema, 
-        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-        Schema:
-        {"$schema":"https://json-schema.org/draft/2020-12/schema", "type":"array", "items":{"$schema":"https://json-schema.org/draft/2020-12/schema", "type":"object", "properties":{"name":{"type":"string"}}, "required":["name"]}}`;
-
-final string expectedPromptStringForBalProgram = string `What's the output of the Ballerina code below?
-
-    ${"```"}ballerina
-    import ballerina/io;
-
-    public function main() {
-        int x = 10;
-        int y = 20;
-        io:println(x + y);
-    }
-    ${"```"}
-        ---
-
-        The output should be a JSON value that satisfies the following JSON schema, 
-        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-        Schema:
-        {"type":"integer"}`;
-
-final string expectedPromptStringForCountry = string `Which country is known as the pearl of the Indian Ocean?
-        ---
-
-        The output should be a JSON value that satisfies the following JSON schema, 
-        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-        Schema:
-        {"type":"string"}`;
+final readonly & FunctionParameters expectedParamterSchemaStringForCountry 
+    = {"type": "object", "properties":{"result":{"type":"string"}}};
 

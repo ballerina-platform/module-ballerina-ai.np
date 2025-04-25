@@ -32,4 +32,21 @@ type OpenAICreateChatCompletionRequest record {
     boolean? 'stream = false;
     decimal? temperature = 1;
     decimal? top_p = 1;
+    ChatCompletionTool[] tools?;
+};
+
+type ChatCompletionTool record {
+    "function" 'type;
+    FunctionObject 'function;
+};
+
+type FunctionObject record {
+    string description?;
+    string name;
+    FunctionParameters parameters?;
+    boolean? strict = false;
+};
+
+type FunctionParameters record {
+
 };

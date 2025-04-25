@@ -118,16 +118,19 @@ isolated function parseResponseAsJson(string resp) returns json|error {
 
 isolated function parseResponseAsType(string resp, 
             typedesc<anydata> expectedResponseTypedesc, boolean isOriginallyJsonObject) returns anydata|error {
-    json respJson = check parseResponseAsJson(resp);
     if !isOriginallyJsonObject {
-        map<json> respContent = check respJson.fromJsonWithType();
-        respJson = respContent[OBJECT_KEY];
+        map<json> respContent = check resp.fromJsonStringWithType();
+        anydata|error result = trap respContent[OBJECT_KEY].fromJsonWithType(expectedResponseTypedesc);
+        if result is error {
+            return handleParseResponseError(result);
+        }
+        return result;
     }
-    anydata|error result = trap respJson.fromJsonWithType(expectedResponseTypedesc);
+    
+    anydata|error result = check resp.fromJsonStringWithType(expectedResponseTypedesc);
     if result is error {
         return handleParseResponseError(result);
     }
-    return result;
 }
 
 isolated function handleParseResponseError(error chatResponseError) returns error {
