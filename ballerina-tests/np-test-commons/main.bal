@@ -18,9 +18,9 @@ import ballerina/http;
 import ballerina/test;
 
 service /llm on new http:Listener(8080) {
-    resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
+    resource function post azureopenai/deployments/gpt4onew/chat/completions(AzureOpenAICreateChatCompletionRequest payload)
             returns json|error {
-        OpenAIChatCompletionRequestUserMessage message = payload.messages[0];
+        AzureOpenAIChatCompletionRequestUserMessage message = payload.messages[0];
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
@@ -35,7 +35,6 @@ service /llm on new http:Listener(8080) {
         }
         test:assertEquals(parameters, getExpectedParameterSchema(contentStr));
 
-        test:assertEquals(payload.model, "gpt-4o-mini");
         return {
             'object: "chat.completion",
             created: 0,
@@ -131,7 +130,7 @@ isolated function getMockLLMResponse(string message) returns string? {
     }
 
     if message.startsWith("Who is a popular sportsperson") {
-        return {result: {"firstName":"Simone","lastName":"Biles","yearOfBirth":1997,"sport":"Gymnastics"}}.toJsonString();
+        return {"firstName":"Simone","lastName":"Biles","yearOfBirth":1997,"sport":"Gymnastics"}.toJsonString();
     }
 
     if message.includes("Tell me about places in the specified country") && message.includes("Sri Lanka") {

@@ -126,11 +126,12 @@ isolated function parseResponseAsType(string resp,
         }
         return result;
     }
-    
+
     anydata|error result = check resp.fromJsonStringWithType(expectedResponseTypedesc);
     if result is error {
         return handleParseResponseError(result);
     }
+    return result;
 }
 
 isolated function handleParseResponseError(error chatResponseError) returns error {
