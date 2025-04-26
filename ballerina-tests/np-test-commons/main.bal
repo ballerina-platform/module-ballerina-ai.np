@@ -18,9 +18,9 @@ import ballerina/http;
 import ballerina/test;
 
 service /llm on new http:Listener(8080) {
-    resource function post azureopenai/deployments/gpt4onew/chat/completions(AzureOpenAICreateChatCompletionRequest payload)
+    resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
             returns json|error {
-        AzureOpenAIChatCompletionRequestUserMessage message = payload.messages[0];
+        OpenAIChatCompletionRequestUserMessage message = payload.messages[0];
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
@@ -58,6 +58,14 @@ service /llm on new http:Listener(8080) {
                     }
                 }
             ]
+        };
+    }
+
+    resource function post 'default/chat/complete(DefaultChatCompletionRequest req)
+            returns json|error {
+        test:assertEquals(req.outputSchema, getExpectedParameterSchema(req.prompt));
+        return {
+            content: [getMockLLMResponse(req.prompt)]
         };
     }
 }
