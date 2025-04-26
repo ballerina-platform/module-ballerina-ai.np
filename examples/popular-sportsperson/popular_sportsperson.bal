@@ -12,9 +12,7 @@ type SportsPerson record {|
     string sport;
 |};
 
-function getPopularSportsPerson(
-        string nameSegment, 
-        int decadeStart) 
+function getPopularSportsPerson(string nameSegment, int decadeStart) 
       returns SportsPerson|error? => natural {
     Who is a popular sportsperson that was born in the decade starting 
     from ${decadeStart} with ${nameSegment} in their name?
