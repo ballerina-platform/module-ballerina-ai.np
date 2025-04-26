@@ -15,4 +15,4 @@ graalvmCompatible = true
 groupId = "io.ballerina.lib"
 artifactId = "np-native"
 version = "0.3.0"
-path = "../native/build/libs/np-native-0.3.0-SNAPSHOT.jar"
+path = "../native/build/libs/np-native-0.3.0.jar"
