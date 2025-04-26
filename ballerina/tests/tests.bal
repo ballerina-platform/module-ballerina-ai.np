@@ -26,7 +26,7 @@ function testPromptAsCodeFunctionWithSimpleExpectedTypeWithDefaultAzureOpenAICli
     test:assertEquals(rating, 4);
 }
 
-@test:Config {enable: false}
+@test:Config
 function testPromptAsCodeFunctionWithStructuredExpectedTypeWithOpenAIClient() returns error? {
     ModelProvider model = check new OpenAIModel({
         connectionConfig: {
