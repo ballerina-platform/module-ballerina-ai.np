@@ -1,3 +1,19 @@
+// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org).
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 isolated function getExpectedParameterSchema(string message) returns FunctionParameters {
     if message.startsWith("Rate this blog") {
         return expectedParamterSchemaStringForRateBlog;
@@ -24,7 +40,7 @@ isolated function getExpectedParameterSchema(string message) returns FunctionPar
     }
 
     if message.startsWith("Who is a popular sportsperson") {
-        return {"$schema":"https://json-schema.org/draft/2020-12/schema", "type": "object", "properties":{"result":{"type":["object", "null"], "properties":{"firstName":{"type":"string"}, "middleName":{"type":["string", "null"]}, "lastName":{"type":"string"}, "yearOfBirth":{"type":"integer"}, "sport":{"type":"string"}}, "required":["firstName", "middleName", "lastName", "yearOfBirth", "sport"]}}};
+        return {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": {"result": {"type": ["object", "null"], "properties": {"firstName": {"type": "string"}, "middleName": {"type": ["string", "null"]}, "lastName": {"type": "string"}, "yearOfBirth": {"type": "integer"}, "sport": {"type": "string"}}, "required": ["firstName", "middleName", "lastName", "yearOfBirth", "sport"]}}};
     }
 
     return {};
@@ -44,7 +60,7 @@ isolated function getTheMockLLMResult(string message) returns string {
     }
 
     if message.startsWith("Tell me") {
-        return {result: [{"name":"Virat Kohli","age":33},{"name":"Kane Williamson","age":30}]}.toJsonString();
+        return {result: [{"name": "Virat Kohli", "age": 33}, {"name": "Kane Williamson", "age": 30}]}.toJsonString();
     }
 
     if message.startsWith("What's the output of the Ballerina code below?") {
@@ -56,7 +72,7 @@ isolated function getTheMockLLMResult(string message) returns string {
     }
 
     if message.startsWith("Who is a popular sportsperson") {
-        return {result: {"firstName":"Simone","middleName":null,"lastName":"Biles","yearOfBirth":1997,"sport":"Gymnastics"}}.toJsonString();
+        return {result: {"firstName": "Simone", "middleName": null, "lastName": "Biles", "yearOfBirth": 1997, "sport": "Gymnastics"}}.toJsonString();
     }
 
     return "INVALID";
