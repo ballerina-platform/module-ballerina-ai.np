@@ -24,11 +24,6 @@ type AzureOpenAIModelConfig record {|
     string serviceUrl;
 |};
 
-type SchemaResponse record {
-    map<json> schema;
-    boolean isOriginallyJsonObject = true;
-};
-
 # Azure OpenAI model chat completion client.
 isolated distinct client class AzureOpenAIModel {
     *ModelProvider;
@@ -46,14 +41,14 @@ isolated distinct client class AzureOpenAIModel {
 
         http:BearerTokenConfig|ApiKeysConfig auth = connectionConfig.auth;
         self.headers = auth is ApiKeysConfig ? {"api-key": auth?.apiKey} : {};
-        
+
         self.cl = check new (azureOpenAIModelConfig.serviceUrl, httpClientConfig);
 
         self.deploymentId = deploymentId;
         self.apiVersion = apiVersion;
     }
 
-    isolated remote function chat(AzureOpenAICreateChatCompletionRequest chatBody) 
+    isolated remote function chat(AzureOpenAICreateChatCompletionRequest chatBody)
             returns AzureOpenAICreateChatCompletionResponse|error {
         string resourcePath = string `/deployments/${check getEncodedUri(self.deploymentId)}/chat/completions`;
         resourcePath = string `${resourcePath}?${check getEncodedUri("api-version")}=${self.apiVersion}`;
@@ -64,22 +59,8 @@ isolated distinct client class AzureOpenAIModel {
         SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
         AzureOpenAICreateChatCompletionRequest chatBody = {
             messages: [{role: "user", content: buildPromptString(prompt)}],
-            tools: [
-                {
-                    'type: "function",
-                    'function: {
-                        name: "get_results",
-                        description: getToolCallingDescription(),
-                        parameters: schemaResponse.schema
-                    }
-                }
-            ],
-            tool_choice: {
-                'type: "function",
-                'function: {
-                    name: "get_results"
-                }
-            }
+            tools: getTools(schemaResponse.schema),
+            tool_choice: getToolChoice()
         };
 
         AzureOpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
@@ -92,14 +73,14 @@ isolated distinct client class AzureOpenAIModel {
         }
 
         ChatCompletionMessageToolCalls? toolCalls = choices[0].message?.tool_calls;
-        
+
         if toolCalls is () {
             return error("No completion message");
         }
 
         string? resp = toolCalls[0].'function.arguments;
 
-        if resp is () || resp == RESPONSE_WITH_EMPTY_PARAMETERS  {
+        if resp is () {
             return error("No completion message");
         }
 

@@ -36,10 +36,10 @@ isolated distinct client class OpenAIModel {
         http:ClientConfiguration httpClientConfig = buildHttpClientConfig(connectionConfig);
         httpClientConfig.auth = connectionConfig.auth;
         self.cl = check new (openAIModelConfig.serviceUrl ?: "https://api.openai.com/v1", httpClientConfig);
-        self.model = model;        
+        self.model = model;
     }
 
-    isolated remote function chat(OpenAICreateChatCompletionRequest chatBody) 
+    isolated remote function chat(OpenAICreateChatCompletionRequest chatBody)
             returns OpenAICreateChatCompletionResponse|error {
         return self.cl->/chat/completions.post(chatBody);
     }
@@ -49,22 +49,8 @@ isolated distinct client class OpenAIModel {
         OpenAICreateChatCompletionRequest chatBody = {
             messages: [{role: "user", "content": buildPromptString(prompt)}],
             model: self.model,
-            tools: [
-                {
-                    'type: "function",
-                    'function: {
-                        name: "get_results",
-                        parameters: schemaResponse.schema,
-                        description: getToolCallingDescription()
-                    }
-                }
-            ],
-            tool_choice: {
-                'type: "function",
-                'function: {
-                    name: "get_results"
-                }
-            }
+            tools: getTools(schemaResponse.schema),
+            tool_choice: getToolChoice()
         };
 
         OpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
@@ -77,7 +63,7 @@ isolated distinct client class OpenAIModel {
 
         string? resp = toolCalls[0].'function.arguments;
 
-        if resp is () || resp == RESPONSE_WITH_EMPTY_PARAMETERS {
+        if resp is () {
             return error("No completion message");
         }
 

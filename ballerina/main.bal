@@ -17,8 +17,8 @@
 const JSON_CONVERSION_ERROR = "FromJsonStringError";
 const CONVERSION_ERROR = "ConversionError";
 const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
-const OBJECT_KEY = "result";
-const RESPONSE_WITH_EMPTY_PARAMETERS = "{}";
+const RESULT = "result";
+const TOOL_NAME = "getResults";
 
 type DefaultModelConfig DefaultAzureOpenAIModelConfig|DefaultOpenAIModelConfig|DefaultBallerinaModelConfig;
 
@@ -31,6 +31,11 @@ type DefaultAzureOpenAIModelConfig record {|
 type DefaultOpenAIModelConfig record {|
     *OpenAIModelConfig;
     string model;
+|};
+
+type SchemaResponse record {|
+    map<json> schema;
+    boolean isOriginallyJsonObject = true;
 |};
 
 public annotation map<json> JsonSchema on type;
@@ -85,8 +90,8 @@ isolated function buildPromptString(Prompt prompt) returns string {
     return str.trim();
 }
 
-isolated function callLlmGeneric(Prompt prompt, Context context, 
-                                 typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+isolated function callLlmGeneric(Prompt prompt, Context context,
+        typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
     ModelProvider model = context.model;
     anydata response = check model->call(prompt, expectedResponseTypedesc);
     anydata|error result = response.ensureType(expectedResponseTypedesc);
@@ -106,8 +111,8 @@ isolated function parseResponseAsJson(string resp) returns json|error {
     }
     int? endIndex = resp.lastIndexOf("```");
 
-    string processedResponse = startIndex is () || endIndex is () ? 
-        resp : 
+    string processedResponse = startIndex is () || endIndex is () ?
+        resp :
         resp.substring(startIndex + startDelimLength, endIndex).trim();
     json|error result = trap processedResponse.fromJsonString();
     if result is error {
@@ -116,11 +121,11 @@ isolated function parseResponseAsJson(string resp) returns json|error {
     return result;
 }
 
-isolated function parseResponseAsType(string resp, 
-            typedesc<anydata> expectedResponseTypedesc, boolean isOriginallyJsonObject) returns anydata|error {
+isolated function parseResponseAsType(string resp,
+        typedesc<anydata> expectedResponseTypedesc, boolean isOriginallyJsonObject) returns anydata|error {
     if !isOriginallyJsonObject {
         map<json> respContent = check resp.fromJsonStringWithType();
-        anydata|error result = trap respContent[OBJECT_KEY].fromJsonWithType(expectedResponseTypedesc);
+        anydata|error result = trap respContent[RESULT].fromJsonWithType(expectedResponseTypedesc);
         if result is error {
             return handleParseResponseError(result);
         }
@@ -135,7 +140,7 @@ isolated function parseResponseAsType(string resp,
 }
 
 isolated function handleParseResponseError(error chatResponseError) returns error {
-    if chatResponseError.message().includes(JSON_CONVERSION_ERROR) 
+    if chatResponseError.message().includes(JSON_CONVERSION_ERROR)
             || chatResponseError.message().includes(CONVERSION_ERROR) {
         return error(string `${ERROR_MESSAGE}`, detail = chatResponseError);
     }
@@ -151,36 +156,48 @@ isolated function getExpectedResponseSchema(typedesc<anydata> expectedResponseTy
 isolated function generateJsonObjectSchema(map<json> schema) returns SchemaResponse {
     string[] supportedMetaDataFields = ["$schema", "$id", "$anchor", "$comment", "title", "description"];
 
-    // Check if the schema already has type "object"
     if schema.hasKey("type") {
-        json typeValue = schema["type"];
-        
-        // If type is already "object", return as-is
-        if typeValue == "object" {
+        if schema["type"] == "object" {
             return {schema};
         }
     }
-    
-    // Create the new wrapper object schema
-    map<json> updatedSchema = {};
-    
-    // Copy all existing schema metadata (except type)
-    foreach var [key, value] in schema.entries() {
-        if supportedMetaDataFields.indexOf(key) is int {
-            updatedSchema[key] = value;
-        }
-    }
-    
-    // Set the type to "object"
+
+    map<json> updatedSchema = map from var [key, value] in schema.entries()
+        where supportedMetaDataFields.indexOf(key) is int
+        select [key, value];
+
     updatedSchema["type"] = "object";
     map<json> content = map from var [key, value] in schema.entries()
         where supportedMetaDataFields.indexOf(key) !is int
         select [key, value];
-    updatedSchema["properties"] = {[OBJECT_KEY]: content};
-    
+
+    updatedSchema["properties"] = {[RESULT]: content};
+
     return {schema: updatedSchema, isOriginallyJsonObject: false};
 }
 
 isolated function getToolCallingDescription() returns string {
     return string `If the expected schema of this tool is relevant/suitable to the expected output of the user prompt, this tool must be called.`;
+}
+
+isolated function getTools(map<json> parameters) returns ChatCompletionTool[] {
+    return [
+        {
+            'type: "function",
+            'function: {
+                name: TOOL_NAME,
+                parameters: parameters,
+                description: getToolCallingDescription()
+            }
+        }
+    ];
+}
+
+isolated function getToolChoice() returns ChatCompletionNamedToolChoice {
+    return {
+        'type: "function",
+        'function: {
+            name: TOOL_NAME
+        }
+    };
 }
