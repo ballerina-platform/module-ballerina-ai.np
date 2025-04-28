@@ -19,6 +19,8 @@ const CONVERSION_ERROR = "ConversionError";
 const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
 const RESULT = "result";
 const TOOL_NAME = "getResults";
+const NO_RESPONSE_FROM_THE_LLM = "No response from the LLM for the given prompt";
+const 'function = "function";
 
 type DefaultModelConfig DefaultAzureOpenAIModelConfig|DefaultOpenAIModelConfig|DefaultBallerinaModelConfig;
 
@@ -37,6 +39,8 @@ type SchemaResponse record {|
     map<json> schema;
     boolean isOriginallyJsonObject = true;
 |};
+
+type FunctionType "function";
 
 public annotation map<json> JsonSchema on type;
 
@@ -156,10 +160,8 @@ isolated function getExpectedResponseSchema(typedesc<anydata> expectedResponseTy
 isolated function generateJsonObjectSchema(map<json> schema) returns SchemaResponse {
     string[] supportedMetaDataFields = ["$schema", "$id", "$anchor", "$comment", "title", "description"];
 
-    if schema.hasKey("type") {
-        if schema["type"] == "object" {
-            return {schema};
-        }
+    if schema["type"] == "object" {
+        return {schema};
     }
 
     map<json> updatedSchema = map from var [key, value] in schema.entries()
@@ -176,28 +178,24 @@ isolated function generateJsonObjectSchema(map<json> schema) returns SchemaRespo
     return {schema: updatedSchema, isOriginallyJsonObject: false};
 }
 
-isolated function getToolCallingDescription() returns string {
-    return string `If the expected schema of this tool is relevant/suitable to the expected output of the user prompt, this tool must be called.`;
+isolated function getToolDescription() returns string {
+    return string `Tool to call with the response from a large language model (LLM) for a user prompt.`;
 }
 
-isolated function getTools(map<json> parameters) returns ChatCompletionTool[] {
-    return [
+isolated function getTools(map<json> parameters) returns ChatCompletionTool[] => [
         {
-            'type: "function",
+            'type: 'function,
             'function: {
                 name: TOOL_NAME,
                 parameters: parameters,
-                description: getToolCallingDescription()
+                description: getToolDescription()
             }
         }
     ];
-}
 
-isolated function getToolChoice() returns ChatCompletionNamedToolChoice {
-    return {
-        'type: "function",
+isolated function getToolChoice() returns ChatCompletionNamedToolChoice => {
+        'type: 'function,
         'function: {
             name: TOOL_NAME
         }
     };
-}

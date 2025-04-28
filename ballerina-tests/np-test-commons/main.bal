@@ -17,6 +17,10 @@
 import ballerina/http;
 import ballerina/test;
 
+const NO_RESPONSE_FROM_THE_LLM = "No response from the LLM for the given prompt";
+const 'function = "function";
+const TOOL_NAME = "getResults";
+
 service /llm on new http:Listener(8080) {
     resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
             returns json|error {
@@ -26,12 +30,12 @@ service /llm on new http:Listener(8080) {
         test:assertEquals(message.role, "user");
         ChatCompletionTool[]? tools = payload?.tools;
         if tools is () {
-            test:assertFail("No tools in the payload");
+            test:assertFail(NO_RESPONSE_FROM_THE_LLM);
         }
 
         FunctionParameters? parameters = tools[0].'function.parameters;
         if parameters is () {
-            return error("No completion message");
+            return error(NO_RESPONSE_FROM_THE_LLM);
         }
         test:assertEquals(parameters, getExpectedParameterSchema(contentStr));
 
@@ -49,10 +53,10 @@ service /llm on new http:Listener(8080) {
                         role: "assistant",
                         tool_calls: [
                             {
-                                id: "getResultss",
-                                'type: "function",
+                                id: TOOL_NAME,
+                                'type: 'function,
                                 'function: {
-                                    name: "getResultss",
+                                    name: TOOL_NAME,
                                     arguments: getMockLLMResponse(contentStr)
                                 }
                             }
@@ -124,46 +128,46 @@ isolated function getExpectedParameterSchema(string prompt) returns map<json> {
 
 isolated function getMockLLMResponse(string message) returns string? {
     if message.startsWith("Which country") {
-        return {result: "Sri Lanka"}.toJsonString();
+        return "{\"result\": \"Sri Lanka\"}";
     }
 
     if message.startsWith("For each string value ") {
-        return {result: ["foo", 1, "bar", "2.3", 4]}.toJsonString();
+        return "{\"result\": [\"foo\", 1, \"bar\", \"2.3\", 4]}";
     }
 
     if message.startsWith("Who is a popular sportsperson") {
-        return {"firstName": "Simone", "lastName": "Biles", "yearOfBirth": 1997, "sport": "Gymnastics"}.toJsonString();
+        return "{\"firstName\": \"Simone\", \"lastName\": \"Biles\", \"yearOfBirth\": 1997, \"sport\": \"Gymnastics\"}";
     }
 
     if message.includes("Tell me about places in the specified country") && message.includes("Sri Lanka") {
-        return {result: [{"name": "Unawatuna Beach", "city": "Galle", "country": "Sri Lanka", "description": "A popular beach known for its golden sands and vibrant nightlife."}, {"name": "Mirissa Beach", "city": "Mirissa", "country": "Sri Lanka", "description": "Famous for its stunning sunsets and opportunities for whale watching."}, {"name": "Hikkaduwa Beach", "city": "Hikkaduwa", "country": "Sri Lanka", "description": "A great destination for snorkeling and surfing, lined with lively restaurants."}]}.toJsonString();
+        return "{\"result\": [{\"name\": \"Unawatuna Beach\", \"city\": \"Galle\", \"country\": \"Sri Lanka\", \"description\": \"A popular beach known for its golden sands and vibrant nightlife.\"}, {\"name\": \"Mirissa Beach\", \"city\": \"Mirissa\", \"country\": \"Sri Lanka\", \"description\": \"Famous for its stunning sunsets and opportunities for whale watching.\"}, {\"name\": \"Hikkaduwa Beach\", \"city\": \"Hikkaduwa\", \"country\": \"Sri Lanka\", \"description\": \"A great destination for snorkeling and surfing, lined with lively restaurants.\"}]}";
     }
 
     if message.includes("Tell me about places in the specified country") && message.includes("UAE") {
-        return {result: [{"name": "Burj Khalifa", "city": "Dubai", "country": "UAE", "description": "The tallest building in the world, offering panoramic views of the city."}, {"name": "Ain Dubai", "city": "Dubai", "country": "UAE", "description": "The world's tallest observation wheel, providing breathtaking views of the Dubai skyline."}]}.toJsonString();
+        return "{\"result\": [{\"name\": \"Burj Khalifa\", \"city\": \"Dubai\", \"country\": \"UAE\", \"description\": \"The tallest building in the world, offering panoramic views of the city.\"}, {\"name\": \"Ain Dubai\", \"city\": \"Dubai\", \"country\": \"UAE\", \"description\": \"The world's tallest observation wheel, providing breathtaking views of the Dubai skyline.\"}]}";
     }
 
     if message.startsWith("What's the output of the Ballerina code below?") {
-        return {result: 30}.toJsonString();
+        return "{\"result\": 30}";
     }
 
     if message.includes("What's the sum of these") {
         if message.includes("[]") {
-            return {result: 3}.toJsonString();
+            return "{\"result\": 3}";
         }
 
         if message.includes("[40,50]") {
-            return {result: 140}.toJsonString();
+            return "{\"result\": 140}";
         }
     }
 
     if message.includes("Give me the sum of these values") {
         if message.includes("[]") {
-            return {result: 300}.toJsonString();
+            return "{\"result\": 300}";
         }
 
         if message.includes("[500]") {
-            return {result: 1200}.toJsonString();
+            return "{\"result\": 1200}";
         }
     }
 

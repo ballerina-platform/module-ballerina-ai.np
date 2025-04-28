@@ -49,8 +49,7 @@ isolated distinct client class DefaultBallerinaModel {
     isolated remote function call(Prompt prompt, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
         http:Client cl = self.cl;
         SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
-        http:Response chatResponse =
-            check cl->/chat/complete.post({
+        http:Response chatResponse = check cl->/chat/complete.post({
             prompt: buildPromptString(prompt),
             outputSchema: schemaResponse.schema
         });
@@ -66,7 +65,7 @@ isolated distinct client class DefaultBallerinaModel {
         ChatCompletionResponse chatCompleteResponse = check (check chatResponse.getJsonPayload()).cloneWithType();
         string[]? content = chatCompleteResponse?.content;
         if content is () {
-            return error("No completion message");
+            return error(NO_RESPONSE_FROM_THE_LLM);
         }
 
         return parseResponseAsType(content[0], expectedResponseTypedesc, schemaResponse.isOriginallyJsonObject);

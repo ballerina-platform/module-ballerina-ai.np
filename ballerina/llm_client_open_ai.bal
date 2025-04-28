@@ -58,13 +58,13 @@ isolated distinct client class OpenAIModel {
         ChatCompletionMessageToolCalls? toolCalls = choices[0].message?.tool_calls;
 
         if toolCalls is () {
-            return error("No completion message");
+            return error(NO_RESPONSE_FROM_THE_LLM);
         }
 
         string? resp = toolCalls[0].'function.arguments;
 
         if resp is () {
-            return error("No completion message");
+            return error(NO_RESPONSE_FROM_THE_LLM);
         }
 
         return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isOriginallyJsonObject);
