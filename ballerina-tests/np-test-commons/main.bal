@@ -51,6 +51,7 @@ service /llm on new http:Listener(8080) {
                     index: 0,
                     logprobs: (),
                     message: {
+                        content: (),
                         role: "assistant",
                         tool_calls: [
                             {

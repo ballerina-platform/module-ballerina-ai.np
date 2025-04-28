@@ -40,7 +40,6 @@ type FunctionObject record {
 };
 
 type FunctionParameters record {
-
 };
 
 type DefaultChatCompletionRequest record {|

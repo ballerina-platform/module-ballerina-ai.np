@@ -110,3 +110,33 @@ isolated function getTheMockLLMResult(string message) returns string {
 
     return "INVALID";
 }
+
+isolated function getTestServiceResponse(string content) returns json {
+    return {
+        'object: "chat.completion",
+        created: 0,
+        model: "",
+        id: "",
+        choices: [
+            {
+                finish_reason: "stop",
+                index: 0,
+                logprobs: (),
+                message: {
+                    content: (),
+                    role: "assistant",
+                    tool_calls: [
+                        {
+                            id: TOOL_NAME,
+                            'type: 'function,
+                            'function: {
+                                name: TOOL_NAME,
+                                arguments: getTheMockLLMResult(content)
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }; 
+}
