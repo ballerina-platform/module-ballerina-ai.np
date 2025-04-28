@@ -128,7 +128,7 @@ type AssistantsNamedToolChoice_function record {
 };
 
 type OpenAIChatCompletionResponseMessage record {
-    string? content?;
+    string? content;
     ChatCompletionMessageToolCalls tool_calls?;
 };
 

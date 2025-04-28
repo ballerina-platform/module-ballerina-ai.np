@@ -39,34 +39,9 @@ service /llm on new http:Listener(8080) {
         if parameters is () {
             test:assertFail("No tools in the payload");
         }
-        test:assertEquals(parameters, getExpectedParameterSchema(content));
 
-        return {
-            'object: "chat.completion",
-            created: 0,
-            model: "",
-            id: "",
-            choices: [
-                {
-                    finish_reason: "stop",
-                    index: 0,
-                    logprobs: (),
-                    message: {
-                        role: "assistant",
-                        tool_calls: [
-                            {
-                                id: TOOL_NAME,
-                                'type: 'function,
-                                'function: {
-                                    name: TOOL_NAME,
-                                    arguments: getTheMockLLMResult(content)
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        };
+        test:assertEquals(parameters, getExpectedParameterSchema(content));
+        return getTestServiceResponse(content);
     }
 
     resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
@@ -89,31 +64,6 @@ service /llm on new http:Listener(8080) {
         test:assertEquals(parameters, getExpectedParameterSchema(contentStr));
 
         test:assertEquals(payload.model, "gpt4o");
-        return {
-            'object: "chat.completion",
-            created: 0,
-            model: "",
-            id: "",
-            choices: [
-                {
-                    finish_reason: "stop",
-                    index: 0,
-                    logprobs: (),
-                    message: {
-                        role: "assistant",
-                        tool_calls: [
-                            {
-                                id: TOOL_NAME,
-                                'type: 'function,
-                                'function: {
-                                    name: TOOL_NAME,
-                                    arguments: getTheMockLLMResult(contentStr)
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        };
+        return getTestServiceResponse(contentStr);
     }
 }
