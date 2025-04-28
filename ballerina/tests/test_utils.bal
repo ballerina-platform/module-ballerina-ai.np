@@ -46,6 +46,39 @@ isolated function getExpectedParameterSchema(string message) returns FunctionPar
     return {};
 }
 
+isolated function getExpectedPrompt(string message) returns string {
+    if message.startsWith("Rate this blog") {
+        return expectedPromptStringForRateBlog;
+    }
+
+    if message.startsWith("Please rate this blog") {
+        return expectedPromptStringForRateBlog2;
+    }
+
+    if message.startsWith("What is 1 + 1?") {
+        return expectedPromptStringForRateBlog3;
+    }
+
+    if message.startsWith("Tell me") {
+        return expectedPromptStringForRateBlog4;
+    }
+
+    if message.startsWith("What's the output of the Ballerina code below?") {
+        return expectedPromptStringForBalProgram;
+    }
+
+    if message.startsWith("Which country") {
+        return expectedPromptStringForCountry;
+    }
+
+    if message.startsWith("Who is a popular sportsperson") {
+        return string `Who is a popular sportsperson that was born in the decade starting
+            from 1990 with Simone in their name?`;
+    }
+
+    return "INVALID";
+}
+
 isolated function getTheMockLLMResult(string message) returns string {
     if message.startsWith("Rate this blog") {
         return "{\"result\": 4}";
