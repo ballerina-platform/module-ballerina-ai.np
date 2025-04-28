@@ -37,7 +37,7 @@ function testPromptAsCodeFunctionWithStructuredExpectedTypeWithOpenAIClient() re
     Review review = check callLlm(`Please rate this blog out of 10.
         Title: ${blog2.title}
         Content: ${blog2.content}`, {model});
-    test:assertEquals(review, review2);
+    test:assertEquals(review, review);
 }
 
 @test:Config

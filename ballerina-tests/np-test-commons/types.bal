@@ -26,8 +26,10 @@ type OpenAICreateChatCompletionRequest record {
     ChatCompletionTool[] tools?;
 };
 
+type FunctionType "function";
+
 type ChatCompletionTool record {
-    "function" 'type;
+    FunctionType 'type;
     FunctionObject 'function;
 };
 
@@ -35,7 +37,6 @@ type FunctionObject record {
     string description?;
     string name;
     FunctionParameters parameters?;
-    boolean? strict = false;
 };
 
 type FunctionParameters record {

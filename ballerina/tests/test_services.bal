@@ -54,10 +54,10 @@ service /llm on new http:Listener(8080) {
                         role: "assistant",
                         tool_calls: [
                             {
-                                id: "getResultss",
-                                'type: "function",
+                                id: TOOL_NAME,
+                                'type: 'function,
                                 'function: {
-                                    name: "getResultss",
+                                    name: TOOL_NAME,
                                     arguments: getTheMockLLMResult(content)
                                 }
                             }
@@ -101,10 +101,10 @@ service /llm on new http:Listener(8080) {
                         role: "assistant",
                         tool_calls: [
                             {
-                                id: "getResultss",
-                                'type: "function",
+                                id: TOOL_NAME,
+                                'type: 'function,
                                 'function: {
-                                    name: "getResultss",
+                                    name: TOOL_NAME,
                                     arguments: getTheMockLLMResult(contentStr)
                                 }
                             }

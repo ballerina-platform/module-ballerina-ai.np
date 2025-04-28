@@ -42,10 +42,7 @@ final readonly & Blog blog2 = {
         Don't forget to maintain proper hydration and nutrition for optimal performance.`
 };
 
-final readonly & Review review2 = {
-    rating: 8,
-    comment: "Talks about essential aspects of sports performance including warm-up, form, equipment, and nutrition."
-};
+final string review = "{\"rating\": 8, \"comment\": \"Talks about essential aspects of sports performance including warm-up, form, equipment, and nutrition.\"}";
 
 final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog =
     {"type": "object", "properties": {"result": {"type": "integer"}}};

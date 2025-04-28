@@ -48,31 +48,31 @@ isolated function getExpectedParameterSchema(string message) returns FunctionPar
 
 isolated function getTheMockLLMResult(string message) returns string {
     if message.startsWith("Rate this blog") {
-        return {result: 4}.toJsonString();
+        return "{\"result\": 4}";
     }
 
     if message.startsWith("Please rate this blog") {
-        return review2.toJsonString();
+        return review;
     }
 
     if message.startsWith("What is 1 + 1?") {
-        return {result: "2"}.toJsonString();
+        return "{\"result\": 2}";
     }
 
     if message.startsWith("Tell me") {
-        return {result: [{"name": "Virat Kohli", "age": 33}, {"name": "Kane Williamson", "age": 30}]}.toJsonString();
+        return "{\"result\": [{\"name\": \"Virat Kohli\", \"age\": 33}, {\"name\": \"Kane Williamson\", \"age\": 30}]}";
     }
 
     if message.startsWith("What's the output of the Ballerina code below?") {
-        return {result: 30}.toJsonString();
+        return "{\"result\": 30}";
     }
 
     if message.startsWith("Which country") {
-        return {result: "Sri Lanka"}.toJsonString();
+        return "{\"result\": \"Sri Lanka\"}";
     }
 
     if message.startsWith("Who is a popular sportsperson") {
-        return {result: {"firstName": "Simone", "middleName": null, "lastName": "Biles", "yearOfBirth": 1997, "sport": "Gymnastics"}}.toJsonString();
+        return "{\"result\": {\"firstName\": \"Simone\", \"middleName\": null, \"lastName\": \"Biles\", \"yearOfBirth\": 1997, \"sport\": \"Gymnastics\"}}";
     }
 
     return "INVALID";
