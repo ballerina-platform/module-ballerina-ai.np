@@ -44,6 +44,32 @@ final readonly & Blog blog2 = {
 
 final string review = "{\"rating\": 8, \"comment\": \"Talks about essential aspects of sports performance including warm-up, form, equipment, and nutrition.\"}";
 
+final string expectedPromptStringForRateBlog = string `Rate this blog out of 10.
+        Title: ${blog1.title}
+        Content: ${blog1.content}`;
+
+final string expectedPromptStringForRateBlog2 = string `Please rate this blog out of 10.
+        Title: ${blog2.title}
+        Content: ${blog2.content}`;
+
+final string expectedPromptStringForRateBlog3 = string `What is 1 + 1?`;
+
+final string expectedPromptStringForRateBlog4 = string `Tell me name and the age of the top 10 world class cricketers`;
+
+final string expectedPromptStringForBalProgram = string `What's the output of the Ballerina code below?
+
+    ${"```"}ballerina
+    import ballerina/io;
+
+    public function main() {
+        int x = 10;
+        int y = 20;
+        io:println(x + y);
+    }
+    ${"```"}`;
+
+final string expectedPromptStringForCountry = string `Which country is known as the pearl of the Indian Ocean?`;
+
 final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog =
     {"type": "object", "properties": {"result": {"type": "integer"}}};
 
@@ -61,4 +87,3 @@ final readonly & FunctionParameters expectedParamterSchemaStringForBalProgram =
 
 final readonly & FunctionParameters expectedParamterSchemaStringForCountry =
     {"type": "object", "properties": {"result": {"type": "string"}}};
-

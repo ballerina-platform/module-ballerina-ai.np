@@ -37,6 +37,7 @@ service /llm on new http:Listener(8080) {
         if parameters is () {
             return error(NO_RESPONSE_FROM_THE_LLM);
         }
+        test:assertEquals(contentStr, getExpectedPrompt(contentStr));
         test:assertEquals(parameters, getExpectedParameterSchema(contentStr));
 
         return {
@@ -74,6 +75,177 @@ service /llm on new http:Listener(8080) {
             content: [getMockLLMResponse(req.prompt)]
         };
     }
+}
+
+isolated function getExpectedPrompt(string prompt) returns string {
+    string trimmedPrompt = prompt.trim();
+
+    if trimmedPrompt.startsWith("Which country") {
+        return  string `Which country is known as the pearl of the Indian Ocean?`;
+    }
+
+    if trimmedPrompt.startsWith("For each string value ") {
+        return string `For each string value in the given array if the value can be parsed
+    as an integer give an integer, if not give the same string value. Please preserve the order.
+    Array value: ["foo","1","bar","2.3","4"]`;
+    }
+
+    if trimmedPrompt.startsWith("Who is a popular sportsperson") {
+        return string `Who is a popular sportsperson that was born in the decade starting
+    from 1990 with Simone in their name?`;
+    }
+
+    if trimmedPrompt.includes("Tell me about places in the specified country") && trimmedPrompt.includes("Sri Lanka") {
+        return string `You have been given the following input:
+
+country: 
+${"```"}
+Sri Lanka
+${"```"}
+
+interest: 
+${"```"}
+beach
+${"```"}
+
+count: 
+${"```"}
+3
+${"```"}
+
+    Tell me about places in the specified country that could be a good destination 
+    to someone who has the specified interest.
+
+    Include only the number of places specified by the count parameter.`;
+    }
+
+    if trimmedPrompt.includes("Tell me about places in the specified country") && trimmedPrompt.includes("UAE") {
+        return string `You have been given the following input:
+
+country: 
+${"```"}
+UAE
+${"```"}
+
+interest: 
+${"```"}
+skyscrapers
+${"```"}
+
+count: 
+${"```"}
+2
+${"```"}
+
+    Tell me about places in the specified country that could be a good destination 
+    to someone who has the specified interest.
+
+    Include only the number of places specified by the count parameter.`;
+    }
+
+    if trimmedPrompt.startsWith("What's the output of the Ballerina code below") {
+        return string `What's the output of the Ballerina code below?
+
+    ${"```"}ballerina
+    import ballerina/io;
+
+    public function main() {
+        int x = 10;
+        int y = 20;
+        io:println(x + y);
+    }
+    ${"```"}`;
+    }
+
+    if trimmedPrompt.includes("What's the sum of these") {
+        if trimmedPrompt.includes("[]") {
+            return string `You have been given the following input:
+
+a: 
+${"```"}
+1
+${"```"}
+
+b: 
+${"```"}
+2
+${"```"}
+
+c: 
+${"```"}
+[]
+${"```"}
+
+    What's the sum of these values?`;
+        }
+
+        if trimmedPrompt.includes("[40,50]") {
+            return string `You have been given the following input:
+
+a: 
+${"```"}
+20
+${"```"}
+
+b: 
+${"```"}
+30
+${"```"}
+
+c: 
+${"```"}
+[40,50]
+${"```"}
+
+    What's the sum of these values?`;
+        }
+    }
+
+    if trimmedPrompt.includes("Give me the sum of these values") {
+        if trimmedPrompt.includes("[]") {
+            return string `You have been given the following input:
+
+d: 
+${"```"}
+100
+${"```"}
+
+e: 
+${"```"}
+{"val":200}
+${"```"}
+
+f: 
+${"```"}
+[]
+${"```"}
+
+    Give me the sum of these values`;
+        }
+
+        if trimmedPrompt.includes("[500]") {
+            return string `You have been given the following input:
+
+d: 
+${"```"}
+300
+${"```"}
+
+e: 
+${"```"}
+{"val":400}
+${"```"}
+
+f: 
+${"```"}
+[500]
+${"```"}
+
+    Give me the sum of these values`;
+        }
+    }
+
+    test:assertFail("Unexpected prompt: " + trimmedPrompt);
 }
 
 isolated function getExpectedParameterSchema(string prompt) returns map<json> {

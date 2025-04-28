@@ -28,6 +28,7 @@ service /llm on new http:Listener(8080) {
             test:assertFail("Expected messages in the payload");
         }
         AzureOpenAIChatCompletionRequestMessage message = messages[0];
+        test:assertEquals(content, getExpectedPrompt(content));
         test:assertEquals(message.role, "user");
         ChatCompletionTool[]? tools = payload?.tools;
         if tools is () {
@@ -75,6 +76,7 @@ service /llm on new http:Listener(8080) {
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
+        test:assertEquals(content, getExpectedPrompt(contentStr));
         ChatCompletionTool[]? tools = payload?.tools;
         if tools is () {
             test:assertFail("No tools in the payload");
