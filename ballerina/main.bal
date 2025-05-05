@@ -18,9 +18,9 @@ const JSON_CONVERSION_ERROR = "FromJsonStringError";
 const CONVERSION_ERROR = "ConversionError";
 const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
 const RESULT = "result";
-const TOOL_NAME = "getResults";
-const NO_RESPONSE_FROM_THE_LLM = "No response from the LLM for the given prompt";
-const 'function = "function";
+const GET_LLM_RESULTS_TOOL = "getResults";
+const NO_RELEVANT_RESPONSE_FROM_THE_LLM = "No response from the LLM for the given prompt";
+const FUNCTION = "function";
 
 type DefaultModelConfig DefaultAzureOpenAIModelConfig|DefaultOpenAIModelConfig|DefaultBallerinaModelConfig;
 
@@ -39,8 +39,6 @@ type SchemaResponse record {|
     map<json> schema;
     boolean isOriginallyJsonObject = true;
 |};
-
-type FunctionType "function";
 
 public annotation map<json> JsonSchema on type;
 
@@ -182,11 +180,11 @@ isolated function getToolDescription() returns string {
     return string `Tool to call with the response from a large language model (LLM) for a user prompt.`;
 }
 
-isolated function getTools(map<json> parameters) returns ChatCompletionTool[] => [
+isolated function getToolsForGenerateTheLlmResult(map<json> parameters) returns ChatCompletionTool[] => [
         {
-            'type: 'function,
+            'type: FUNCTION,
             'function: {
-                name: TOOL_NAME,
+                name: GET_LLM_RESULTS_TOOL,
                 parameters: parameters,
                 description: getToolDescription()
             }
@@ -194,8 +192,8 @@ isolated function getTools(map<json> parameters) returns ChatCompletionTool[] =>
     ];
 
 isolated function getToolChoice() returns ChatCompletionNamedToolChoice => {
-        'type: 'function,
+        'type: FUNCTION,
         'function: {
-            name: TOOL_NAME
+            name: GET_LLM_RESULTS_TOOL
         }
     };
