@@ -35,7 +35,7 @@ service /llm on new http:Listener(8080) {
 
         FunctionParameters? parameters = tools[0].'function.parameters;
         if parameters is () {
-            return error(NO_RESPONSE_FROM_THE_LLM);
+            test:assertFail(NO_RESPONSE_FROM_THE_LLM);
         }
         test:assertEquals(contentStr, getExpectedPrompt(contentStr));
         test:assertEquals(parameters, getExpectedParameterSchema(contentStr));

@@ -86,6 +86,31 @@ type OpenAIChatCompletionRequestUserMessage record {
     string name?;
 };
 
+type FunctionParameters record {
+};
+
+type FunctionObject record {
+    string description?;
+    string name;
+    FunctionParameters parameters?;
+};
+
+type AssistantsNamedToolChoice_function record {
+    string name;
+};
+
+type ChatCompletionNamedToolChoice record {
+    FUNCTION 'type;
+    AssistantsNamedToolChoice_function 'function;
+};
+
+type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;
+
+type ChatCompletionTool record {
+    FUNCTION 'type;
+    FunctionObject 'function;
+};
+
 type OpenAICreateChatCompletionRequest record {
     OpenAIChatCompletionRequestUserMessage[1] messages;
     string model;
@@ -102,47 +127,22 @@ type OpenAICreateChatCompletionRequest record {
     ChatCompletionToolChoiceOption tool_choice?;
 };
 
-type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;
-
-type ChatCompletionTool record {
-    FunctionType 'type;
-    FunctionObject 'function;
-};
-
-type FunctionObject record {
-    string description?;
+type ChatCompletionMessageToolCall_function record {
     string name;
-    FunctionParameters parameters?;
+    string arguments;
 };
 
-type FunctionParameters record {
-};
-
-type ChatCompletionNamedToolChoice record {
-    FunctionType 'type;
-    AssistantsNamedToolChoice_function 'function;
-};
-
-type AssistantsNamedToolChoice_function record {
-    string name;
-};
+type ChatCompletionMessageToolCalls ChatCompletionMessageToolCall[];
 
 type OpenAIChatCompletionResponseMessage record {
     string? content;
     ChatCompletionMessageToolCalls tool_calls?;
 };
 
-type ChatCompletionMessageToolCalls ChatCompletionMessageToolCall[];
-
 type ChatCompletionMessageToolCall record {
     string id;
-    FunctionType 'type;
+    FUNCTION 'type;
     ChatCompletionMessageToolCall_function 'function;
-};
-
-type ChatCompletionMessageToolCall_function record {
-    string name;
-    string arguments;
 };
 
 type OpenAICreateChatCompletionResponse_choices record {
@@ -153,21 +153,37 @@ type OpenAICreateChatCompletionResponse record {
     OpenAICreateChatCompletionResponse_choices[] choices;
 };
 
+# Connection configuration for Azure OpenAI.
 type AzureOpenAIConnectionConfig record {|
+    # Configurations related to client authentication
     http:BearerTokenConfig|ApiKeysConfig auth;
+    # The HTTP version understood by the client
     http:HttpVersion httpVersion = http:HTTP_2_0;
+    # Configurations related to HTTP/1.x protocol
     ClientHttp1Settings http1Settings?;
+    # Configurations related to HTTP/2 protocol
     http:ClientHttp2Settings http2Settings?;
+    # The maximum time to wait (in seconds) for a response before closing the connection
     decimal timeout = 60;
+    # The choice of setting `forwarded`/`x-forwarded` header
     string forwarded = "disable";
+    # Configurations associated with request pooling
     http:PoolConfiguration poolConfig?;
+    # HTTP caching related configurations
     http:CacheConfig cache?;
+    # Specifies the way of handling compression (`accept-encoding`) header
     http:Compression compression = http:COMPRESSION_AUTO;
+    # Configurations associated with the behaviour of the Circuit Breaker
     http:CircuitBreakerConfig circuitBreaker?;
+    # Configurations associated with retrying
     http:RetryConfig retryConfig?;
+    # Configurations associated with inbound response size limits
     http:ResponseLimitConfigs responseLimits?;
+    # SSL/TLS-related options
     http:ClientSecureSocket secureSocket?;
+    # Proxy server related options
     http:ProxyConfig proxy?;
+    # Enables the inbound payload validation functionality which provided by the constraint package. Enabled by default
     boolean validation = true;
 |};
 

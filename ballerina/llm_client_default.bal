@@ -65,7 +65,7 @@ isolated distinct client class DefaultBallerinaModel {
         ChatCompletionResponse chatCompleteResponse = check (check chatResponse.getJsonPayload()).cloneWithType();
         string[]? content = chatCompleteResponse?.content;
         if content is () {
-            return error(NO_RESPONSE_FROM_THE_LLM);
+            return error(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
         }
 
         return parseResponseAsType(content[0], expectedResponseTypedesc, schemaResponse.isOriginallyJsonObject);

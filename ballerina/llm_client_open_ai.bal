@@ -49,7 +49,7 @@ isolated distinct client class OpenAIModel {
         OpenAICreateChatCompletionRequest chatBody = {
             messages: [{role: "user", "content": buildPromptString(prompt)}],
             model: self.model,
-            tools: getTools(schemaResponse.schema),
+            tools: getToolsForGenerateTheLlmResult(schemaResponse.schema),
             tool_choice: getToolChoice()
         };
 
@@ -58,13 +58,13 @@ isolated distinct client class OpenAIModel {
         ChatCompletionMessageToolCalls? toolCalls = choices[0].message?.tool_calls;
 
         if toolCalls is () {
-            return error(NO_RESPONSE_FROM_THE_LLM);
+            return error(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
         }
 
         string? resp = toolCalls[0].'function.arguments;
 
         if resp is () {
-            return error(NO_RESPONSE_FROM_THE_LLM);
+            return error(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
         }
 
         return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isOriginallyJsonObject);
