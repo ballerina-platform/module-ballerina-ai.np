@@ -82,7 +82,7 @@ type ApiKeysConfig record {|
 
 type OpenAIChatCompletionRequestUserMessage record {
     string content;
-    "user" role;
+    "user"|"assistant" role;
     string name?;
 };
 
@@ -112,7 +112,7 @@ type ChatCompletionTool record {
 };
 
 type OpenAICreateChatCompletionRequest record {
-    OpenAIChatCompletionRequestUserMessage[1] messages;
+    OpenAIChatCompletionRequestUserMessage[] messages;
     string model;
     boolean? store = false;
     decimal? frequency_penalty = 0;
@@ -195,7 +195,7 @@ type AzureOpenAIChatCompletionRequestMessage record {|
 |};
 
 type AzureOpenAICreateChatCompletionRequest record {|
-    AzureOpenAIChatCompletionRequestMessage[1] messages;
+    AzureOpenAIChatCompletionRequestMessage[] messages;
     ChatCompletionTool[] tools?;
     ChatCompletionToolChoiceOption tool_choice?;
 |};

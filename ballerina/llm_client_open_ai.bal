@@ -53,6 +53,11 @@ isolated distinct client class OpenAIModel {
             tool_choice: getToolChoiceToGenerateLlmResult()
         };
 
+        return self.processOpenAIRequest(chatBody, schemaResponse, expectedResponseTypedesc);
+    }
+
+    isolated function processOpenAIRequest(OpenAICreateChatCompletionRequest chatBody, 
+                SchemaResponse schemaResponse, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
         OpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
         OpenAICreateChatCompletionResponse_choices[] choices = chatResult.choices;
         ChatCompletionMessageToolCalls? toolCalls = choices[0].message?.tool_calls;
@@ -67,6 +72,29 @@ isolated distinct client class OpenAIModel {
             return error(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
         }
 
-        return parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isOriginallyJsonObject);
+        anydata|error result = parseResponseAsType(resp, expectedResponseTypedesc, schemaResponse.isOriginallyJsonObject);
+        if result is anydata {
+            return result;
+        }
+
+        lock {
+            if retryCount >= maxRetries {
+                return handleParseResponseError(result);
+            }
+            retryCount += 1;
+        }
+
+        OpenAIChatCompletionRequestUserMessage[] messages = chatBody.messages;
+        messages.push({role: "assistant", content: resp});
+        messages.push({role: "user", content: generateRepairResponseForLLM(result)});
+
+        OpenAICreateChatCompletionRequest updatedRequest = {
+            messages,
+            model: self.model,
+            tools: getTools(schemaResponse.schema),
+            tool_choice: getToolChoice()
+        };
+
+        return self.processOpenAIRequest(updatedRequest, schemaResponse, expectedResponseTypedesc);
     }
 }

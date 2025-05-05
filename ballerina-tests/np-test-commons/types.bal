@@ -14,14 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-type OpenAIChatCompletionRequestUserMessage record {
+type ChatCompletionRequestUserMessage record {
     string content;
     "user" role;
     string name?;
 };
 
 type OpenAICreateChatCompletionRequest record {
-    OpenAIChatCompletionRequestUserMessage[1] messages;
+    ChatCompletionRequestUserMessage[1] messages;
     string model;
     ChatCompletionTool[] tools?;
 };
@@ -40,7 +40,7 @@ type FunctionObject record {
 type FunctionParameters record {
 };
 
-type DefaultChatCompletionRequest record {|
-    string prompt;
-    map<json> outputSchema;
-|};
+type AzureOpenAICreateChatCompletionRequest record {
+    ChatCompletionRequestUserMessage[] messages;
+    ChatCompletionTool[] tools?;
+};

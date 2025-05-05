@@ -22,6 +22,8 @@ const GET_RESULTS_TOOL = "getResults";
 const NO_RELEVANT_RESPONSE_FROM_THE_LLM = "No relevant response from the LLM";
 const FUNCTION = "function";
 
+isolated int retryCount = 0;
+
 type DefaultModelConfig DefaultAzureOpenAIModelConfig|DefaultOpenAIModelConfig|DefaultBallerinaModelConfig;
 
 type DefaultAzureOpenAIModelConfig record {|
@@ -127,18 +129,10 @@ isolated function parseResponseAsType(string resp,
         typedesc<anydata> expectedResponseTypedesc, boolean isOriginallyJsonObject) returns anydata|error {
     if !isOriginallyJsonObject {
         map<json> respContent = check resp.fromJsonStringWithType();
-        anydata|error result = trap respContent[RESULT].fromJsonWithType(expectedResponseTypedesc);
-        if result is error {
-            return handleParseResponseError(result);
-        }
-        return result;
+        return trap respContent[RESULT].fromJsonWithType(expectedResponseTypedesc);
     }
 
-    anydata|error result = check resp.fromJsonStringWithType(expectedResponseTypedesc);
-    if result is error {
-        return handleParseResponseError(result);
-    }
-    return result;
+    return resp.fromJsonStringWithType(expectedResponseTypedesc);
 }
 
 isolated function handleParseResponseError(error chatResponseError) returns error {
@@ -195,3 +189,11 @@ isolated function getToolChoiceToGenerateLlmResult() returns ChatCompletionNamed
             name: GET_RESULTS_TOOL
         }
     };
+
+isolated function generateRepairResponseForLLM(error result) returns string => 
+    string `I noticed an error in your previous response. Here are the details:
+    Error: ${result.message()}
+    Please:
+    1. Review the error information above
+    2. Analyze where the mistake occurred
+    3. Generate a new corrected response`;

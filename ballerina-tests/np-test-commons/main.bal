@@ -24,7 +24,7 @@ const GET_RESULTS_TOOL = "getResults";
 service /llm on new http:Listener(8080) {
     resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
             returns json|error {
-        OpenAIChatCompletionRequestUserMessage message = payload.messages[0];
+        ChatCompletionRequestUserMessage message = payload.messages[0];
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
@@ -68,11 +68,25 @@ service /llm on new http:Listener(8080) {
         };
     }
 
-    resource function post 'default/chat/complete(DefaultChatCompletionRequest req)
+    resource function post 'default/chat/complete(AzureOpenAICreateChatCompletionRequest req)
             returns json|error {
-        test:assertEquals(req.outputSchema, getExpectedParameterSchema(req.prompt));
+        ChatCompletionRequestUserMessage message = req.messages[0];
+        anydata content = message["content"];
+        string contentStr = content.toString();
+        test:assertEquals(message.role, "user");
+        ChatCompletionTool[]? tools = req?.tools;
+        if tools is () {
+            test:assertFail(NO_RESPONSE_FROM_THE_LLM);
+        }
+
+        FunctionParameters? parameters = tools[0].'function.parameters;
+        if parameters is () {
+            return error(NO_RESPONSE_FROM_THE_LLM);
+        }
+        test:assertEquals(contentStr, getExpectedPrompt(contentStr));
+        test:assertEquals(parameters, getExpectedParameterSchema(contentStr));
         return {
-            content: [getMockLLMResponse(req.prompt)]
+            content: [getMockLLMResponse(contentStr)]
         };
     }
 }
