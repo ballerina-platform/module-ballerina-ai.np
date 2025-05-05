@@ -22,8 +22,6 @@ const GET_RESULTS_TOOL = "getResults";
 const NO_RELEVANT_RESPONSE_FROM_THE_LLM = "No relevant response from the LLM";
 const FUNCTION = "function";
 
-isolated int retryCount = 0;
-
 type DefaultModelConfig DefaultAzureOpenAIModelConfig|DefaultOpenAIModelConfig|DefaultBallerinaModelConfig;
 
 type DefaultAzureOpenAIModelConfig record {|
@@ -192,7 +190,8 @@ isolated function getToolChoiceToGenerateLlmResult() returns ChatCompletionNamed
 
 isolated function generateRepairResponseForLLM(error result) returns string => 
     string `I noticed an error in your previous response. Here are the details:
-    Error: ${result.message()}
+    Error Message: ${result.message()}
+    Error Details: ${result.detail().toString()}
     Please:
     1. Review the error information above
     2. Analyze where the mistake occurred

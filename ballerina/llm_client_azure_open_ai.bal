@@ -63,11 +63,13 @@ isolated distinct client class AzureOpenAIModel {
             tool_choice: getToolChoiceToGenerateLlmResult()
         };
 
-        return self.processAzureOpenAIRequest(chatBody, schemaResponse, expectedResponseTypedesc);
+	    int retryCount = 0;
+        return self.processAzureOpenAIRequest(chatBody, schemaResponse, expectedResponseTypedesc, retryCount);
     }
 
-    isolated function processAzureOpenAIRequest(AzureOpenAICreateChatCompletionRequest chatBody, 
-                SchemaResponse schemaResponse, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+    isolated function processAzureOpenAIRequest(
+            AzureOpenAICreateChatCompletionRequest chatBody, SchemaResponse schemaResponse, 
+            typedesc<anydata> expectedResponseTypedesc, int retryCount) returns anydata|error {
         AzureOpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
         record {
             AzureOpenAIChatCompletionResponseMessage message?;
@@ -94,11 +96,8 @@ isolated distinct client class AzureOpenAIModel {
             return result;
         }
 
-        lock {
-            if retryCount >= maxRetries {
-                return handleParseResponseError(result);
-            }
-            retryCount += 1;
+        if retryCount >= maxRetries {
+            return handleParseResponseError(result);
         }
 
         AzureOpenAIChatCompletionRequestMessage[] messages = chatBody.messages;
@@ -111,6 +110,6 @@ isolated distinct client class AzureOpenAIModel {
             tool_choice: getToolChoice()
         };
         
-        return self.processAzureOpenAIRequest(updatedRequest, schemaResponse, expectedResponseTypedesc);
+        return self.processAzureOpenAIRequest(updatedRequest, schemaResponse, expectedResponseTypedesc, retryCount + 1);
     }
 }

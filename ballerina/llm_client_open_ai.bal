@@ -53,11 +53,14 @@ isolated distinct client class OpenAIModel {
             tool_choice: getToolChoiceToGenerateLlmResult()
         };
 
-        return self.processOpenAIRequest(chatBody, schemaResponse, expectedResponseTypedesc);
+        int retryCount = 0;
+
+        return self.processOpenAIRequest(chatBody, schemaResponse, expectedResponseTypedesc, retryCount);
     }
 
     isolated function processOpenAIRequest(OpenAICreateChatCompletionRequest chatBody, 
-                SchemaResponse schemaResponse, typedesc<anydata> expectedResponseTypedesc) returns anydata|error {
+                SchemaResponse schemaResponse, typedesc<anydata> expectedResponseTypedesc, 
+                int retryCount) returns anydata|error {
         OpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
         OpenAICreateChatCompletionResponse_choices[] choices = chatResult.choices;
         ChatCompletionMessageToolCalls? toolCalls = choices[0].message?.tool_calls;
@@ -77,11 +80,8 @@ isolated distinct client class OpenAIModel {
             return result;
         }
 
-        lock {
-            if retryCount >= maxRetries {
-                return handleParseResponseError(result);
-            }
-            retryCount += 1;
+        if retryCount >= maxRetries {
+            return handleParseResponseError(result);
         }
 
         OpenAIChatCompletionRequestUserMessage[] messages = chatBody.messages;
@@ -95,6 +95,6 @@ isolated distinct client class OpenAIModel {
             tool_choice: getToolChoice()
         };
 
-        return self.processOpenAIRequest(updatedRequest, schemaResponse, expectedResponseTypedesc);
+        return self.processOpenAIRequest(updatedRequest, schemaResponse, expectedResponseTypedesc, retryCount + 1);
     }
 }
