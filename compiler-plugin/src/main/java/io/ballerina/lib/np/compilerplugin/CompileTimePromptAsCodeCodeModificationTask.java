@@ -31,9 +31,9 @@ import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExpressionFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.ExternalFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
+import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
-import io.ballerina.compiler.syntax.tree.LetExpressionNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
@@ -72,6 +72,9 @@ import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCode;
+import static io.ballerina.lib.np.compilerplugin.Commons.CODE_ANNOTATION;
+import static io.ballerina.lib.np.compilerplugin.Commons.LANG_ANNOTATIONS_MODULE;
+import static io.ballerina.lib.np.compilerplugin.Commons.isCodeAnnotation;
 
 /**
  * Code modification task to replace generate code based on a prompt and replace.
@@ -83,15 +86,12 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
     private static final Token SEMICOLON = createToken(SyntaxKind.SEMICOLON_TOKEN);
     private static final Token RIGHT_DOUBLE_ARROW = createToken(SyntaxKind.RIGHT_DOUBLE_ARROW_TOKEN);
 
-    private static final String MODULE_NAME = "np";
     private static final String PROMPT = "prompt";
-    private static final String PROMPT_TYPE = "Prompt";
-    private static final String CODE_ANNOT = "GenerateCode";
 
     private static final String BAL_EXT = ".bal";
-    private static final String GENERATED_FUNCTION_SUFFIX = "_NPGenerated";
+    private static final String GENERATED_FUNCTION_SUFFIX = "NPGenerated";
     private static final String GENERATED_DIRECTORY = "generated";
-    private static final String GENERATED_FUNC_FILE_NAME_SUFFIX = GENERATED_FUNCTION_SUFFIX + BAL_EXT;
+    private static final String GENERATED_FUNC_FILE_NAME_SUFFIX = "_np_generated" + BAL_EXT;
     private static final String FILE_PATH = "filePath";
 
     private static String copilotUri = "http://localhost:9094/ai"; // TODO
@@ -144,7 +144,6 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
         private final boolean isSingleBalFileMode;
         private final Path sourceRoot;
 
-        private Optional<String> npPrefixIfImported = Optional.empty();
         private HttpClient client = null;
         private JsonArray sourceFiles = null;
 
@@ -158,50 +157,31 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             this.sourceRoot = sourceRoot;
         }
 
-//        @Override
-//        public ImportDeclarationNode transform(ImportDeclarationNode importDeclarationNode) {
-//            Optional<ImportOrgNameNode> importOrgNameNode = importDeclarationNode.orgName();
-//            // Allow the not present case for module tests.
-//            if (importOrgNameNode.isPresent() && !ORG_NAME.equals(importOrgNameNode.get().orgName().text())) {
-//                return importDeclarationNode;
-//            }
-//
-//            SeparatedNodeList<IdentifierToken> moduleName = importDeclarationNode.moduleName();
-//            if (moduleName.size() > 1 || !MODULE_NAME.equals(moduleName.iterator().next().text())) {
-//                return importDeclarationNode;
-//            }
-//
-//            Optional<ImportPrefixNode> prefix = importDeclarationNode.prefix();
-//            this.npPrefixIfImported = Optional.of(prefix.isEmpty() ? MODULE_NAME : prefix.get().prefix().text());
-//            return importDeclarationNode;
-//        }
-
         @Override
         public FunctionDefinitionNode transform(FunctionDefinitionNode functionDefinition) {
-            if (this.npPrefixIfImported.isEmpty()) {
-                return functionDefinition;
-            }
-
-            String npPrefix = this.npPrefixIfImported.get();
-
             FunctionBodyNode functionBodyNode = functionDefinition.functionBody();
 
             if (!(functionBodyNode instanceof ExternalFunctionBodyNode functionBody)) {
                 return functionDefinition;
             }
 
-            if (hasCodeAnnotation(functionBody, npPrefix, CODE_ANNOT)) {
+            if (hasCodeAnnotation(functionBody, this.semanticModel)) {
+                if (this.isSingleBalFileMode) {
+                    // Validator logs an error for this.
+                    return functionDefinition;
+                }
+
                 String funcName = functionDefinition.functionName().text();
                 String generatedFuncName = funcName.concat(GENERATED_FUNCTION_SUFFIX);
                 String prompt = getPrompt(functionDefinition, semanticModel);
                 String generatedCode = generateCode(copilotUri, diagnosticsServiceUri, funcName, generatedFuncName,
                         prompt, getHttpClient(),
                         this.getSourceFilesWithoutFileGeneratedForCurrentFunc(generatedFuncName));
-                handleGeneratedCode(generatedFuncName, generatedCode);
+                handleGeneratedCode(funcName, generatedCode);
                 ExpressionFunctionBodyNode expressionFunctionBody =
                         NodeFactory.createExpressionFunctionBodyNode(
                                 RIGHT_DOUBLE_ARROW,
-                                createGeneratedFunctionCallExpression(npPrefix, functionDefinition, generatedFuncName),
+                                createGeneratedFunctionCallExpression(functionDefinition, generatedFuncName),
                                 SEMICOLON);
                 return functionDefinition.modify().withFunctionBody(expressionFunctionBody).apply();
             }
@@ -209,12 +189,10 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             return functionDefinition;
         }
 
-        private void handleGeneratedCode(String generatedFuncName, String generatedCode) {
+        private void handleGeneratedCode(String originalFuncName, String generatedCode) {
             ModuleMemberDeclarationNode moduleMemberDeclarationNode =
                     NodeParser.parseModuleMemberDeclaration(generatedCode);
-            if (!this.isSingleBalFileMode) {
-                persistInGeneratedDirectory(generatedFuncName, moduleMemberDeclarationNode);
-            }
+            persistInGeneratedDirectory(originalFuncName, moduleMemberDeclarationNode);
             this.newMembers.add(moduleMemberDeclarationNode);
         }
 
@@ -260,7 +238,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             return sourceFiles;
         }
 
-        private void persistInGeneratedDirectory(String generatedFuncName,
+        private void persistInGeneratedDirectory(String originalFuncName,
                                                  ModuleMemberDeclarationNode moduleMemberDeclarationNode) {
             Path generatedDirPath = Paths.get(this.sourceRoot.toString(), GENERATED_DIRECTORY);
             if (!Files.exists(generatedDirPath)) {
@@ -273,7 +251,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             }
 
             try (PrintWriter writer = new PrintWriter(
-                    Paths.get(generatedDirPath.toString(), getGeneratedBalFileName(generatedFuncName)).toString(),
+                    Paths.get(generatedDirPath.toString(), getGeneratedBalFileName(originalFuncName)).toString(),
                     StandardCharsets.UTF_8)) {
                 writer.println(Formatter.format(moduleMemberDeclarationNode.toSourceCode()));
             } catch (IOException | FormatterException e) {
@@ -283,8 +261,8 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
         }
     }
 
-    private static String getGeneratedBalFileName(String generatedFuncName) {
-        return generatedFuncName + BAL_EXT;
+    private static String getGeneratedBalFileName(String originalFuncName) {
+        return originalFuncName + GENERATED_FUNC_FILE_NAME_SUFFIX;
     }
 
     private static String getPrompt(FunctionDefinitionNode functionDefinition, SemanticModel semanticModel) {
@@ -293,11 +271,11 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                         .annotAttachmentsOnExternal()) {
             AnnotationSymbol annotationSymbol = annotationAttachmentSymbol.typeDescriptor();
             Optional<ModuleSymbol> module = annotationSymbol.getModule();
-            if (module.isEmpty() || !MODULE_NAME.equals(module.get().getName().get())) {
+            if (module.isEmpty() || !LANG_ANNOTATIONS_MODULE.equals(module.get().getName().get())) {
                 continue;
             }
 
-            if (CODE_ANNOT.equals(annotationSymbol.getName().get())) {
+            if (CODE_ANNOTATION.equals(annotationSymbol.getName().get())) {
                 return (String) ((ConstantValue) (
                         (LinkedHashMap) annotationAttachmentSymbol.attachmentValue().get().value())
                         .get(PROMPT)).value();
@@ -306,8 +284,8 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
         throw new RuntimeException("cannot find the annotation");
     }
 
-    private static LetExpressionNode createGeneratedFunctionCallExpression(
-            String npPrefix, FunctionDefinitionNode functionDefinition, String generatedFunctionName) {
+    private static FunctionCallExpressionNode createGeneratedFunctionCallExpression(
+            FunctionDefinitionNode functionDefinition, String generatedFunctionName) {
         SeparatedNodeList<ParameterNode> parameters = functionDefinition.functionSignature().parameters();
         int size = parameters.size();
         String[] arguments = new String[size];
@@ -322,19 +300,17 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             };
         }
 
-        return (LetExpressionNode) NodeParser.parseExpression(
-                String.format("let var _ = %s:%s in %s(%s)", // let expr as a workaround to avoid an unused import
-                        npPrefix, PROMPT_TYPE, generatedFunctionName, String.join(", ", arguments)));
+        return (FunctionCallExpressionNode) NodeParser.parseExpression(
+                String.format("%s(%s)", generatedFunctionName, String.join(", ", arguments)));
     }
 
     private static boolean npGeneratedFile(Document document) {
         return document.name().endsWith(GENERATED_FUNC_FILE_NAME_SUFFIX);
     }
 
-    private static boolean hasCodeAnnotation(ExternalFunctionBodyNode externalFunctionBody, String annotation) {
-        final String annotationRef = modulePrefix + ":" + annotation;
+    private static boolean hasCodeAnnotation(ExternalFunctionBodyNode externalFunctionBody,
+                                             SemanticModel semanticModel) {
         return externalFunctionBody.annotations().stream().
-                anyMatch(annotationNode -> annotationNode.annotReference().toString().trim()
-                        .equals(annotationRef));
+                anyMatch(annotationNode -> isCodeAnnotation(annotationNode, semanticModel));
     }
 }

@@ -38,7 +38,6 @@ public class CodeModifier extends io.ballerina.projects.plugins.CodeModifier {
                 List.of(SyntaxKind.NATURAL_EXPRESSION, SyntaxKind.FUNCTION_CALL, SyntaxKind.ANNOTATION));
         modifierContext.addSyntaxNodeAnalysisTask(new TypeMapperImplInitializer(analysisData), SyntaxKind.MODULE_PART);
         modifierContext.addSourceModifierTask(new RuntimePromptAsCodeCodeModificationTask(analysisData));
-        // TODO: Add conditionally maybe.
         modifierContext.addSourceModifierTask(new CompileTimePromptAsCodeCodeModificationTask());
     }
 
