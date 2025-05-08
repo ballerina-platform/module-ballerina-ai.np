@@ -128,7 +128,6 @@ isolated function getTestServiceResponse(string content) returns json {
                     tool_calls: [
                         {
                             id: GET_LLM_RESULTS_TOOL,
-                            'type: FUNCTION,
                             'function: {
                                 name: GET_LLM_RESULTS_TOOL,
                                 arguments: getTheMockLLMResult(content)

@@ -26,10 +26,8 @@ type OpenAICreateChatCompletionRequest record {
     ChatCompletionTool[] tools?;
 };
 
-type FunctionType "function";
-
 type ChatCompletionTool record {
-    FunctionType 'type;
+    FUNCTION 'type = FUNCTION;
     FunctionObject 'function;
 };
 

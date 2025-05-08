@@ -17,9 +17,9 @@
 import ballerina/http;
 import ballerina/test;
 
-const NO_RESPONSE_FROM_THE_LLM = "No response from the LLM for the given prompt";
-const 'function = "function";
-const TOOL_NAME = "getResults";
+const NO_RELEVANT_RESPONSE_FROM_THE_LLM = "No relevant response from the LLM";
+const FUNCTION = "function";
+const GET_RESULTS_TOOL = "getResults";
 
 service /llm on new http:Listener(8080) {
     resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
@@ -30,12 +30,12 @@ service /llm on new http:Listener(8080) {
         test:assertEquals(message.role, "user");
         ChatCompletionTool[]? tools = payload?.tools;
         if tools is () {
-            test:assertFail(NO_RESPONSE_FROM_THE_LLM);
+            test:assertFail(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
         }
 
         FunctionParameters? parameters = tools[0].'function.parameters;
         if parameters is () {
-            test:assertFail(NO_RESPONSE_FROM_THE_LLM);
+            test:assertFail(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
         }
         test:assertEquals(contentStr, getExpectedPrompt(contentStr));
         test:assertEquals(parameters, getExpectedParameterSchema(contentStr));
@@ -55,10 +55,9 @@ service /llm on new http:Listener(8080) {
                         role: "assistant",
                         tool_calls: [
                             {
-                                id: TOOL_NAME,
-                                'type: 'function,
+                                id: GET_RESULTS_TOOL,
                                 'function: {
-                                    name: TOOL_NAME,
+                                    name: GET_RESULTS_TOOL,
                                     arguments: getMockLLMResponse(contentStr)
                                 }
                             }
