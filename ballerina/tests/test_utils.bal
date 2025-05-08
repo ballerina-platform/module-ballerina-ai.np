@@ -127,9 +127,9 @@ isolated function getTestServiceResponse(string content) returns json {
                     role: "assistant",
                     tool_calls: [
                         {
-                            id: GET_LLM_RESULTS_TOOL,
+                            id: GET_RESULTS_TOOL,
                             'function: {
-                                name: GET_LLM_RESULTS_TOOL,
+                                name: GET_RESULTS_TOOL,
                                 arguments: getTheMockLLMResult(content)
                             }
                         }
