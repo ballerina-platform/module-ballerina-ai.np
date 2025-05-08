@@ -18,7 +18,7 @@ const JSON_CONVERSION_ERROR = "FromJsonStringError";
 const CONVERSION_ERROR = "ConversionError";
 const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
 const RESULT = "result";
-const GET_LLM_RESULTS_TOOL = "getResults";
+const GET_RESULTS_TOOL = "getResults";
 const NO_RELEVANT_RESPONSE_FROM_THE_LLM = "No relevant response from the LLM";
 const FUNCTION = "function";
 
@@ -183,7 +183,7 @@ isolated function getToolDescription() returns string {
 isolated function getToolsForGenerateTheLlmResult(map<json> parameters) returns ChatCompletionTool[] => [
         {
             'function: {
-                name: GET_LLM_RESULTS_TOOL,
+                name: GET_RESULTS_TOOL,
                 parameters: parameters,
                 description: getToolDescription()
             }
@@ -192,6 +192,6 @@ isolated function getToolsForGenerateTheLlmResult(map<json> parameters) returns 
 
 isolated function getToolChoiceToGenerateLlmResult() returns ChatCompletionNamedToolChoice => {
         'function: {
-            name: GET_LLM_RESULTS_TOOL
+            name: GET_RESULTS_TOOL
         }
     };
