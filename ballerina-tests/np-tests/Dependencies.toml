@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.13.0-m1"
+distribution-version = "2201.13.0-m2"
 
 [[package]]
 org = "ballerina"
@@ -233,7 +233,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "np"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -246,7 +246,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "np_test_commons"
-version = "0.3.0"
+version = "0.3.1"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "http"},
@@ -259,7 +259,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "np_tests"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
 	{org = "ballerina", name = "np"},
 	{org = "ballerina", name = "np_test_commons"},
