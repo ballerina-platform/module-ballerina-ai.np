@@ -19,7 +19,7 @@ const CONVERSION_ERROR = "ConversionError";
 const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
 const RESULT = "result";
 const GET_LLM_RESULTS_TOOL = "getResults";
-const NO_RELEVANT_RESPONSE_FROM_THE_LLM = "No response from the LLM for the given prompt";
+const NO_RELEVANT_RESPONSE_FROM_THE_LLM = "No relevant response from the LLM";
 const FUNCTION = "function";
 
 type DefaultModelConfig DefaultAzureOpenAIModelConfig|DefaultOpenAIModelConfig|DefaultBallerinaModelConfig;
@@ -182,7 +182,6 @@ isolated function getToolDescription() returns string {
 
 isolated function getToolsForGenerateTheLlmResult(map<json> parameters) returns ChatCompletionTool[] => [
         {
-            'type: FUNCTION,
             'function: {
                 name: GET_LLM_RESULTS_TOOL,
                 parameters: parameters,
@@ -191,8 +190,7 @@ isolated function getToolsForGenerateTheLlmResult(map<json> parameters) returns 
         }
     ];
 
-isolated function getToolChoice() returns ChatCompletionNamedToolChoice => {
-        'type: FUNCTION,
+isolated function getToolChoiceToGenerateLlmResult() returns ChatCompletionNamedToolChoice => {
         'function: {
             name: GET_LLM_RESULTS_TOOL
         }

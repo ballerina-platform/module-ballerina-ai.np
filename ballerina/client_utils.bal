@@ -100,14 +100,14 @@ type AssistantsNamedToolChoice_function record {
 };
 
 type ChatCompletionNamedToolChoice record {
-    FUNCTION 'type;
+    FUNCTION 'type = FUNCTION;
     AssistantsNamedToolChoice_function 'function;
 };
 
 type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;
 
 type ChatCompletionTool record {
-    FUNCTION 'type;
+    FUNCTION 'type = FUNCTION;
     FunctionObject 'function;
 };
 
@@ -141,7 +141,7 @@ type OpenAIChatCompletionResponseMessage record {
 
 type ChatCompletionMessageToolCall record {
     string id;
-    FUNCTION 'type;
+    FUNCTION 'type = FUNCTION;
     ChatCompletionMessageToolCall_function 'function;
 };
 

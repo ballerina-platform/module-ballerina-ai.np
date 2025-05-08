@@ -60,7 +60,7 @@ isolated distinct client class AzureOpenAIModel {
         AzureOpenAICreateChatCompletionRequest chatBody = {
             messages: [{role: "user", content: buildPromptString(prompt)}],
             tools: getToolsForGenerateTheLlmResult(schemaResponse.schema),
-            tool_choice: getToolChoice()
+            tool_choice: getToolChoiceToGenerateLlmResult()
         };
 
         AzureOpenAICreateChatCompletionResponse chatResult = check self->chat(chatBody);
