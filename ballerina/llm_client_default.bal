@@ -55,7 +55,8 @@ isolated distinct client class DefaultBallerinaModel {
         });
         int statusCode = chatResponse.statusCode;
         if statusCode == UNAUTHORIZED {
-            return error("The default Ballerina model is being used. The token has expired and needs to be regenerated.");
+            return error("The default Ballerina model is being used. " 
+                + "The token has expired and needs to be regenerated.");
         }
 
         if !(statusCode >= 200 && statusCode < 300) {

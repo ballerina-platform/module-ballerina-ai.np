@@ -16,7 +16,8 @@
 
 const JSON_CONVERSION_ERROR = "FromJsonStringError";
 const CONVERSION_ERROR = "ConversionError";
-const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
+const ERROR_MESSAGE = "Error occurred while attempting to parse the response from the " +
+    "LLM as the expected type. Retrying and/or validating the prompt could fix the response.";
 const RESULT = "result";
 const GET_RESULTS_TOOL = "getResults";
 const NO_RELEVANT_RESPONSE_FROM_THE_LLM = "No relevant response from the LLM";
@@ -176,16 +177,13 @@ isolated function generateJsonObjectSchema(map<json> schema) returns SchemaRespo
     return {schema: updatedSchema, isOriginallyJsonObject: false};
 }
 
-isolated function getToolDescription() returns string {
-    return string `Tool to call with the response from a large language model (LLM) for a user prompt.`;
-}
-
-isolated function getToolsForGenerateTheLlmResult(map<json> parameters) returns ChatCompletionTool[] => [
+isolated function getGetLlmResultTool(map<json> parameters) returns ChatCompletionTool[] => [
         {
             'function: {
                 name: GET_RESULTS_TOOL,
                 parameters: parameters,
-                description: getToolDescription()
+                description: string 
+                    `Tool to call with the response from a large language model (LLM) for a user prompt.`
             }
         }
     ];

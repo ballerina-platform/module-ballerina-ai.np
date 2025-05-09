@@ -59,7 +59,7 @@ isolated distinct client class AzureOpenAIModel {
         SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
         AzureOpenAICreateChatCompletionRequest chatBody = {
             messages: [{role: "user", content: buildPromptString(prompt)}],
-            tools: getToolsForGenerateTheLlmResult(schemaResponse.schema),
+            tools: getGetLlmResultTool(schemaResponse.schema),
             tool_choice: getToolChoiceToGenerateLlmResult()
         };
 

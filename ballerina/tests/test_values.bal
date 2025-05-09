@@ -24,7 +24,7 @@ type Review record {|
     string comment;
 |};
 
-final readonly & Blog blog1 = {
+const blog1 = {
     // Generated.
     title: "Tips for Growing a Beautiful Garden",
     content: string `Spring is the perfect time to start your garden. 
@@ -33,7 +33,7 @@ final readonly & Blog blog1 = {
         Don't forget to mulch to retain moisture and prevent weeds.`
 };
 
-final readonly & Blog blog2 = {
+const blog2 = {
     // Generated.
     title: "Essential Tips for Sports Performance",
     content: string `Success in sports requires dedicated preparation and training.
@@ -42,7 +42,8 @@ final readonly & Blog blog2 = {
         Don't forget to maintain proper hydration and nutrition for optimal performance.`
 };
 
-final string review = "{\"rating\": 8, \"comment\": \"Talks about essential aspects of sports performance including warm-up, form, equipment, and nutrition.\"}";
+const review = "{\"rating\": 8, \"comment\": \"Talks about essential aspects of sports performance " + 
+        "including warm-up, form, equipment, and nutrition.\"}";
 
 final string expectedPromptStringForRateBlog = string `Rate this blog out of 10.
         Title: ${blog1.title}
@@ -52,11 +53,11 @@ final string expectedPromptStringForRateBlog2 = string `Please rate this blog ou
         Title: ${blog2.title}
         Content: ${blog2.content}`;
 
-final string expectedPromptStringForRateBlog3 = string `What is 1 + 1?`;
+const expectedPromptStringForRateBlog3 = string `What is 1 + 1?`;
 
-final string expectedPromptStringForRateBlog4 = string `Tell me name and the age of the top 10 world class cricketers`;
+const expectedPromptStringForRateBlog4 = string `Tell me name and the age of the top 10 world class cricketers`;
 
-final string expectedPromptStringForBalProgram = string `What's the output of the Ballerina code below?
+const expectedPromptStringForBalProgram = string `What's the output of the Ballerina code below?
 
     ${"```"}ballerina
     import ballerina/io;
@@ -68,22 +69,25 @@ final string expectedPromptStringForBalProgram = string `What's the output of th
     }
     ${"```"}`;
 
-final string expectedPromptStringForCountry = string `Which country is known as the pearl of the Indian Ocean?`;
+const expectedPromptStringForCountry = string `Which country is known as the pearl of the Indian Ocean?`;
 
-final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog =
+const expectedParamterSchemaStringForRateBlog =
     {"type": "object", "properties": {"result": {"type": "integer"}}};
 
-final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog2 =
-    {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": {"rating": {"type": "integer"}, "comment": {"type": "string"}}, "required": ["rating", "comment"]};
+const expectedParamterSchemaStringForRateBlog2 =
+    {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": {
+        "rating": {"type": "integer"}, "comment": {"type": "string"}}, "required": ["rating", "comment"]};
 
-final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog3 =
+const expectedParamterSchemaStringForRateBlog3 =
     {"type": "object", "properties": {"result": {"type": "boolean"}}};
 
-final readonly & FunctionParameters expectedParamterSchemaStringForRateBlog4 =
-    {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": {"result": {"type": "array", "items": {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}}}};
+const expectedParamterSchemaStringForRateBlog4 =
+    {"$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "properties": {
+        "result": {"type": "array", "items": {"$schema": "https://json-schema.org/draft/2020-12/schema", 
+        "type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}}}};
 
-final readonly & FunctionParameters expectedParamterSchemaStringForBalProgram =
+const expectedParamterSchemaStringForBalProgram =
     {"type": "object", "properties": {"result": {"type": "integer"}}};
 
-final readonly & FunctionParameters expectedParamterSchemaStringForCountry =
+const expectedParamterSchemaStringForCountry =
     {"type": "object", "properties": {"result": {"type": "string"}}};
