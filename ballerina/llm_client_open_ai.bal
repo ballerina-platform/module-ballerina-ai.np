@@ -49,7 +49,7 @@ isolated distinct client class OpenAIModel {
         OpenAICreateChatCompletionRequest chatBody = {
             messages: [{role: "user", "content": buildPromptString(prompt)}],
             model: self.model,
-            tools: getToolsForGenerateTheLlmResult(schemaResponse.schema),
+            tools: getGetLlmResultTool(schemaResponse.schema),
             tool_choice: getToolChoiceToGenerateLlmResult()
         };
 
