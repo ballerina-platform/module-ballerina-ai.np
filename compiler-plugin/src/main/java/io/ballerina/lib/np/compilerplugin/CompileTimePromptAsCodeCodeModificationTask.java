@@ -87,19 +87,25 @@ import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpress
  */
 public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask<SourceModifierContext> {
 
+    public static final String BAL_COPILOT_URI = "BAL_COPILOT_URI";
+    public static final String BAL_DIAGNOSTICS_SERVER_URI = "BAL_DIAGNOSTICS_SERVER_URI";
+
     private static final Token SEMICOLON = createToken(SyntaxKind.SEMICOLON_TOKEN);
     private static final Token RIGHT_DOUBLE_ARROW = createToken(SyntaxKind.RIGHT_DOUBLE_ARROW_TOKEN);
-
     private static final String PROMPT = "prompt";
-
     private static final String BAL_EXT = ".bal";
     private static final String GENERATED_FUNCTION_SUFFIX = "NPGenerated";
     private static final String GENERATED_DIRECTORY = "generated";
     private static final String GENERATED_FUNC_FILE_NAME_SUFFIX = "_np_generated" + BAL_EXT;
     private static final String FILE_PATH = "filePath";
 
-    private static String copilotUri = "http://localhost:9094/ai"; // TODO
-    private static String diagnosticsServiceUri = "http://localhost:8080"; // TODO
+    private static final String copilotUri;
+    private static final String diagnosticsServiceUri;
+
+    static {
+        copilotUri = System.getenv(BAL_COPILOT_URI);
+        diagnosticsServiceUri = System.getenv(BAL_DIAGNOSTICS_SERVER_URI);
+    }
 
     @Override
     public void modify(SourceModifierContext modifierContext) {
