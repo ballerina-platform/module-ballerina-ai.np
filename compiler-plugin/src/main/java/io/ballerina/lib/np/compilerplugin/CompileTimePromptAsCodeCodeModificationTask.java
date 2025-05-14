@@ -27,8 +27,10 @@ import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ExternalFunctionSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
 import io.ballerina.compiler.api.values.ConstantValue;
+import io.ballerina.compiler.syntax.tree.BaseNodeModifier;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
 import io.ballerina.compiler.syntax.tree.ExpressionFunctionBodyNode;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExternalFunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionBodyNode;
 import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
@@ -36,6 +38,7 @@ import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
 import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
@@ -44,7 +47,6 @@ import io.ballerina.compiler.syntax.tree.RestParameterNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.compiler.syntax.tree.TreeModifier;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
@@ -71,10 +73,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCode;
+import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
+import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForNaturalExpression;
 import static io.ballerina.lib.np.compilerplugin.Commons.CODE_ANNOTATION;
 import static io.ballerina.lib.np.compilerplugin.Commons.LANG_ANNOTATIONS_MODULE;
 import static io.ballerina.lib.np.compilerplugin.Commons.isCodeAnnotation;
+import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
 
 /**
  * Code modification task to replace generate code based on a prompt and replace.
@@ -130,31 +134,33 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                                                boolean isSingleBalFileMode, Path sourceRoot) {
         ModulePartNode modulePartNode = document.syntaxTree().rootNode();
         List<ModuleMemberDeclarationNode> newMembers = new ArrayList<>();
-        FunctionModifier functionModifier =
-                new FunctionModifier(semanticModel, module, newMembers, isSingleBalFileMode, sourceRoot);
-        ModulePartNode newRoot = (ModulePartNode) modulePartNode.apply(functionModifier);
+        CodeGenerator codeGenerator =
+                new CodeGenerator(semanticModel, module, newMembers, isSingleBalFileMode, sourceRoot, document);
+        ModulePartNode newRoot = (ModulePartNode) modulePartNode.apply(codeGenerator);
         newRoot = newRoot.modify(newRoot.imports(), newRoot.members().addAll(newMembers), newRoot.eofToken());
         return document.syntaxTree().modifyWith(newRoot).textDocument();
     }
 
-    private static class FunctionModifier extends TreeModifier {
+    private static class CodeGenerator extends BaseNodeModifier {
         private final SemanticModel semanticModel;
         private final Module module;
         private final List<ModuleMemberDeclarationNode> newMembers;
         private final boolean isSingleBalFileMode;
         private final Path sourceRoot;
+        private final Document document;
 
         private HttpClient client = null;
         private JsonArray sourceFiles = null;
 
-        public FunctionModifier(SemanticModel semanticModel, Module module,
-                                List<ModuleMemberDeclarationNode> newMembers, boolean isSingleBalFileMode,
-                                Path sourceRoot) {
+        public CodeGenerator(SemanticModel semanticModel, Module module,
+                             List<ModuleMemberDeclarationNode> newMembers, boolean isSingleBalFileMode,
+                             Path sourceRoot, Document document) {
             this.semanticModel = semanticModel;
             this.module = module;
             this.newMembers = newMembers;
             this.isSingleBalFileMode = isSingleBalFileMode;
             this.sourceRoot = sourceRoot;
+            this.document = document;
         }
 
         @Override
@@ -162,31 +168,42 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             FunctionBodyNode functionBodyNode = functionDefinition.functionBody();
 
             if (!(functionBodyNode instanceof ExternalFunctionBodyNode functionBody)) {
-                return functionDefinition;
+                return (FunctionDefinitionNode) super.transform(functionDefinition);
             }
 
-            if (hasCodeAnnotation(functionBody, this.semanticModel)) {
-                if (this.isSingleBalFileMode) {
-                    // Validator logs an error for this.
-                    return functionDefinition;
-                }
-
-                String funcName = functionDefinition.functionName().text();
-                String generatedFuncName = funcName.concat(GENERATED_FUNCTION_SUFFIX);
-                String prompt = getPrompt(functionDefinition, semanticModel);
-                String generatedCode = generateCode(copilotUri, diagnosticsServiceUri, funcName, generatedFuncName,
-                        prompt, getHttpClient(),
-                        this.getSourceFilesWithoutFileGeneratedForCurrentFunc(generatedFuncName));
-                handleGeneratedCode(funcName, generatedCode);
-                ExpressionFunctionBodyNode expressionFunctionBody =
-                        NodeFactory.createExpressionFunctionBodyNode(
-                                RIGHT_DOUBLE_ARROW,
-                                createGeneratedFunctionCallExpression(functionDefinition, generatedFuncName),
-                                SEMICOLON);
-                return functionDefinition.modify().withFunctionBody(expressionFunctionBody).apply();
+            if (!hasCodeAnnotation(functionBody, this.semanticModel)) {
+                return (FunctionDefinitionNode) super.transform(functionDefinition);
             }
 
-            return functionDefinition;
+            if (this.isSingleBalFileMode) {
+                // Validator logs an error for this.
+                return (FunctionDefinitionNode) super.transform(functionDefinition);
+            }
+
+            String funcName = functionDefinition.functionName().text();
+            String generatedFuncName = funcName.concat(GENERATED_FUNCTION_SUFFIX);
+            String prompt = getPrompt(functionDefinition, semanticModel);
+            String generatedCode = generateCodeForFunction(copilotUri, diagnosticsServiceUri, funcName,
+                    generatedFuncName, prompt, getHttpClient(),
+                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(generatedFuncName));
+            handleGeneratedCode(funcName, generatedCode);
+            ExpressionFunctionBodyNode expressionFunctionBody =
+                    NodeFactory.createExpressionFunctionBodyNode(
+                            RIGHT_DOUBLE_ARROW,
+                            createGeneratedFunctionCallExpression(functionDefinition, generatedFuncName),
+                            SEMICOLON);
+            return functionDefinition.modify().withFunctionBody(expressionFunctionBody).apply();
+        }
+
+        @Override
+        public ExpressionNode transform(NaturalExpressionNode naturalExpressionNode) {
+            if (isRuntimeNaturalExpression(naturalExpressionNode)) {
+                return naturalExpressionNode;
+            }
+            String generatedCode = generateCodeForNaturalExpression(copilotUri,
+                    semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get(),
+                    naturalExpressionNode, getHttpClient(), this.getSourceFiles(), semanticModel);
+            return NodeParser.parseExpression(generatedCode);
         }
 
         private void handleGeneratedCode(String originalFuncName, String generatedCode) {

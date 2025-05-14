@@ -258,6 +258,10 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
 
         @Override
         public ExpressionNode transform(NaturalExpressionNode naturalExpressionNode) {
+            if (!isRuntimeNaturalExpression(naturalExpressionNode)) {
+                return naturalExpressionNode;
+            }
+
             Optional<String> npPrefixIfImported = modifierData.npPrefixIfImported;
             String npPrefix;
 
@@ -267,11 +271,7 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
                 modifierData.documentsRequiringNPImport.add(document);
                 npPrefix = MODULE_NAME;
             }
-
-            if (isRuntimeNaturalExpression(naturalExpressionNode)) {
-                return createNPCallFunctionCallExpression(npPrefix, naturalExpressionNode, this.semanticModel);
-            }
-            return naturalExpressionNode;
+            return createNPCallFunctionCallExpression(npPrefix, naturalExpressionNode, this.semanticModel);
         }
 
         @Override
