@@ -76,7 +76,10 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
 import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForNaturalExpression;
+import static io.ballerina.lib.np.compilerplugin.Commons.BAL_EXT;
 import static io.ballerina.lib.np.compilerplugin.Commons.CODE_ANNOTATION;
+import static io.ballerina.lib.np.compilerplugin.Commons.CONTENT;
+import static io.ballerina.lib.np.compilerplugin.Commons.FILE_PATH;
 import static io.ballerina.lib.np.compilerplugin.Commons.LANG_ANNOTATIONS_MODULE;
 import static io.ballerina.lib.np.compilerplugin.Commons.isCodeAnnotation;
 import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
@@ -88,25 +91,18 @@ import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpress
  */
 public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask<SourceModifierContext> {
 
-    public static final String BAL_COPILOT_URI = "BAL_COPILOT_URI";
-    public static final String BAL_DIAGNOSTICS_SERVER_URI = "BAL_DIAGNOSTICS_SERVER_URI";
-
     private static final Token SEMICOLON = createToken(SyntaxKind.SEMICOLON_TOKEN);
     private static final Token RIGHT_DOUBLE_ARROW = createToken(SyntaxKind.RIGHT_DOUBLE_ARROW_TOKEN);
     private static final String PROMPT = "prompt";
-    private static final String BAL_EXT = ".bal";
     private static final String GENERATED_FUNCTION_SUFFIX = "NPGenerated";
     private static final String GENERATED_DIRECTORY = "generated";
     private static final String GENERATED_FUNC_FILE_NAME_SUFFIX = "_np_generated" + BAL_EXT;
-    private static final String FILE_PATH = "filePath";
 
-    private static final String copilotUri;
-    private static final String diagnosticsServiceUri;
+    private static final String BAL_COPILOT_URL = "BAL_COPILOT_URL";
+    private static final String BAL_COPILOT_ACCESS_TOKEN = "BAL_COPILOT_ACCESS_TOKEN";
 
-    static {
-        copilotUri = System.getenv(BAL_COPILOT_URI);
-        diagnosticsServiceUri = System.getenv(BAL_DIAGNOSTICS_SERVER_URI);
-    }
+    private static final String copilotUrl = System.getenv(BAL_COPILOT_URL);
+    private static final String copilotAccessToken = System.getenv(BAL_COPILOT_ACCESS_TOKEN);
 
     @Override
     public void modify(SourceModifierContext modifierContext) {
@@ -195,9 +191,9 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             String funcName = functionDefinition.functionName().text();
             String generatedFuncName = funcName.concat(GENERATED_FUNCTION_SUFFIX);
             String prompt = getPrompt(functionDefinition, semanticModel);
-            String generatedCode = generateCodeForFunction(copilotUri, diagnosticsServiceUri, funcName,
+            String generatedCode = generateCodeForFunction(copilotUrl, copilotAccessToken, funcName,
                     generatedFuncName, prompt, getHttpClient(),
-                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(generatedFuncName));
+                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor());
             handleGeneratedCode(funcName, generatedCode);
             ExpressionFunctionBodyNode expressionFunctionBody =
                     NodeFactory.createExpressionFunctionBodyNode(
@@ -212,7 +208,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             if (isRuntimeNaturalExpression(naturalExpressionNode)) {
                 return naturalExpressionNode;
             }
-            String generatedCode = generateCodeForNaturalExpression(copilotUri,
+            String generatedCode = generateCodeForNaturalExpression(copilotUrl, copilotAccessToken,
                     semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get(),
                     naturalExpressionNode, getHttpClient(), this.getSourceFiles(), semanticModel);
             return NodeParser.parseExpression(generatedCode);
@@ -234,11 +230,11 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             return this.client;
         }
 
-        private JsonArray getSourceFilesWithoutFileGeneratedForCurrentFunc(String generatedFuncName) {
+        private JsonArray getSourceFilesWithoutFileGeneratedForCurrentFunc(String originalFunctionName) {
             JsonArray sourceFiles = this.getSourceFiles();
             JsonArray filteredSourceFiles = new JsonArray(sourceFiles.size());
             for (JsonElement sourceFile : sourceFiles) {
-                if (!getGeneratedBalFileName(generatedFuncName).equals(
+                if (!getGeneratedBalFileName(originalFunctionName).equals(
                         sourceFile.getAsJsonObject().get(FILE_PATH).getAsString())) {
                     filteredSourceFiles.add(sourceFile);
                 }
@@ -261,7 +257,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                 Document document = module.document(documentId);
                 JsonObject sourceFile = new JsonObject();
                 sourceFile.addProperty(FILE_PATH, document.name());
-                sourceFile.addProperty("content", String.join("", document.textDocument().textLines()));
+                sourceFile.addProperty(CONTENT, String.join("\n", document.textDocument().textLines()));
                 sourceFiles.add(sourceFile);
             }
             return sourceFiles;
