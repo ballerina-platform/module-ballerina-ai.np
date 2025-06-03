@@ -314,6 +314,8 @@ public class CodeGenerationUtils {
                         The '%s' function should have exactly the same signature as the '%s' function.
                         Use only the parameters passed to the function and module-level clients that are clients \
                         from the ballerina and ballerinax module in the generated code. 
+                        Do not use any configuration variables defined in the program. Respond with only the \
+                        generated code, nothing else. Ensure that there are NO compile-time errors.
                         
                         Respond with ONLY THE GENERATED FUNCTION AND ANY IMPORTS REQUIRED BY THE GENERATED FUNCTION.
                         """,
@@ -342,6 +344,7 @@ public class CodeGenerationUtils {
                 The value should belong to the type '%s'. This value will be used in the code in place of the
                 `const natural {...}` expression with the requirement.
                 
+                Do not use any configuration variables defined in the program inside the value expression.
                 Respond with ONLY THE VALUE EXPRESSION.
                 
                 Requirement:

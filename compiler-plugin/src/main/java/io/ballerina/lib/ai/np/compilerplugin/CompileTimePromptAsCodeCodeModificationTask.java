@@ -146,6 +146,8 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
     }
 
     private static class CodeGenerator extends BaseNodeModifier {
+        final static String BALLERINA = "ballerina";
+        final static String BALLERINAX = "ballerinax";
         private final SemanticModel semanticModel;
         private final Module module;
         private final List<ImportDeclarationNode> newImports;
@@ -216,7 +218,12 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
         private void handleGeneratedCode(String originalFuncName, String generatedCode) {
             ModulePartNode modulePartNode = NodeParser.parseModulePart(generatedCode);
             persistInGeneratedDirectory(originalFuncName, generatedCode);
-            this.newImports.addAll(modulePartNode.imports().stream().toList());
+            this.newImports.addAll(modulePartNode.imports().stream()
+                    .filter(importNode -> {
+                        String moduleName = importNode.moduleName().toString();
+                        return moduleName.startsWith(BALLERINA) || moduleName.startsWith(BALLERINAX);
+                    })
+                    .toList());
             this.newMembers.addAll(modulePartNode.members().stream().toList());
         }
 
