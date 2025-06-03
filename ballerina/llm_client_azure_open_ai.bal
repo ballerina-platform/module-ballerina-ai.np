@@ -49,22 +49,21 @@ isolated distinct client class AzureOpenAIModel {
         self.apiVersion = apiVersion;
     }
 
-    isolated remote function call(AzureOpenAICreateChatCompletionRequest chatBody)
-            returns AzureOpenAICreateChatCompletionResponse|error {
-        string resourcePath = string `/deployments/${check getEncodedUri(self.deploymentId)}/chat/completions`;
-        resourcePath = string `${resourcePath}?${check getEncodedUri("api-version")}=${self.apiVersion}`;
-        return self.cl->post(resourcePath, chatBody, self.headers);
-    }
+    isolated remote function chat(ai:ChatMessage[] messages, ai:ChatCompletionFunctions[] tools = [], 
+            string? stop = ()) returns ai:ChatAssistantMessage|ai:LlmError {
+        ChatCompletionTool[]|error chatCompletionTools = generateOpenAIChatCompletionTools(tools);
+        if chatCompletionTools is error {
+            return error ai:LlmError(
+                "Failed to generate OpenAI chat completion tools: " + chatCompletionTools.message());
+        }
 
-    isolated remote function chat(ai:ChatMessage[] messages, ai:ChatCompletionFunctions[] tools = [], string? stop = ())
-            returns ai:ChatAssistantMessage|ai:LlmError {
         AzureOpenAICreateChatCompletionRequest chatBody = {
             messages,
-            tools: generateOpenAIChatCompletionTools(tools),
-            tool_choice: getToolChoiceToGenerateLlmResult()
+            tools: chatCompletionTools,
+            tool_choice: getGetResultsToolChoice()
         };
 
-        AzureOpenAICreateChatCompletionResponse|error chatResult = self->call(chatBody);
+        AzureOpenAICreateChatCompletionResponse|error chatResult = self.callAzureOpenAIModel(chatBody);
         if chatResult is error {
             return error ai:LlmError("LLM call failed: " + chatResult.message());
         }
@@ -89,5 +88,12 @@ isolated distinct client class AzureOpenAIModel {
             toolCalls: <ai:FunctionCall[]>from ChatCompletionMessageToolCall tool in toolCalls 
                 select {name: tool.'function.name, arguments: tool.'function.arguments}
         };
+    }
+
+    isolated function callAzureOpenAIModel(AzureOpenAICreateChatCompletionRequest chatBody)
+            returns AzureOpenAICreateChatCompletionResponse|error {
+        string resourcePath = string `/deployments/${check getEncodedUri(self.deploymentId)}/chat/completions`;
+        resourcePath = string `${resourcePath}?${check getEncodedUri("api-version")}=${self.apiVersion}`;
+        return self.cl->post(resourcePath, chatBody, self.headers);
     }
 }

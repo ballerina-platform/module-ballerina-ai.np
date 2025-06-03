@@ -40,21 +40,22 @@ isolated distinct client class OpenAIModel {
         self.model = model;
     }
 
-    isolated remote function call(OpenAICreateChatCompletionRequest chatBody)
-            returns OpenAICreateChatCompletionResponse|error {
-        return self.cl->/chat/completions.post(chatBody);
-    }
-
     isolated remote function chat(ai:ChatMessage[] messages, ai:ChatCompletionFunctions[] tools = [], string? stop = ())
             returns ai:ChatAssistantMessage|ai:LlmError {
+        ChatCompletionTool[]|error chatCompletionTools = generateOpenAIChatCompletionTools(tools);
+        if chatCompletionTools is error {
+            return error ai:LlmError(
+                "Failed to generate OpenAI chat completion tools: " + chatCompletionTools.message());
+        }
+
         OpenAICreateChatCompletionRequest chatBody = {
             messages,
             model: self.model,
-            tools: generateOpenAIChatCompletionTools(tools),
-            tool_choice: getToolChoiceToGenerateLlmResult()
+            tools: chatCompletionTools,
+            tool_choice: getGetResultsToolChoice()
         };
 
-        OpenAICreateChatCompletionResponse|error chatResult = self->call(chatBody);
+        OpenAICreateChatCompletionResponse|error chatResult = self.cl->/chat/completions.post(chatBody);
         if chatResult is error {
             return error ai:LlmError("LLM call failed: " + chatResult.message());
         }

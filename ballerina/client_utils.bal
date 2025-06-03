@@ -81,7 +81,7 @@ type ApiKeysConfig record {|
     string apiKey;
 |};
 
-type FunctionParameters record {|json...;|};
+type FunctionParameters map<json>;
 
 type FunctionObject record {
     string description?;
@@ -89,13 +89,13 @@ type FunctionObject record {
     FunctionParameters parameters?;
 };
 
-type AssistantsNamedToolChoice_function record {
+type AssistantsNamedToolChoiceFunction record {
     string name;
 };
 
 type ChatCompletionNamedToolChoice record {
     FUNCTION 'type = FUNCTION;
-    AssistantsNamedToolChoice_function 'function;
+    AssistantsNamedToolChoiceFunction 'function;
 };
 
 type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;

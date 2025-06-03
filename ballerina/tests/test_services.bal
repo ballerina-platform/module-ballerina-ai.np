@@ -39,7 +39,7 @@ service /llm on new http:Listener(8080) {
 
         FunctionParameters? parameters = check tools[0].'function?.parameters.toJson().cloneWithType();
         if parameters is () {
-            test:assertFail("No tools in the payload");
+            test:assertFail("No parameters in the expected tool");
         }
 
         test:assertEquals(parameters, getExpectedParameterSchema(content));

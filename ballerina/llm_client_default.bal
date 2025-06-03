@@ -46,10 +46,17 @@ isolated distinct client class DefaultBallerinaModel {
     isolated remote function chat(ai:ChatMessage[] messages, ai:ChatCompletionFunctions[] tools = [], string? stop = ())
             returns ai:ChatAssistantMessage|ai:LlmError {
         http:Client cl = self.cl;
+        
+        ChatCompletionTool[]|error chatCompletionTools = generateOpenAIChatCompletionTools(tools);
+        if chatCompletionTools is error {
+            return error ai:LlmError(
+                "Failed to generate OpenAI chat completion tools: " + chatCompletionTools.message());
+        }
+
         http:Response|error chatResponse = cl->/chat/complete.post({
             messages,
-            tools: generateOpenAIChatCompletionTools(tools),
-            tool_choice: getToolChoiceToGenerateLlmResult()
+            tools: chatCompletionTools,
+            tool_choice: getGetResultsToolChoice()
         });
 
         if chatResponse is error {

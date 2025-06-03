@@ -100,7 +100,7 @@ isolated function callLlmGeneric(Prompt prompt, Context context,
     ai:ModelProvider model = context.model;
     SchemaResponse schemaResponse = getExpectedResponseSchema(expectedResponseTypedesc);
     ai:ChatMessage[] messages = [{role: "user", content: buildPromptString(prompt)}];
-    ai:ChatCompletionFunctions[] tools = check getGetLlmResultTool(schemaResponse.schema);
+    ai:ChatCompletionFunctions[] tools = check getGetResultsTool(schemaResponse.schema);
     ai:ChatAssistantMessage response = check model->chat(messages, tools);
 
     ai:FunctionCall[]? functionCalls = response.toolCalls;
@@ -192,26 +192,26 @@ isolated function generateJsonObjectSchema(map<json> schema) returns SchemaRespo
     return {schema: updatedSchema, isOriginallyJsonObject: false};
 }
 
-isolated function getGetLlmResultTool(map<json> parameters) returns ai:ChatCompletionFunctions[]|error {
+isolated function getGetResultsTool(map<json> parameters) returns ai:ChatCompletionFunctions[]|error {
     return [{
         name: GET_RESULTS_TOOL,
-        parameters: check parameters.toJson().cloneWithType(),
-        description: string 
-            `Tool to call with the response from a large language model (LLM) for a user prompt.`
+        parameters: check parameters.cloneWithType(),
+        description: "Tool to call with the response from a large language model (LLM) for a user prompt."
     }];
 }
 
-isolated function getToolChoiceToGenerateLlmResult() returns ChatCompletionNamedToolChoice => {
+isolated function getGetResultsToolChoice() returns ChatCompletionNamedToolChoice => {
         'function: {
             name: GET_RESULTS_TOOL
         }
     };
 
-isolated function generateOpenAIChatCompletionTools(ai:ChatCompletionFunctions[] tools) returns ChatCompletionTool[] =>
-         from ai:ChatCompletionFunctions tool in tools select {
-                'function: {
-                    name: tool.name,
-                    description: tool.description,
-                    parameters: checkpanic tool.parameters.toJson().cloneWithType()
-                }
-            };
+isolated function generateOpenAIChatCompletionTools(ai:ChatCompletionFunctions[] tools) 
+            returns ChatCompletionTool[]|error =>
+        from ai:ChatCompletionFunctions tool in tools select {
+            'function: {
+                name: tool.name,
+                description: tool.description,
+                parameters: check tool.parameters.cloneWithType()
+            }
+        };

@@ -22,13 +22,13 @@ type OpenAIChatCompletionRequestUserMessage record {
     string name?;
 };
 
-type AssistantsNamedToolChoice_function record {
+type AssistantsNamedToolChoiceFunction record {
     string name;
 };
 
 type ChatCompletionNamedToolChoice record {
     FUNCTION 'type = FUNCTION;
-    AssistantsNamedToolChoice_function 'function;
+    AssistantsNamedToolChoiceFunction 'function;
 };
 
 type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;
