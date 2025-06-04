@@ -111,7 +111,7 @@ type OpenAIChatCompletionRequestUserMessage record {|
 |};
 
 type OpenAICreateChatCompletionRequest record {|
-    OpenAIChatCompletionRequestUserMessage[] messages;
+    OpenAIChatCompletionRequestUserMessage[1] messages;
     string model;
     ChatCompletionTool[] tools?;
     ChatCompletionToolChoiceOption tool_choice?;
@@ -184,7 +184,7 @@ type AzureOpenAICreateChatCompletionRequestUserMessage record {|
 |};
 
 type AzureOpenAICreateChatCompletionRequest record {|
-    AzureOpenAICreateChatCompletionRequestUserMessage[] messages;
+    AzureOpenAICreateChatCompletionRequestUserMessage[1] messages;
     ChatCompletionTool[] tools;
     ChatCompletionToolChoiceOption? tool_choice = ();
 |};

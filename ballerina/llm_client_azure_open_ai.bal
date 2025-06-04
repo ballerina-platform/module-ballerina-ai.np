@@ -58,7 +58,7 @@ isolated distinct client class AzureOpenAIModel {
         }
 
         AzureOpenAICreateChatCompletionRequest chatBody = {
-            messages: from ai:ChatMessage message in messages select {role: ai:USER, content: <string>message.content},
+            messages: [{role: ai:USER, content: <string>messages[0].content}],
             tools: chatCompletionTools,
             tool_choice: getGetResultsToolChoice()
         };

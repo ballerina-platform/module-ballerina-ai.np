@@ -49,7 +49,7 @@ isolated distinct client class OpenAIModel {
         }
 
         OpenAICreateChatCompletionRequest chatBody = {
-            messages: from ai:ChatMessage message in messages select {role: ai:USER, content: <string>message.content},
+            messages: [{role: ai:USER, content: <string>messages[0].content}],
             model: self.model,
             tools: chatCompletionTools,
             tool_choice: getGetResultsToolChoice()

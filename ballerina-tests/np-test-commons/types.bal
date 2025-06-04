@@ -38,7 +38,7 @@ type ChatCompletionNamedToolChoice record {|
 type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;
 
 type OpenAICreateChatCompletionRequest record {|
-    OpenAIChatCompletionRequestUserMessage[] messages;
+    OpenAIChatCompletionRequestUserMessage[1] messages;
     string model;
     ChatCompletionTool[] tools?;
     ChatCompletionToolChoiceOption tool_choice?;
@@ -58,7 +58,7 @@ type FunctionObject record {|
 |};
 
 type DefaultChatCompletionRequest record {|
-    AzureOpenAIChatCompletionRequestUserMessage[] messages;
+    AzureOpenAIChatCompletionRequestUserMessage[1] messages;
     ChatCompletionTool[] tools?;
     ChatCompletionToolChoiceOption tool_choice?;
 |};
