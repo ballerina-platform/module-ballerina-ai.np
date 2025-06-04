@@ -208,10 +208,10 @@ isolated function getGetResultsToolChoice() returns ChatCompletionNamedToolChoic
 
 isolated function generateOpenAIChatCompletionTools(ai:ChatCompletionFunctions[] tools) 
             returns ChatCompletionTool[]|error =>
-        from ai:ChatCompletionFunctions tool in tools select {
+        [{
             'function: {
-                name: tool.name,
-                description: tool.description,
-                parameters: check tool.parameters.cloneWithType()
+                name: tools[0].name,
+                description: tools[0].description,
+                parameters: check tools[0].parameters.cloneWithType()
             }
-        };
+        }];
