@@ -25,11 +25,14 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.InterpolationNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
+import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.DiagnosticResult;
 import io.ballerina.projects.ModuleDescriptor;
@@ -69,10 +72,13 @@ public class CodeGenerationUtils {
     private static final String BALLERINA_TOML_FILE = "Ballerina.toml";
     private static final String TRIPLE_BACKTICK_BALLERINA = "```ballerina";
     private static final String TRIPLE_BACKTICK = "```";
+    static final String BALLERINA = "ballerina";
+    static final String BALLERINAX = "ballerinax";
 
     static String generateCodeForFunction(String copilotUrl, String copilotAccessToken, String originalFuncName,
                                           String generatedFuncName, String prompt, HttpClient client,
-                                          JsonArray sourceFiles, ModuleDescriptor moduleDescriptor) {
+                                          JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
+                                          SemanticModel semanticModel) {
         try {
             String generatedPrompt = generatePrompt(originalFuncName, generatedFuncName, prompt);
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
@@ -80,7 +86,7 @@ public class CodeGenerationUtils {
 
             updateSourceFilesWithGeneratedContent(sourceFiles, generatedFuncName, generatedCode);
             return repairCode(copilotUrl, copilotAccessToken, generatedFuncName, client, sourceFiles, moduleDescriptor,
-                    generatedPrompt, generatedCode);
+                    generatedPrompt, generatedCode, semanticModel);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -124,27 +130,35 @@ public class CodeGenerationUtils {
 
     private static String repairCode(String copilotUrl, String copilotAccessToken, String generatedFuncName,
                                      HttpClient client, JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
-                                     String generatedPrompt, GeneratedCode generatedCode)
+                                     String generatedPrompt, GeneratedCode generatedCode, SemanticModel semanticModel)
             throws IOException, URISyntaxException, InterruptedException {
         String generatedFunctionSrc = repairIfDiagnosticsExist(copilotUrl, copilotAccessToken, client, sourceFiles,
-                moduleDescriptor, generatedFuncName, generatedPrompt, generatedCode);
+                moduleDescriptor, generatedFuncName, generatedPrompt, generatedCode, semanticModel);
         return repairIfDiagnosticsExist(copilotUrl, copilotAccessToken, client, sourceFiles, moduleDescriptor,
                 generatedFuncName, generatedPrompt,
-                new GeneratedCode(generatedFunctionSrc, generatedCode.functions));
+                new GeneratedCode(generatedFunctionSrc, generatedCode.functions), semanticModel);
     }
 
     private static String repairIfDiagnosticsExist(String copilotUrl, String copilotAccessToken, HttpClient client,
                                                    JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
                                                    String generatedFuncName, String generatedPrompt,
-                                                   GeneratedCode generatedCode)
+                                                   GeneratedCode generatedCode, SemanticModel semanticModel)
             throws IOException, URISyntaxException, InterruptedException {
-        Optional<JsonArray> diagnostics = getDiagnostics(sourceFiles, moduleDescriptor);
-        if (diagnostics.isEmpty()) {
+        ModulePartNode modulePartNode = NodeParser.parseModulePart(generatedCode.code);
+
+        Optional<JsonArray> compilerDiagnostics = getDiagnostics(sourceFiles, moduleDescriptor);
+        Optional<JsonArray> externalImportsDiagnostics = generateDiagnosticsForExternalImports(modulePartNode);
+        JsonArray configVariableUsageDiagnostics = new ConfigurableVariableVisitor(semanticModel)
+                .getConfigVariablesRelatedDiagnostics(modulePartNode);
+        JsonArray allDiagnostics = mergeDiagnostics(compilerDiagnostics, externalImportsDiagnostics,
+                configVariableUsageDiagnostics);
+
+        if (allDiagnostics.size() == 0) {
             return generatedCode.code;
         }
 
         String repairResponse = repairCode(copilotUrl, copilotAccessToken, generatedFuncName, client, sourceFiles,
-                generatedPrompt, generatedCode, diagnostics.get());
+                generatedPrompt, generatedCode, allDiagnostics);
 
         if (hasBallerinaCodeSnippet(repairResponse)) {
             String generatedFunctionSrc = extractBallerinaCodeSnippet(repairResponse);
@@ -152,6 +166,40 @@ public class CodeGenerationUtils {
             return generatedFunctionSrc;
         }
         return generatedCode.code;
+    }
+
+    private static JsonArray mergeDiagnostics(Optional<JsonArray> diagnostics,
+                                              Optional<JsonArray> externalImportsDiagnostics,
+                                              JsonArray configVariableUsageDiagnostics) {
+        JsonArray merged = new JsonArray();
+        Stream.of(diagnostics, externalImportsDiagnostics)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(array -> {
+                    for (int i = 0; i < array.size(); i++) {
+                        merged.add(array.get(i));
+                    }
+                });
+
+        for (int i = 0; i < configVariableUsageDiagnostics.size(); i++) {
+            merged.add(configVariableUsageDiagnostics.get(i));
+        }
+        return merged;
+    }
+
+    private static Optional<JsonArray> generateDiagnosticsForExternalImports(ModulePartNode modulePartNode) {
+        Stream<ImportDeclarationNode> externalImports = modulePartNode.imports().stream()
+                    .filter(importNode -> {
+                        String moduleName = importNode.moduleName().toString();
+                        return !moduleName.startsWith(BALLERINA) && !moduleName.startsWith(BALLERINAX);
+                    });
+        if (externalImports.count() == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.of(externalImports.map(importNode -> String.format("Error: Disallowed import '%s' detected," +
+                        " only 'ballerina/' or 'ballerinax/' packages are permitted", importNode.moduleName()))
+                .collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
     }
 
     private static String repairCode(String copilotUrl, String copilotAccessToken, String generatedFuncName,

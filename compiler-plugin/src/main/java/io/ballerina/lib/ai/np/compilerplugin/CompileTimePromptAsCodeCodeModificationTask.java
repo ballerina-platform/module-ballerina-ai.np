@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.lib.ai.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
@@ -152,8 +153,6 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
     }
 
     private static class CodeGenerator extends BaseNodeModifier {
-        static final String BALLERINA = "ballerina";
-        static final String BALLERINAX = "ballerinax";
         private final SemanticModel semanticModel;
         private final Module module;
         private final List<ImportDeclarationNode> newImports;
@@ -200,7 +199,8 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             String prompt = getPrompt(functionDefinition, semanticModel);
             String generatedCode = generateCodeForFunction(copilotUrl, copilotAccessToken, funcName,
                     generatedFuncName, prompt, getHttpClient(),
-                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor());
+                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor(),
+                    this.semanticModel);
             handleGeneratedCode(funcName, generatedCode);
             ExpressionFunctionBodyNode expressionFunctionBody =
                     NodeFactory.createExpressionFunctionBodyNode(
@@ -224,16 +224,22 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
         private void handleGeneratedCode(String originalFuncName, String generatedCode) {
             ModulePartNode modulePartNode = NodeParser.parseModulePart(generatedCode);
             persistInGeneratedDirectory(originalFuncName, generatedCode);
-            this.newImports.addAll(modulePartNode.imports().stream()
-                    .filter(importNode -> {
-                        String moduleName = importNode.moduleName().toString();
-                        return moduleName.startsWith(BALLERINA) || moduleName.startsWith(BALLERINAX);
-                    }).toList());
+            Stream<ImportDeclarationNode> importStream = modulePartNode.imports().stream();
+//            Stream<ImportDeclarationNode> externalImports = importStream
+//                    .filter(importNode -> {
+//                        String moduleName = importNode.moduleName().toString();
+//                        return moduleName.startsWith(BALLERINA) || moduleName.startsWith(BALLERINAX);
+//                    });
+//            if (externalImports.count() > 0) {
+//                return;
+//            }
 
-            ConfigurableVariableVisitor configurableVariableVisitor = new ConfigurableVariableVisitor(semanticModel);
-            if (!configurableVariableVisitor.hasConfigurableVariableDeclarationOrUsage(modulePartNode)) {
-                return;
-            }
+            this.newImports.addAll(importStream.toList());
+
+//            ConfigurableVariableVisitor configurableVariableVisitor = new ConfigurableVariableVisitor(semanticModel);
+//            if (!configurableVariableVisitor.hasConfigurableVariableDeclarationOrUsage(modulePartNode)) {
+//                return;
+//            }
 
             this.newMembers.addAll(modulePartNode.members().stream().toList());
         }
@@ -354,51 +360,5 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                                              SemanticModel semanticModel) {
         return externalFunctionBody.annotations().stream().
                 anyMatch(annotationNode -> isCodeAnnotation(annotationNode, semanticModel));
-    }
-}
-
-class ConfigurableVariableVisitor extends NodeVisitor {
-    SemanticModel semanticModel;
-    private boolean isContainsConfigurableVariableDeclarationOrUsage = false;
-
-    public ConfigurableVariableVisitor(SemanticModel semanticModel) {
-        this.semanticModel = semanticModel;
-    }
-
-    protected boolean hasConfigurableVariableDeclarationOrUsage(ModulePartNode modulePartNode) {
-        visit(modulePartNode);
-        return this.isContainsConfigurableVariableDeclarationOrUsage;
-    }
-
-    @Override
-    public void visit(ModuleVariableDeclarationNode moduleVariableDeclarationNode) {
-        if (moduleVariableDeclarationNode.qualifiers().stream()
-                .anyMatch(qualifier -> qualifier.kind() == SyntaxKind.CONFIGURABLE_KEYWORD)) {
-            this.isContainsConfigurableVariableDeclarationOrUsage = true;
-            return;
-        }
-        super.visitSyntaxNode(moduleVariableDeclarationNode);
-    }
-
-    @Override
-    protected void visitSyntaxNode(Node node) {
-        if (node instanceof VariableReferenceNode) {
-            this.semanticModel.symbol(node).ifPresent(symbol -> {
-                if (symbol instanceof VariableSymbol variableSymbol) {
-                    variableSymbol.qualifiers().stream()
-                            .filter(qualifier -> qualifier == Qualifier.CONFIGURABLE)
-                            .findFirst()
-                            .ifPresent(qualifier -> {
-                                this.isContainsConfigurableVariableDeclarationOrUsage = true;
-                            });
-                }
-            });
-        }
-
-        if (this.isContainsConfigurableVariableDeclarationOrUsage) {
-            return;
-        }
-
-        super.visitSyntaxNode(node);
     }
 }
