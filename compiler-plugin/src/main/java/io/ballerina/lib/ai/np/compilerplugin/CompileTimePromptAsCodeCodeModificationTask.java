@@ -26,6 +26,8 @@ import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ExternalFunctionSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.Qualifier;
+import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.BaseNodeModifier;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
@@ -39,9 +41,12 @@ import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.ModuleVariableDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeParser;
+import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.RestParameterNode;
@@ -60,6 +65,7 @@ import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
+import org.ballerinalang.model.tree.expressions.VariableReferenceNode;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -146,8 +152,8 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
     }
 
     private static class CodeGenerator extends BaseNodeModifier {
-        final static String BALLERINA = "ballerina";
-        final static String BALLERINAX = "ballerinax";
+        static final String BALLERINA = "ballerina";
+        static final String BALLERINAX = "ballerinax";
         private final SemanticModel semanticModel;
         private final Module module;
         private final List<ImportDeclarationNode> newImports;
@@ -222,8 +228,13 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                     .filter(importNode -> {
                         String moduleName = importNode.moduleName().toString();
                         return moduleName.startsWith(BALLERINA) || moduleName.startsWith(BALLERINAX);
-                    })
-                    .toList());
+                    }).toList());
+
+            ConfigurableVariableVisitor configurableVariableVisitor = new ConfigurableVariableVisitor(semanticModel);
+            if (!configurableVariableVisitor.hasConfigurableVariableDeclarationOrUsage(modulePartNode)) {
+                return;
+            }
+
             this.newMembers.addAll(modulePartNode.members().stream().toList());
         }
 
@@ -343,5 +354,51 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                                              SemanticModel semanticModel) {
         return externalFunctionBody.annotations().stream().
                 anyMatch(annotationNode -> isCodeAnnotation(annotationNode, semanticModel));
+    }
+}
+
+class ConfigurableVariableVisitor extends NodeVisitor {
+    SemanticModel semanticModel;
+    private boolean isContainsConfigurableVariableDeclarationOrUsage = false;
+
+    public ConfigurableVariableVisitor(SemanticModel semanticModel) {
+        this.semanticModel = semanticModel;
+    }
+
+    protected boolean hasConfigurableVariableDeclarationOrUsage(ModulePartNode modulePartNode) {
+        visit(modulePartNode);
+        return this.isContainsConfigurableVariableDeclarationOrUsage;
+    }
+
+    @Override
+    public void visit(ModuleVariableDeclarationNode moduleVariableDeclarationNode) {
+        if (moduleVariableDeclarationNode.qualifiers().stream()
+                .anyMatch(qualifier -> qualifier.kind() == SyntaxKind.CONFIGURABLE_KEYWORD)) {
+            this.isContainsConfigurableVariableDeclarationOrUsage = true;
+            return;
+        }
+        super.visitSyntaxNode(moduleVariableDeclarationNode);
+    }
+
+    @Override
+    protected void visitSyntaxNode(Node node) {
+        if (node instanceof VariableReferenceNode) {
+            this.semanticModel.symbol(node).ifPresent(symbol -> {
+                if (symbol instanceof VariableSymbol variableSymbol) {
+                    variableSymbol.qualifiers().stream()
+                            .filter(qualifier -> qualifier == Qualifier.CONFIGURABLE)
+                            .findFirst()
+                            .ifPresent(qualifier -> {
+                                this.isContainsConfigurableVariableDeclarationOrUsage = true;
+                            });
+                }
+            });
+        }
+
+        if (this.isContainsConfigurableVariableDeclarationOrUsage) {
+            return;
+        }
+
+        super.visitSyntaxNode(node);
     }
 }
