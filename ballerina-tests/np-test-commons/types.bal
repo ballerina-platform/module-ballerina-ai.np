@@ -14,9 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/ai;
-
 type OpenAIChatCompletionRequestUserMessage record {
+    string content;
+    "user" role;
+    string name?;
+};
+
+type AzureOpenAIChatCompletionRequestUserMessage record {
     string content;
     "user" role;
     string name?;
@@ -34,7 +38,7 @@ type ChatCompletionNamedToolChoice record {
 type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;
 
 type OpenAICreateChatCompletionRequest record {
-    ai:ChatMessage[] messages;
+    OpenAIChatCompletionRequestUserMessage[] messages;
     string model;
     ChatCompletionTool[] tools?;
     ChatCompletionToolChoiceOption tool_choice?;
@@ -56,7 +60,7 @@ type FunctionObject record {
 };
 
 type DefaultChatCompletionRequest record {|
-    ai:ChatMessage[] messages;
+    AzureOpenAIChatCompletionRequestUserMessage[] messages;
     ChatCompletionTool[] tools?;
     ChatCompletionToolChoiceOption tool_choice?;
 |};

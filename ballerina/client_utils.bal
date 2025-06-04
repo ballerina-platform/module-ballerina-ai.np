@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/ai;
 import ballerina/http;
 import ballerina/url;
 
@@ -83,60 +82,66 @@ type ApiKeysConfig record {|
 
 type FunctionParameters map<json>;
 
-type FunctionObject record {
+type FunctionObject record {|
     string description?;
     string name;
     FunctionParameters parameters?;
-};
+|};
 
-type AssistantsNamedToolChoiceFunction record {
+type AssistantsNamedToolChoiceFunction record {|
     string name;
-};
+|};
 
-type ChatCompletionNamedToolChoice record {
+type ChatCompletionNamedToolChoice record {|
     FUNCTION 'type = FUNCTION;
     AssistantsNamedToolChoiceFunction 'function;
-};
+|};
 
 type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;
 
-type ChatCompletionTool record {
+type ChatCompletionTool record {|
     FUNCTION 'type = FUNCTION;
     FunctionObject 'function;
-};
+|};
 
-type OpenAICreateChatCompletionRequest record {
-    ai:ChatMessage[] messages;
+type OpenAIChatCompletionRequestUserMessage record {|
+    string content;
+    "user" role;
+    string name?;
+|};
+
+type OpenAICreateChatCompletionRequest record {|
+    OpenAIChatCompletionRequestUserMessage[] messages;
     string model;
     ChatCompletionTool[] tools?;
     ChatCompletionToolChoiceOption tool_choice?;
-};
+|};
 
-type ChatCompletionMessageToolCall_function record {
+type ChatCompletionMessageToolCall_function record {|
     string name;
     string arguments;
-};
+|};
 
 type ChatCompletionMessageToolCalls ChatCompletionMessageToolCall[];
 
-type OpenAIChatCompletionResponseMessage record {
+type OpenAIChatCompletionResponseMessage record {|
     string? content;
     ChatCompletionMessageToolCalls tool_calls?;
-};
+|};
 
-type ChatCompletionMessageToolCall record {
+type ChatCompletionMessageToolCall record {|
     string id?;
     FUNCTION 'type = FUNCTION;
     ChatCompletionMessageToolCall_function 'function;
-};
+|};
 
-type OpenAICreateChatCompletionResponse_choices record {
+type OpenAICreateChatCompletionResponse_choices record {|
     OpenAIChatCompletionResponseMessage message;
-};
+|};
 
-type OpenAICreateChatCompletionResponse record {
+type OpenAICreateChatCompletionResponse record {|
     OpenAICreateChatCompletionResponse_choices[] choices;
-};
+|};
 
 # Connection configuration for Azure OpenAI.
 type AzureOpenAIConnectionConfig record {|
@@ -172,8 +177,14 @@ type AzureOpenAIConnectionConfig record {|
     boolean validation = true;
 |};
 
+type AzureOpenAICreateChatCompletionRequestUserMessage record {|
+    string content;
+    "user" role;
+    string name?;
+|};
+
 type AzureOpenAICreateChatCompletionRequest record {|
-    ai:ChatMessage[] messages;
+    AzureOpenAICreateChatCompletionRequestUserMessage[] messages;
     ChatCompletionTool[] tools;
     ChatCompletionToolChoiceOption? tool_choice = ();
 |};

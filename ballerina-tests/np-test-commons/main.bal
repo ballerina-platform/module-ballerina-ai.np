@@ -25,7 +25,7 @@ const GET_RESULTS_TOOL = "getResults";
 service /llm on new http:Listener(8080) {
     resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
             returns json|error {
-        ai:ChatMessage message = payload.messages[0];
+        OpenAIChatCompletionRequestUserMessage message = payload.messages[0];
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
@@ -62,7 +62,7 @@ service /llm on new http:Listener(8080) {
 
     resource function post 'default/chat/complete(DefaultChatCompletionRequest req)
             returns ai:ChatAssistantMessage|error {
-        ai:ChatMessage message = req.messages[0];
+        AzureOpenAIChatCompletionRequestUserMessage message = req.messages[0];
         anydata content = message["content"];
         string contentStr = content.toString();
         ChatCompletionTool[]? tools = req?.tools;
