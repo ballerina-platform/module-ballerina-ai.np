@@ -14,50 +14,48 @@
 // specific language governing permissions and limitations
 // under the License.
 
-type OpenAIChatCompletionRequestUserMessage record {
+type OpenAIChatCompletionRequestUserMessage record {|
     string content;
     "user" role;
     string name?;
-};
+|};
 
-type AzureOpenAIChatCompletionRequestUserMessage record {
+type AzureOpenAIChatCompletionRequestUserMessage record {|
     string content;
     "user" role;
     string name?;
-};
+|};
 
-type AssistantsNamedToolChoiceFunction record {
+type AssistantsNamedToolChoiceFunction record {|
     string name;
-};
+|};
 
-type ChatCompletionNamedToolChoice record {
+type ChatCompletionNamedToolChoice record {|
     FUNCTION 'type = FUNCTION;
     AssistantsNamedToolChoiceFunction 'function;
-};
+|};
 
 type ChatCompletionToolChoiceOption ChatCompletionNamedToolChoice;
 
-type OpenAICreateChatCompletionRequest record {
+type OpenAICreateChatCompletionRequest record {|
     OpenAIChatCompletionRequestUserMessage[] messages;
     string model;
     ChatCompletionTool[] tools?;
     ChatCompletionToolChoiceOption tool_choice?;
-};
-
-type ChatCompletionTool record {
-    FUNCTION 'type = FUNCTION;
-    FunctionObject 'function;
-};
-
-type FunctionParameters record {|
-    json...;
 |};
 
-type FunctionObject record {
+type ChatCompletionTool record {|
+    FUNCTION 'type = FUNCTION;
+    FunctionObject 'function;
+|};
+
+type FunctionParameters map<json>;
+
+type FunctionObject record {|
     string description?;
     string name;
     FunctionParameters parameters;
-};
+|};
 
 type DefaultChatCompletionRequest record {|
     AzureOpenAIChatCompletionRequestUserMessage[] messages;
