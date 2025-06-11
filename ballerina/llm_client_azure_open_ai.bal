@@ -78,11 +78,7 @@ isolated distinct client class AzureOpenAIModel {
 
         ChatCompletionMessageToolCall[]? toolCalls = choices[0].message?.tool_calls;
 
-        if toolCalls is () {
-            return error ai:LlmError(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
-        }
-
-        if toolCalls.length() == 0 {
+        if toolCalls is () || toolCalls.length() == 0 {
             return error ai:LlmError(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
         }
 
