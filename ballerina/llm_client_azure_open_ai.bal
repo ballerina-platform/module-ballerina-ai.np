@@ -82,11 +82,20 @@ isolated distinct client class AzureOpenAIModel {
             return error ai:LlmError(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
         }
 
+        if toolCalls.length() == 0 {
+            return error ai:LlmError(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
+        }
+
+        ChatCompletionMessageToolCall tool = toolCalls[0];
+        map<json>|error arguments = tool.'function.arguments.fromJsonStringWithType();
+        if arguments is error {
+            return error ai:LlmError(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
+        }
+
         return {
             role: ai:ASSISTANT,
             name: GET_RESULTS_TOOL,
-            toolCalls: <ai:FunctionCall[]>from ChatCompletionMessageToolCall tool in toolCalls 
-                select {name: tool.'function.name, arguments: tool.'function.arguments}
+            toolCalls: [{name: tool.'function.name, arguments}]
         };
     }
 

@@ -123,7 +123,7 @@ distinct isolated client class CustomModelWithInvalidReturn {
             toolCalls: [
                 {
                     name: GET_RESULTS_TOOL,
-                    arguments: "{\"firstName\": \"Simone\", \"lastName\": \"Biles\", \"middleName\": 1, \"sport\": \"Gymnastics\", \"yearOfBirth\": 1997}"
+                    arguments: {"firstName": "Simone", "lastName": "Biles", "middleName": 1, "sport": "Gymnastics", "yearOfBirth": 1997}
                 }
             ]
         };

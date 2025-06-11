@@ -108,8 +108,12 @@ isolated function callLlmGeneric(Prompt prompt, Context context,
         return error ai:LlmError(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
     }
 
-    string arguments = functionCalls[0].arguments;
-    anydata res = check parseResponseAsType(arguments, expectedResponseTypedesc, 
+    map<json>? arguments = functionCalls[0].arguments;
+    if arguments is () {
+        return error ai:LlmError(NO_RELEVANT_RESPONSE_FROM_THE_LLM);
+    }
+    
+    anydata res = check parseResponseAsType(arguments.toJsonString(), expectedResponseTypedesc, 
                             schemaResponse.isOriginallyJsonObject);
     anydata|error result = res.ensureType(expectedResponseTypedesc);
 

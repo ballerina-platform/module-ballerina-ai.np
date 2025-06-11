@@ -77,7 +77,7 @@ service /llm on new http:Listener(8080) {
             toolCalls: [
                 {
                     name: GET_RESULTS_TOOL,
-                    arguments: getMockLLMResponse(contentStr)
+                    arguments: check getMockLLMResponse(contentStr).fromJsonStringWithType()
                 }
             ]
         };
@@ -312,9 +312,11 @@ isolated function getExpectedParameterSchema(string prompt) returns map<json> {
                                     "description": "Sport that the person plays"
                                 }
                             }
+                        },
+                        {
+                            'type: "null"
                         }
-                    ],
-                    "nullable": true
+                    ]
                 }
             }
         };

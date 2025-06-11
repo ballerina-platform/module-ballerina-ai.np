@@ -124,24 +124,23 @@ type ChatCompletionMessageToolCall_function record {|
 
 type ChatCompletionMessageToolCalls ChatCompletionMessageToolCall[];
 
-type OpenAIChatCompletionResponseMessage record {|
+type OpenAIChatCompletionResponseMessage record {
     string? content;
     ChatCompletionMessageToolCalls tool_calls?;
-|};
+};
 
-type ChatCompletionMessageToolCall record {|
-    string id?;
+type ChatCompletionMessageToolCall record {
     FUNCTION 'type = FUNCTION;
     ChatCompletionMessageToolCall_function 'function;
-|};
+};
 
-type OpenAICreateChatCompletionResponse_choices record {|
+type OpenAICreateChatCompletionResponse_choices record {
     OpenAIChatCompletionResponseMessage message;
-|};
+};
 
-type OpenAICreateChatCompletionResponse record {|
+type OpenAICreateChatCompletionResponse record {
     OpenAICreateChatCompletionResponse_choices[] choices;
-|};
+};
 
 # Connection configuration for Azure OpenAI.
 type AzureOpenAIConnectionConfig record {|
@@ -195,7 +194,7 @@ type AzureOpenAIChatCompletionResponseMessage record {
 };
 
 type AzureOpenAICreateChatCompletionResponse record {
-    record {
+    record { 
         AzureOpenAIChatCompletionResponseMessage message?;
     }[] choices?;
 };

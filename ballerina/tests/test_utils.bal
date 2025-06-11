@@ -40,10 +40,27 @@ isolated function getExpectedParameterSchema(string message) returns FunctionPar
     }
 
     if message.startsWith("Who is a popular sportsperson") {
-        return {"type": "object", "properties": {"firstName": {"type": "string"}, 
-            "middleName": {"type": "string", "nullable": true}, "lastName": {"type": "string"}, "yearOfBirth": {
-            "type": "integer"}, "sport": {"type": "string"}}, 
-            "required": ["firstName", "middleName", "lastName", "yearOfBirth", "sport"], "nullable": true};
+        return {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "required": ["firstName", "middleName", "lastName", "yearOfBirth", "sport"],
+                            "properties": {
+                                "firstName": {"type": "string"},
+                                "middleName": {"oneOf": [{"type": "string"}, {"type": "null"}]},
+                                "lastName": {"type": "string"},
+                                "yearOfBirth": {"type": "integer"},
+                                "sport": {"type": "string"}
+                            }
+                        },
+                        {"type": "null"}
+                    ]
+                }
+            }
+        };
     }
 
     return {};
@@ -108,8 +125,8 @@ isolated function getTheMockLLMResult(string message) returns string {
     }
 
     if message.startsWith("Who is a popular sportsperson") {
-        return "{\"firstName\": \"Simone\", \"middleName\": null, " +
-             "\"lastName\": \"Biles\", \"yearOfBirth\": 1997, \"sport\": \"Gymnastics\"}";
+        return "{\"result\": {\"firstName\": \"Simone\", \"middleName\": null, " +
+            "\"lastName\": \"Biles\", \"yearOfBirth\": 1997, \"sport\": \"Gymnastics\"}}";
     }
 
     return "INVALID";
@@ -117,17 +134,19 @@ isolated function getTheMockLLMResult(string message) returns string {
 
 isolated function getTestServiceResponse(string content) returns json =>
     {
-        choices: [
-            {
-                message: {
-                    content: (),
-                    tool_calls: [{
+    choices: [
+        {
+            message: {
+                content: (),
+                tool_calls: [
+                    {
                         'function: {
                             name: GET_RESULTS_TOOL,
                             arguments: getTheMockLLMResult(content)
                         }
-                    }]
-                }
+                    }
+                ]
             }
-        ]
-    };
+        }
+    ]
+};
