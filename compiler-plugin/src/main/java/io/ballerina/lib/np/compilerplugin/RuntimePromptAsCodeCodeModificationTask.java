@@ -100,7 +100,7 @@ import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpress
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
 /**
- * Code modification task to replace runtime prompt as code external functions with np:call.
+ * Code modification task to replace runtime natural expressions with np:call.
  *
  * @since 0.3.0
  */

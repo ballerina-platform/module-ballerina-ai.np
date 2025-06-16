@@ -45,7 +45,7 @@ import java.util.Optional;
 class Commons {
     static final String ORG_NAME = "ballerina";
     static final String MODULE_NAME = "np";
-    static final String VERSION = "0.1.0";
+    static final String VERSION = "0.3.0";
     static final String CALL_LLM = "callLlm";
 
     static final String LANG_ANNOTATIONS_MODULE = "lang.annotations";

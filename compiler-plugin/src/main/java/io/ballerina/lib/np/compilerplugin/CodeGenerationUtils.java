@@ -217,7 +217,7 @@ public class CodeGenerationUtils {
                 [package]
                 org = "%s"
                 name = "%s"
-                name = "%s"
+                version = "%s"
                 """,
                     moduleDescriptor.org().value(),
                     moduleDescriptor.packageName().value(),
