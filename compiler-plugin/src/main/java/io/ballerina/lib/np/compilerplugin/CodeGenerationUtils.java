@@ -42,6 +42,7 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -49,6 +50,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -293,10 +295,14 @@ public class CodeGenerationUtils {
     }
 
     private static String generatePrompt(String originalFuncName, String generatedFuncName, String prompt) {
-        String path = CodeGenerationUtils.class.getClassLoader()
-                .getResource("prompts/generate_function.md").getPath();
-        try {
-            String promptTemplate = Files.readString(Path.of(path));
+        try (InputStream inputStream = CodeGenerationUtils.class.getResourceAsStream(
+                "prompts/generate_function_prompt.md")) {
+
+            if (inputStream == null) {
+                throw new IllegalStateException("Resource not found: prompts/generate_function_prompt.md");
+            }
+
+            String promptTemplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
             return promptTemplate.replaceAll("\\{\\{GENERATTED_FUNCTION_NAME\\}\\}", generatedFuncName)
                     .replaceAll("\\{\\{OUTER_FUNCTION_NAME\\}\\}", originalFuncName)
                     .replaceAll("\\{\\{TASK\\}\\}", prompt);
@@ -308,10 +314,14 @@ public class CodeGenerationUtils {
     private static String generatePrompt(NaturalExpressionNode naturalExpressionNode,
                                          TypeSymbol expectedType, SemanticModel semanticModel) {
         NodeList<Node> userPromptContent = naturalExpressionNode.prompt();
-        String path = CodeGenerationUtils.class.getClassLoader()
-                .getResource("prompts/generate_function.md").getPath();
-        try {
-            String promptTemplate = Files.readString(Path.of(path));
+        try (InputStream inputStream = CodeGenerationUtils.class.getClassLoader()
+                .getResourceAsStream("prompts/generate_natural_functions_prompt.md")) {
+
+            if (inputStream == null) {
+                throw new IllegalStateException("Resource not found: prompts/generate_natural_functions_prompt.md");
+            }
+
+            String promptTemplate = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < userPromptContent.size(); i++) {
                 Node node = userPromptContent.get(i);

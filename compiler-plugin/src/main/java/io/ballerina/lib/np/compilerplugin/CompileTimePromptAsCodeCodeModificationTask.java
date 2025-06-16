@@ -337,4 +337,5 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                                              SemanticModel semanticModel) {
         return externalFunctionBody.annotations().stream().
                 anyMatch(annotationNode -> isCodeAnnotation(annotationNode, semanticModel));
+    }
 }
