@@ -24,7 +24,7 @@ service /llm on new http:Listener(8080) {
         anydata content = message["content"];
         string contentStr = content.toString();
         test:assertEquals(message.role, "user");
-        test:assertEquals(content, getExpectedPrompt(content.toString()));
+        check assertPrompt(content);
 
         test:assertEquals(payload.model, "gpt-4o-mini");
         return {
@@ -49,11 +49,22 @@ service /llm on new http:Listener(8080) {
 
     resource function post 'default/chat/complete(@http:Payload string contentStr)
             returns json|error {
-        test:assertEquals(contentStr, getExpectedPrompt(contentStr.toString()));
+        check assertPrompt(contentStr);
         return {
             content: [getMockLLMResponse(contentStr)]
         };
     }
+}
+
+isolated function assertPrompt(anydata content) returns error? {
+    string contentStr = check content.ensureType();
+    test:assertEquals(normalize(contentStr), normalize(getExpectedPrompt(contentStr)));
+}
+
+isolated function normalize(string str) returns string {
+    string normalized = re `\r\n`.replace(str, "\n");
+    normalized = re `\n{2,}`.replace(normalized, "\n\n");
+    return str.trim();
 }
 
 isolated function getExpectedPrompt(string prompt) returns string {
