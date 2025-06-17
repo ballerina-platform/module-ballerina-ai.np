@@ -1,6 +1,6 @@
 # module-ballerina-np
 
-This is the library module for natural programming - specifically the Code for AI component of natural programming, which simplifies working with large language models (LLMs) and allows LLM interactions to be strongly typed. This is enabled via natural expressions in Ballerina. 
+This is the library module for natural programming - specifically the Code for AI component of natural programming, which simplifies working with large language models (LLMs) and allows LLM interactions to be typed strongly. This is enabled via natural expressions in Ballerina. 
 
 For more information about natural expressions and natural programming, see [Natural Language is Code: A hybrid approach with Natural Programming](https://blog.ballerina.io/posts/2025-04-26-introducing-natural-programming/).
 
