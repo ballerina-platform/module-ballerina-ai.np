@@ -52,9 +52,9 @@ import java.util.concurrent.TimeUnit;
 import static io.ballerina.projects.util.ProjectConstants.BALLERINA_HOME;
 
 /**
- * This class includes tests for the Ballerina natural programming compiler plugin.
+ * This class tests compile-time code generation with const natural expressions and @code annotations.
  *
- * @since 0.1.0
+ * @since 0.4.0
  */
 public class CodeGenerationTest {
 

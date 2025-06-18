@@ -61,7 +61,7 @@ import static io.ballerina.lib.np.compilerplugin.Commons.FILE_PATH;
 /**
  * Methods to generate code at compile-time.
  *
- * @since 0.3.0
+ * @since 0.4.0
  */
 public class CodeGenerationUtils {
 
