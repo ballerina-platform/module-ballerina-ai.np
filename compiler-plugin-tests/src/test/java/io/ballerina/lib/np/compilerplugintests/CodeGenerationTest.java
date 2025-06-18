@@ -42,10 +42,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 import static io.ballerina.projects.util.ProjectConstants.BALLERINA_HOME;
 
@@ -62,6 +63,7 @@ public class CodeGenerationTest {
     private static final String TARGET = "target";
 
     private static final String CODE_URL = "http://localhost:8080/code";
+    private static final String REPAIR_URL = "http://localhost:8080/code/repair";
 
     private final MockWebServer server = new MockWebServer();
 
@@ -107,6 +109,33 @@ public class CodeGenerationTest {
                 "[1234,1456,1678,1890,1357,1579,1246,1468,1975,1753]");
     }
 
+    @Test
+    public void testCodeFunction() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("code-functions", "code_function_code_response.txt"))
+                .setResponseCode(200));
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("code-functions", "code_function_repair_response.json"))
+                .setResponseCode(200)
+                .setHeader("Content-type", "application/json"));
+
+        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions");
+        final Project naturalExprProject = loadPackageProject(projectPath);
+        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
+
+        assertRequest(CODE_URL, "code-functions", "code_function_code_request.json");
+        assertRequest(REPAIR_URL, "code-functions", "code_function_repair_request.json");
+
+        // Validate that a second repair doesn't happen.
+        RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
+        Assert.assertNull(recordedRequest);
+
+        Assert.assertEquals(
+                buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
+                "[{\"name\":\"David\",\"salary\":70000},{\"name\":\"Bob\",\"salary\":60000}," +
+                        "{\"name\":\"Alice\",\"salary\":50000},{\"name\":\"Charlie\",\"salary\":50000}]");
+    }
+
     private static String buildAndRunExecutable(Project project, Path jarPath) throws IOException {
         JBallerinaBackend jBallerinaBackend =
                 JBallerinaBackend.from(project.currentPackage().getCompilation(), JvmTarget.JAVA_21);
@@ -116,7 +145,7 @@ public class CodeGenerationTest {
         Process process = builder.start();
 
         try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                new InputStreamReader(process.getInputStream(), Charset.defaultCharset()))) {
             return reader.readLine();
         }
     }
@@ -163,7 +192,7 @@ public class CodeGenerationTest {
 
     private static JsonObject getExpectedPayload(String directory, String file) throws IOException {
         try (FileReader reader = new FileReader(
-                SERVER_RESOURCES.resolve(directory).resolve(file).toString(), StandardCharsets.UTF_8)) {
+                SERVER_RESOURCES.resolve(directory).resolve(file).toString(), Charset.defaultCharset())) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         }
     }
