@@ -42,6 +42,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -130,6 +131,8 @@ public class CodeGenerationTest {
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
         Assert.assertNull(recordedRequest);
 
+        validateGeneratedCodeAndDeleteGeneratedDir();
+
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
                 "[{\"name\":\"David\",\"salary\":70000},{\"name\":\"Bob\",\"salary\":60000}," +
@@ -186,7 +189,10 @@ public class CodeGenerationTest {
     }
 
     private String getCodeMockResponse(String directory, String file) throws IOException {
-        Path path = SERVER_RESOURCES.resolve(directory).resolve(file);
+        return getFileContent(SERVER_RESOURCES.resolve(directory).resolve(file));
+    }
+
+    private String getFileContent(Path path) throws IOException {
         return String.join("\n", Files.readAllLines(path));
     }
 
@@ -204,5 +210,24 @@ public class CodeGenerationTest {
         JsonObject actualPayload = JsonParser.parseString(recordedRequest.getBody().readUtf8()).getAsJsonObject();
         JsonObject expectedPayload = getExpectedPayload(directory, file);
         Assert.assertEquals(actualPayload, expectedPayload);
+    }
+
+    private void validateGeneratedCodeAndDeleteGeneratedDir() throws IOException {
+        Path generatedDirPath = RESOURCE_DIRECTORY.resolve("code-functions").resolve("generated");
+        Assert.assertTrue(Files.isDirectory(generatedDirPath));
+
+        Path generatedFuncFilePath = generatedDirPath.resolve("sortEmployees_np_generated.bal");
+        Assert.assertTrue(Files.isRegularFile(generatedFuncFilePath));
+        String actualCode = getFileContent(generatedFuncFilePath);
+        String expectedCode = getFileContent(RESOURCE_DIRECTORY
+                .resolve("code-functions").resolve("expected").resolve("expected_function_source.bal"));
+        Assert.assertEquals(actualCode, expectedCode);
+
+        PrintStream out = System.out;
+        boolean deleteRes1 = generatedFuncFilePath.toFile().delete();
+        boolean deleteRes2 = generatedDirPath.toFile().delete();
+        if (!deleteRes1 || !deleteRes2) {
+            out.println("Failed to delete file and/or directory");
+        }
     }
 }
