@@ -26,6 +26,7 @@ import io.ballerina.projects.JvmTarget;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectEnvironmentBuilder;
 import io.ballerina.projects.directory.BuildProject;
+import io.ballerina.projects.directory.SingleFileProject;
 import io.ballerina.projects.environment.Environment;
 import io.ballerina.projects.environment.EnvironmentBuilder;
 import io.ballerina.projects.util.ProjectUtils;
@@ -60,7 +61,9 @@ public class CodeGenerationTest {
     private static final Path SERVER_RESOURCES = RESOURCE_DIRECTORY.resolve("server-resources");
     private static final String TARGET = "target";
 
-    private final MockWebServer server = new MockWebServer();;
+    private static final String CODE_URL = "http://localhost:8080/code";
+
+    private final MockWebServer server = new MockWebServer();
 
     @BeforeSuite
     void init() throws IOException {
@@ -69,31 +72,42 @@ public class CodeGenerationTest {
     }
 
     @Test
-    public void testConstNaturalExpressions() throws IOException, InterruptedException {
+    public void testConstNaturalExpressionsInProject() throws IOException, InterruptedException {
         server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("const-natural-expressions", "const_natural_expr_proj_response.txt"))
+                .setBody(getCodeMockResponse("const-natural-expressions", "const_natural_expr_response.txt"))
                 .setResponseCode(200));
 
         final Path projectPath = RESOURCE_DIRECTORY
                 .resolve("const-natural-expressions")
                 .resolve("const-natural-expressions-project");
-        final Project naturalExprProject = loadPackage(projectPath);
+        final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        RecordedRequest recordedRequest = server.takeRequest();
-        Assert.assertEquals(recordedRequest.getRequestUrl().toString(), "http://localhost:8080/code");
-        Assert.assertEquals(recordedRequest.getHeader("Authorization"), "Bearer not-a-real-token");
-        JsonObject actualPayload = JsonParser.parseString(recordedRequest.getBody().readUtf8()).getAsJsonObject();
-        JsonObject expectedPayload = getExpectedPayload(
-                "const-natural-expressions", "const_natural_expr_proj_request.json");
-        Assert.assertEquals(actualPayload, expectedPayload);
+        assertRequest(CODE_URL, "const-natural-expressions", "const_natural_expr_proj_request.json");
 
-        Assert.assertEquals(getJarRunOutput(projectPath.toString(), naturalExprProject),
+        Assert.assertEquals(
+                buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
                 "[1234,1456,1678,1890,1357,1579,1246,1468,1975,1753]");
     }
 
-    private static String getJarRunOutput(String projectPath, Project project) throws IOException {
-        final Path jarPath = getJarPath(projectPath, project);
+    @Test
+    public void testConstNaturalExpressionsInSingleBalFile() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("const-natural-expressions", "const_natural_expr_response.txt"))
+                .setResponseCode(200));
+
+        final Path dirPath = RESOURCE_DIRECTORY.resolve("const-natural-expressions");
+        final Project naturalExprProject = loadSingleBalFileProject(dirPath.resolve("const_natural_expressions.bal"));
+        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
+
+        assertRequest(CODE_URL, "const-natural-expressions", "const_natural_expr_single_bal_file_request.json");
+
+        Assert.assertEquals(
+                buildAndRunExecutable(naturalExprProject, getJarPathForSingleBalFile(dirPath)),
+                "[1234,1456,1678,1890,1357,1579,1246,1468,1975,1753]");
+    }
+
+    private static String buildAndRunExecutable(Project project, Path jarPath) throws IOException {
         JBallerinaBackend jBallerinaBackend =
                 JBallerinaBackend.from(project.currentPackage().getCompilation(), JvmTarget.JAVA_21);
         jBallerinaBackend.emit(JBallerinaBackend.OutputType.EXEC, jarPath);
@@ -105,6 +119,12 @@ public class CodeGenerationTest {
                 new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
             return reader.readLine();
         }
+    }
+
+    private static Path getJarPathForSingleBalFile(Path projectPath) {
+        Path jarPath = RESOURCE_DIRECTORY.resolve(projectPath).resolve("single_file_project.jar");
+        jarPath.toFile().deleteOnExit();
+        return jarPath;
     }
 
     private static Path getJarPath(String projectPath, Project naturalExprProject) {
@@ -119,11 +139,21 @@ public class CodeGenerationTest {
         server.shutdown();
     }
 
-    private static Project loadPackage(Path projectDirPath) {
+    private static Project loadSingleBalFileProject(Path path) {
+        return loadProject(path, true);
+    }
+
+    private static Project loadPackageProject(Path path) {
+        return loadProject(path, false);
+    }
+
+    private static Project loadProject(Path path, boolean isSingleBalFileMode) {
         Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(DISTRIBUTION_PATH).build();
         ProjectEnvironmentBuilder projectEnvironmentBuilder = ProjectEnvironmentBuilder.getBuilder(environment);
         BuildOptions buildOptions = BuildOptions.builder().setExperimental(true).build();
-        return BuildProject.load(projectEnvironmentBuilder, projectDirPath, buildOptions);
+        return isSingleBalFileMode ?
+                SingleFileProject.load(projectEnvironmentBuilder, path, buildOptions) :
+                BuildProject.load(projectEnvironmentBuilder, path, buildOptions);
     }
 
     private String getCodeMockResponse(String directory, String file) throws IOException {
@@ -136,5 +166,14 @@ public class CodeGenerationTest {
                 SERVER_RESOURCES.resolve(directory).resolve(file).toString(), StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         }
+    }
+
+    private void assertRequest(String url, String directory, String file) throws InterruptedException, IOException {
+        RecordedRequest recordedRequest = server.takeRequest();
+        Assert.assertEquals(recordedRequest.getRequestUrl().toString(), url);
+        Assert.assertEquals(recordedRequest.getHeader("Authorization"), "Bearer not-a-real-token");
+        JsonObject actualPayload = JsonParser.parseString(recordedRequest.getBody().readUtf8()).getAsJsonObject();
+        JsonObject expectedPayload = getExpectedPayload(directory, file);
+        Assert.assertEquals(actualPayload, expectedPayload);
     }
 }
