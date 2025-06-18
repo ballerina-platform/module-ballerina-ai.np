@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.InterpolationNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
@@ -343,8 +344,10 @@ public class CodeGenerationUtils {
                 continue;
             }
 
-            sb.append(((ConstantSymbol) semanticModel.symbol(((InterpolationNode) node).expression()).get())
-                    .resolvedValue().get());
+            Symbol symbol = semanticModel.symbol(((InterpolationNode) node).expression()).get();
+            if (symbol instanceof ConstantSymbol constantSymbol) {
+                sb.append(constantSymbol.resolvedValue().get());
+            }
         }
         return sb.toString();
     }

@@ -22,6 +22,7 @@
     <test name="UnitTests">
         <classes>
             <class name="io.ballerina.lib.np.compilerplugintests.DiagnosticsTest"/>
+            <class name="io.ballerina.lib.np.compilerplugintests.CodeGenerationTest"/>
         </classes>
     </test>
 </suite>

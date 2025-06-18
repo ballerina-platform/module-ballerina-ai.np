@@ -1,0 +1,140 @@
+/*
+ * Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package io.ballerina.lib.np.compilerplugintests;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import io.ballerina.projects.BuildOptions;
+import io.ballerina.projects.JBallerinaBackend;
+import io.ballerina.projects.JvmTarget;
+import io.ballerina.projects.Project;
+import io.ballerina.projects.ProjectEnvironmentBuilder;
+import io.ballerina.projects.directory.BuildProject;
+import io.ballerina.projects.environment.Environment;
+import io.ballerina.projects.environment.EnvironmentBuilder;
+import io.ballerina.projects.util.ProjectUtils;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static io.ballerina.projects.util.ProjectConstants.BALLERINA_HOME;
+
+/**
+ * This class includes tests for the Ballerina natural programming compiler plugin.
+ *
+ * @since 0.1.0
+ */
+public class CodeGenerationTest {
+
+    private static final Path DISTRIBUTION_PATH = Paths.get("../", "target", "ballerina-runtime").toAbsolutePath();
+    private static final Path RESOURCE_DIRECTORY = Paths.get("src", "test", "resources").toAbsolutePath();
+    private static final Path SERVER_RESOURCES = RESOURCE_DIRECTORY.resolve("server-resources");
+    private static final String TARGET = "target";
+
+    private final MockWebServer server = new MockWebServer();;
+
+    @BeforeSuite
+    void init() throws IOException {
+        server.start(8080);
+        System.setProperty(BALLERINA_HOME, DISTRIBUTION_PATH.toAbsolutePath().toString());
+    }
+
+    @Test
+    public void testConstNaturalExpressions() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("const-natural-expressions", "const_natural_expr_proj_response.txt"))
+                .setResponseCode(200));
+
+        final Path projectPath = RESOURCE_DIRECTORY
+                .resolve("const-natural-expressions")
+                .resolve("const-natural-expressions-project");
+        final Project naturalExprProject = loadPackage(projectPath);
+        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        Assert.assertEquals(recordedRequest.getRequestUrl().toString(), "http://localhost:8080/code");
+        Assert.assertEquals(recordedRequest.getHeader("Authorization"), "Bearer not-a-real-token");
+        JsonObject actualPayload = JsonParser.parseString(recordedRequest.getBody().readUtf8()).getAsJsonObject();
+        JsonObject expectedPayload = getExpectedPayload(
+                "const-natural-expressions", "const_natural_expr_proj_request.json");
+        Assert.assertEquals(actualPayload, expectedPayload);
+
+        Assert.assertEquals(getJarRunOutput(projectPath.toString(), naturalExprProject),
+                "[1234,1456,1678,1890,1357,1579,1246,1468,1975,1753]");
+    }
+
+    private static String getJarRunOutput(String projectPath, Project project) throws IOException {
+        final Path jarPath = getJarPath(projectPath, project);
+        JBallerinaBackend jBallerinaBackend =
+                JBallerinaBackend.from(project.currentPackage().getCompilation(), JvmTarget.JAVA_21);
+        jBallerinaBackend.emit(JBallerinaBackend.OutputType.EXEC, jarPath);
+
+        ProcessBuilder builder = new ProcessBuilder("java", "-jar", jarPath.toString());
+        Process process = builder.start();
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+            return reader.readLine();
+        }
+    }
+
+    private static Path getJarPath(String projectPath, Project naturalExprProject) {
+        return RESOURCE_DIRECTORY
+                .resolve(projectPath)
+                .resolve(TARGET)
+                .resolve(ProjectUtils.getExecutableName(naturalExprProject.currentPackage()));
+    }
+
+    @AfterSuite
+    void tearDown() throws Exception {
+        server.shutdown();
+    }
+
+    private static Project loadPackage(Path projectDirPath) {
+        Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(DISTRIBUTION_PATH).build();
+        ProjectEnvironmentBuilder projectEnvironmentBuilder = ProjectEnvironmentBuilder.getBuilder(environment);
+        BuildOptions buildOptions = BuildOptions.builder().setExperimental(true).build();
+        return BuildProject.load(projectEnvironmentBuilder, projectDirPath, buildOptions);
+    }
+
+    private String getCodeMockResponse(String directory, String file) throws IOException {
+        Path path = SERVER_RESOURCES.resolve(directory).resolve(file);
+        return String.join("\n", Files.readAllLines(path));
+    }
+
+    private static JsonObject getExpectedPayload(String directory, String file) throws IOException {
+        try (FileReader reader = new FileReader(
+                SERVER_RESOURCES.resolve(directory).resolve(file).toString(), StandardCharsets.UTF_8)) {
+            return JsonParser.parseReader(reader).getAsJsonObject();
+        }
+    }
+}
