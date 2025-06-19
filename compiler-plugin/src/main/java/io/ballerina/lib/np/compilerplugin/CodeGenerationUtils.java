@@ -297,9 +297,9 @@ public class CodeGenerationUtils {
 
     private static String generatePrompt(String originalFuncName, String generatedFuncName, String prompt) {
         return String.format("""
-                        An `external` function with the `@code` Ballerina annotation needs to replaced at compile-time
-                        with the code necessary to achieve the requirement specified as the `prompt` field in the
-                        annotation.
+                        An `external` function with the `@code` Ballerina annotation needs to be replaced at
+                        compile-time with the code necessary to achieve the requirement specified as the `prompt`
+                        field in the annotation.
                         
                         As a skilled Ballerina programmer, you have to generate the code to do this for the %s function.
                         The following prompt defines the requirement:
