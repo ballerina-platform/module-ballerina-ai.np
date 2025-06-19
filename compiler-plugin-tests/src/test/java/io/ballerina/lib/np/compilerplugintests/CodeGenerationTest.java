@@ -18,8 +18,10 @@
 
 package io.ballerina.lib.np.compilerplugintests;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.JBallerinaBackend;
 import io.ballerina.projects.JvmTarget;
@@ -39,6 +41,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -63,8 +66,8 @@ public class CodeGenerationTest {
     private static final Path SERVER_RESOURCES = RESOURCE_DIRECTORY.resolve("server-resources");
     private static final String TARGET = "target";
 
-    private static final String CODE_URL = "http://localhost:8080/code";
-    private static final String REPAIR_URL = "http://localhost:8080/code/repair";
+    private static final String CODE_PATH = "/code";
+    private static final String REPAIR_PATH = "/code/repair";
 
     private final MockWebServer server = new MockWebServer();
 
@@ -86,7 +89,7 @@ public class CodeGenerationTest {
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(CODE_URL, "const-natural-expressions", "const_natural_expr_proj_request.json");
+        assertRequest(CODE_PATH, "const-natural-expressions", "const_natural_expr_proj_request.json");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
@@ -103,7 +106,7 @@ public class CodeGenerationTest {
         final Project naturalExprProject = loadSingleBalFileProject(dirPath.resolve("const_natural_expressions.bal"));
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(CODE_URL, "const-natural-expressions", "const_natural_expr_single_bal_file_request.json");
+        assertRequest(CODE_PATH, "const-natural-expressions", "const_natural_expr_single_bal_file_request.json");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPathForSingleBalFile(dirPath)),
@@ -124,8 +127,8 @@ public class CodeGenerationTest {
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(CODE_URL, "code-functions", "code_function_code_request.json");
-        assertRequest(REPAIR_URL, "code-functions", "code_function_repair_request.json");
+        assertRequest(CODE_PATH, "code-functions", "code_function_code_request.json");
+        assertRepairRequest();
 
         // Validate that a second repair doesn't happen.
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
@@ -137,6 +140,11 @@ public class CodeGenerationTest {
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
                 "[{\"name\":\"David\",\"salary\":70000},{\"name\":\"Bob\",\"salary\":60000}," +
                         "{\"name\":\"Alice\",\"salary\":50000},{\"name\":\"Charlie\",\"salary\":50000}]");
+    }
+
+    @AfterSuite
+    void tearDown() throws Exception {
+        server.shutdown();
     }
 
     private static String buildAndRunExecutable(Project project, Path jarPath) throws IOException {
@@ -164,11 +172,6 @@ public class CodeGenerationTest {
                 .resolve(projectPath)
                 .resolve(TARGET)
                 .resolve(ProjectUtils.getExecutableName(naturalExprProject.currentPackage()));
-    }
-
-    @AfterSuite
-    void tearDown() throws Exception {
-        server.shutdown();
     }
 
     private static Project loadSingleBalFileProject(Path path) {
@@ -203,12 +206,28 @@ public class CodeGenerationTest {
         }
     }
 
-    private void assertRequest(String url, String directory, String file) throws InterruptedException, IOException {
+    private void assertRequest(String path, String directory, String file) throws InterruptedException, IOException {
+        assertRequest(path, getExpectedPayload(directory, file));
+    }
+
+    private void assertRepairRequest()
+            throws InterruptedException, IOException {
+        JsonObject expectedPayload = getExpectedPayload("code-functions", "code_function_repair_request.json");
+        JsonArray diagnostics = expectedPayload.getAsJsonArray("diagnostics");
+        for (int i = 0; i < diagnostics.size(); i++) {
+            diagnostics.set(i,
+                    new JsonPrimitive(diagnostics.get(i).getAsString().replace("generated/functions",
+                            String.format("generated%sfunctions", File.separator))));
+        }
+        assertRequest(REPAIR_PATH, expectedPayload);
+    }
+
+    private void assertRequest(String path, JsonObject expectedPayload) throws InterruptedException, IOException {
         RecordedRequest recordedRequest = server.takeRequest();
-        Assert.assertEquals(recordedRequest.getRequestUrl().toString(), url);
+        Assert.assertEquals(recordedRequest.getPath(), path);
         Assert.assertEquals(recordedRequest.getHeader("Authorization"), "Bearer not-a-real-token");
-        JsonObject actualPayload = JsonParser.parseString(recordedRequest.getBody().readUtf8()).getAsJsonObject();
-        JsonObject expectedPayload = getExpectedPayload(directory, file);
+        JsonObject actualPayload = JsonParser.parseString(
+                recordedRequest.getBody().readUtf8().replace("\\r\\n", "\\n")).getAsJsonObject();
         Assert.assertEquals(actualPayload, expectedPayload);
     }
 
