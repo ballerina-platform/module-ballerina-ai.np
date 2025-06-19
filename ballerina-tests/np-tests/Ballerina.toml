@@ -1,10 +1,10 @@
 [package]
 org = "ballerina"
 name = "np_tests"
-version = "0.3.1"
+version = "0.4.0"
 
 [[dependency]]
 org = "ballerina"
 name = "np_test_commons"
 repository = "local"
-version = "0.3.1"
+version = "0.4.0"

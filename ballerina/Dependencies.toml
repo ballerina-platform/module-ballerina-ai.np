@@ -240,7 +240,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "np"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "jballerina.java"},

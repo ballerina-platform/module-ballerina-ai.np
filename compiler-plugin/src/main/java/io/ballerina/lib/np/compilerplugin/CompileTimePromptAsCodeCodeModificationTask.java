@@ -87,7 +87,7 @@ import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpress
 /**
  * Code modification task to replace generate code based on a prompt and replace.
  *
- * @since 0.3.0
+ * @since 0.4.0
  */
 public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask<SourceModifierContext> {
 

@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.InterpolationNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
@@ -54,14 +55,13 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static io.ballerina.lib.np.compilerplugin.Commons.BAL_EXT;
 import static io.ballerina.lib.np.compilerplugin.Commons.CONTENT;
 import static io.ballerina.lib.np.compilerplugin.Commons.FILE_PATH;
 
 /**
  * Methods to generate code at compile-time.
  *
- * @since 0.3.0
+ * @since 0.4.0
  */
 public class CodeGenerationUtils {
 
@@ -197,10 +197,13 @@ public class CodeGenerationUtils {
         Path tempProjectDir = Files.createTempDirectory(TEMP_DIR_PREFIX + System.currentTimeMillis());
         tempProjectDir.toFile().deleteOnExit();
 
+        Path tempGeneratedDir = Files.createDirectory(tempProjectDir.resolve("generated"));
+        tempGeneratedDir.toFile().deleteOnExit();
+
         for (JsonElement sourceFile : sourceFiles) {
             JsonObject sourceFileObj = sourceFile.getAsJsonObject();
-            File file = File.createTempFile(sourceFileObj.get(FILE_PATH).getAsString(), BAL_EXT,
-                    tempProjectDir.toFile());
+            File file = Files.createFile(
+                    tempProjectDir.resolve(Path.of(sourceFileObj.get(FILE_PATH).getAsString()))).toFile();
             file.deleteOnExit();
 
             try (FileWriter fileWriter = new FileWriter(file, Charset.defaultCharset())) {
@@ -294,19 +297,27 @@ public class CodeGenerationUtils {
 
     private static String generatePrompt(String originalFuncName, String generatedFuncName, String prompt) {
         return String.format("""
-                        Generate a function named '%s' with the code that needs \
-                        to go in the '%s' function to satisfy the following user prompt:
-                        ${"```"}   \s
+                        An `external` function with the `@code` Ballerina annotation needs to be replaced at
+                        compile-time with the code necessary to achieve the requirement specified as the `prompt`
+                        field in the annotation.
+                        
+                        As a skilled Ballerina programmer, you have to generate the code to do this for the %s function.
+                        The following prompt defines the requirement:
+                        
+                        ```
                         %s
-                        ${"```"}   \s
+                        ```
+                        
+                        Your task is to generate a function named '%s' with the code that needs to satisfy this user 
+                        prompt.
+                        
                         The '%s' function should have exactly the same signature as the '%s' function.
                         Use only the parameters passed to the function and module-level clients that are clients \
-                        from the ballerina and ballerinax module in the generated code. Respond with only the \
-                        generated code, nothing else. Ensure that there are NO compile-time errors.
+                        from the ballerina and ballerinax module in the generated code. 
                         
                         Respond with ONLY THE GENERATED FUNCTION AND ANY IMPORTS REQUIRED BY THE GENERATED FUNCTION.
                         """,
-                generatedFuncName, originalFuncName, prompt, generatedFuncName, originalFuncName);
+                originalFuncName, prompt, generatedFuncName, generatedFuncName, originalFuncName);
     }
 
     private static String generatePrompt(NaturalExpressionNode naturalExpressionNode,
@@ -343,8 +354,10 @@ public class CodeGenerationUtils {
                 continue;
             }
 
-            sb.append(((ConstantSymbol) semanticModel.symbol(((InterpolationNode) node).expression()).get())
-                    .resolvedValue().get());
+            Symbol symbol = semanticModel.symbol(((InterpolationNode) node).expression()).get();
+            if (symbol instanceof ConstantSymbol constantSymbol) {
+                sb.append(constantSymbol.resolvedValue().get());
+            }
         }
         return sb.toString();
     }
