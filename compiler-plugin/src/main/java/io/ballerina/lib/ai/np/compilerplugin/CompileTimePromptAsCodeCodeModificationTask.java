@@ -26,8 +26,6 @@ import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ExternalFunctionSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
-import io.ballerina.compiler.api.symbols.Qualifier;
-import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.BaseNodeModifier;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
@@ -41,12 +39,9 @@ import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
 import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.ModuleVariableDeclarationNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeParser;
-import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.ParameterNode;
 import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
 import io.ballerina.compiler.syntax.tree.RestParameterNode;
@@ -65,7 +60,6 @@ import io.ballerina.tools.text.TextDocument;
 import io.ballerina.tools.text.TextDocuments;
 import org.ballerinalang.formatter.core.Formatter;
 import org.ballerinalang.formatter.core.FormatterException;
-import org.ballerinalang.model.tree.expressions.VariableReferenceNode;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -225,22 +219,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             ModulePartNode modulePartNode = NodeParser.parseModulePart(generatedCode);
             persistInGeneratedDirectory(originalFuncName, generatedCode);
             Stream<ImportDeclarationNode> importStream = modulePartNode.imports().stream();
-//            Stream<ImportDeclarationNode> externalImports = importStream
-//                    .filter(importNode -> {
-//                        String moduleName = importNode.moduleName().toString();
-//                        return moduleName.startsWith(BALLERINA) || moduleName.startsWith(BALLERINAX);
-//                    });
-//            if (externalImports.count() > 0) {
-//                return;
-//            }
-
             this.newImports.addAll(importStream.toList());
-
-//            ConfigurableVariableVisitor configurableVariableVisitor = new ConfigurableVariableVisitor(semanticModel);
-//            if (!configurableVariableVisitor.hasConfigurableVariableDeclarationOrUsage(modulePartNode)) {
-//                return;
-//            }
-
             this.newMembers.addAll(modulePartNode.members().stream().toList());
         }
 
