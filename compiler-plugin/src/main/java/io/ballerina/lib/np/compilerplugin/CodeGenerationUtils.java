@@ -49,7 +49,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -206,7 +206,7 @@ public class CodeGenerationUtils {
                     tempProjectDir.resolve(Path.of(sourceFileObj.get(FILE_PATH).getAsString()))).toFile();
             file.deleteOnExit();
 
-            try (FileWriter fileWriter = new FileWriter(file, Charset.defaultCharset())) {
+            try (FileWriter fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
                 fileWriter.write(sourceFileObj.get(CONTENT).getAsString());
             }
         }
@@ -215,7 +215,7 @@ public class CodeGenerationUtils {
         File balTomlFile = Files.createFile(ballerinaTomlPath).toFile();
         balTomlFile.deleteOnExit();
 
-        try (FileWriter fileWriter = new FileWriter(balTomlFile, Charset.defaultCharset())) {
+        try (FileWriter fileWriter = new FileWriter(balTomlFile, StandardCharsets.UTF_8)) {
             fileWriter.write(String.format("""
                 [package]
                 org = "%s"
