@@ -46,7 +46,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -156,7 +156,7 @@ public class CodeGenerationTest {
         Process process = builder.start();
 
         try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), Charset.defaultCharset()))) {
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
             return reader.readLine();
         }
     }
@@ -201,7 +201,7 @@ public class CodeGenerationTest {
 
     private static JsonObject getExpectedPayload(String directory, String file) throws IOException {
         try (FileReader reader = new FileReader(
-                SERVER_RESOURCES.resolve(directory).resolve(file).toString(), Charset.defaultCharset())) {
+                SERVER_RESOURCES.resolve(directory).resolve(file).toString(), StandardCharsets.UTF_8)) {
             return JsonParser.parseReader(reader).getAsJsonObject();
         }
     }
