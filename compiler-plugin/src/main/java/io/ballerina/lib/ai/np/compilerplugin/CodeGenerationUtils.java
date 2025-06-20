@@ -35,7 +35,11 @@ import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.DiagnosticResult;
+import io.ballerina.projects.Document;
+import io.ballerina.projects.DocumentId;
+import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleDescriptor;
+import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.util.ProjectUtils;
@@ -78,7 +82,7 @@ public class CodeGenerationUtils {
     static String generateCodeForFunction(String copilotUrl, String copilotAccessToken, String originalFuncName,
                                           String generatedFuncName, String prompt, HttpClient client,
                                           JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
-                                          SemanticModel semanticModel) {
+                                          ModuleId moduleId) {
         try {
             String generatedPrompt = generatePrompt(originalFuncName, generatedFuncName, prompt);
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
@@ -86,7 +90,7 @@ public class CodeGenerationUtils {
 
             updateSourceFilesWithGeneratedContent(sourceFiles, generatedFuncName, generatedCode);
             return repairCode(copilotUrl, copilotAccessToken, generatedFuncName, client, sourceFiles, moduleDescriptor,
-                    generatedPrompt, generatedCode, semanticModel);
+                    generatedPrompt, generatedCode, moduleId);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -130,28 +134,45 @@ public class CodeGenerationUtils {
 
     private static String repairCode(String copilotUrl, String copilotAccessToken, String generatedFuncName,
                                      HttpClient client, JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
-                                     String generatedPrompt, GeneratedCode generatedCode, SemanticModel semanticModel)
+                                     String generatedPrompt, GeneratedCode generatedCode, ModuleId moduleId)
             throws IOException, URISyntaxException, InterruptedException {
         String generatedFunctionSrc = repairIfDiagnosticsExist(copilotUrl, copilotAccessToken, client, sourceFiles,
-                moduleDescriptor, generatedFuncName, generatedPrompt, generatedCode, semanticModel);
+                moduleDescriptor, generatedFuncName, generatedPrompt, generatedCode, moduleId);
         return repairIfDiagnosticsExist(copilotUrl, copilotAccessToken, client, sourceFiles, moduleDescriptor,
                 generatedFuncName, generatedPrompt,
-                new GeneratedCode(generatedFunctionSrc, generatedCode.functions), semanticModel);
+                new GeneratedCode(generatedFunctionSrc, generatedCode.functions), moduleId);
+    }
+
+    private static Optional<Document> findDocumentByName(Module module, String generateFuncName) {
+        String documentName = generateSourceFileNameForGeneratedFunction(generateFuncName);
+        for (DocumentId docId : module.documentIds()) {
+            Document doc = module.document(docId);
+            if (doc.name().contains(documentName)) {
+                return Optional.of(doc);
+            }
+        }
+        return Optional.empty();
     }
 
     private static String repairIfDiagnosticsExist(String copilotUrl, String copilotAccessToken, HttpClient client,
                                                    JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
                                                    String generatedFuncName, String generatedPrompt,
-                                                   GeneratedCode generatedCode, SemanticModel semanticModel)
+                                                   GeneratedCode generatedCode, ModuleId moduleId)
             throws IOException, URISyntaxException, InterruptedException {
         ModulePartNode modulePartNode = NodeParser.parseModulePart(generatedCode.code);
 
-        Optional<JsonArray> compilerDiagnostics = getDiagnostics(sourceFiles, moduleDescriptor);
-        Optional<JsonArray> externalImportsDiagnostics = generateDiagnosticsForExternalImports(modulePartNode);
-        JsonArray configVariableUsageDiagnostics = new ConfigurableVariableVisitor(semanticModel)
-                .getConfigVariablesRelatedDiagnostics(modulePartNode);
+        BuildProject project = createProject(sourceFiles, moduleDescriptor);
+        Optional<JsonArray> compilerDiagnostics = getDiagnostics(project);
+        Optional<JsonArray> externalImportsDiagnostics = generateDiagnosticsForExternalImports(
+                modulePartNode.imports());
+        Module module = project.currentPackage().module(
+                project.currentPackage().modules().iterator().next().moduleId());
+        JsonArray variableReferenceDiagnostics = new VariableReferenceVisitor(
+                    project.currentPackage().getCompilation().getSemanticModel(module.moduleId()),
+                    findDocumentByName(module, generatedFuncName)
+                ).checkUnsafeVariableReferences(modulePartNode);
         JsonArray allDiagnostics = mergeDiagnostics(compilerDiagnostics, externalImportsDiagnostics,
-                configVariableUsageDiagnostics);
+                variableReferenceDiagnostics);
 
         if (allDiagnostics.size() == 0) {
             return generatedCode.code;
@@ -187,8 +208,9 @@ public class CodeGenerationUtils {
         return merged;
     }
 
-    private static Optional<JsonArray> generateDiagnosticsForExternalImports(ModulePartNode modulePartNode) {
-        Stream<ImportDeclarationNode> externalImports = modulePartNode.imports().stream()
+    private static Optional<JsonArray> generateDiagnosticsForExternalImports(
+            NodeList<ImportDeclarationNode> imports) {
+        Stream<ImportDeclarationNode> externalImports = imports.stream()
                     .filter(importNode -> {
                         String moduleName = importNode.moduleName().toString();
                         return !moduleName.startsWith(BALLERINA) && !moduleName.startsWith(BALLERINAX);
@@ -218,9 +240,7 @@ public class CodeGenerationUtils {
                 .getAsJsonPrimitive("repairResponse").getAsString();
     }
 
-    private static Optional<JsonArray> getDiagnostics(JsonArray sourceFiles, ModuleDescriptor moduleDescriptor)
-            throws IOException {
-        BuildProject project = createProject(sourceFiles, moduleDescriptor);
+    private static Optional<JsonArray> getDiagnostics(BuildProject project) {
         PackageCompilation compilation = project.currentPackage().getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
 
@@ -416,9 +436,17 @@ public class CodeGenerationUtils {
     private static void updateSourceFilesWithGeneratedContent(JsonArray sourceFiles, String generatedFuncName,
                                                               GeneratedCode generatedCode) {
         JsonObject sourceFile = new JsonObject();
-        sourceFile.addProperty(FILE_PATH, String.format("generated/functions_%s.bal", generatedFuncName));
+        sourceFile.addProperty(FILE_PATH, generateSourceFilePathForGeneratedFunction(generatedFuncName));
         sourceFile.addProperty(CONTENT, generatedCode.code);
         sourceFiles.add(sourceFile);
+    }
+
+    private static String generateSourceFilePathForGeneratedFunction(String generatedFuncName) {
+        return String.format("generated/functions_%s.bal", generatedFuncName);
+    }
+
+    private static String generateSourceFileNameForGeneratedFunction(String generatedFuncName) {
+        return String.format("functions_%s.bal", generatedFuncName);
     }
 
     private static JsonObject constructCodeReparationPayload(String generatedPrompt, String generatedFuncName,

@@ -194,7 +194,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             String generatedCode = generateCodeForFunction(copilotUrl, copilotAccessToken, funcName,
                     generatedFuncName, prompt, getHttpClient(),
                     this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor(),
-                    this.semanticModel);
+                    module.moduleId());
             handleGeneratedCode(funcName, generatedCode);
             ExpressionFunctionBodyNode expressionFunctionBody =
                     NodeFactory.createExpressionFunctionBodyNode(
