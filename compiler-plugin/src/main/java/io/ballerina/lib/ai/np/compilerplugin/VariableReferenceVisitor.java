@@ -1,6 +1,7 @@
 package io.ballerina.lib.np.compilerplugin;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Qualifier;
@@ -88,23 +89,23 @@ class VariableReferenceVisitor extends NodeVisitor {
     }
 
     private void addModuleVariableReferencesDiagnostics(Token name) {
-        this.unsafeVariableReferencesRelatedDiagnostics.add(
-                String.format("Error: Module level variables cannot be used inside the generated code. " +
-                        "(found: '%s')", name)
-        );
+        JsonObject diagnostic = new JsonObject();
+        diagnostic.addProperty("message", String.format("Error: Module level variables " +
+                "cannot be used inside the generated code. (found: '%s')", name));
+        this.unsafeVariableReferencesRelatedDiagnostics.add(diagnostic);
     }
 
     private void addConfigVariableReferencesDiagnostics(Token name) {
-        this.unsafeVariableReferencesRelatedDiagnostics.add(
-                String.format("Error: Config variables cannot be used inside the generated code. " +
-                        "(found: '%s')", name)
-        );
+        JsonObject diagnostic = new JsonObject();
+        diagnostic.addProperty("message", String.format("Error: Config variables cannot be used " +
+                "inside the generated code. (found: '%s')", name));
+        this.unsafeVariableReferencesRelatedDiagnostics.add(diagnostic);
     }
 
     private void addInvalidProgramStructureDiagnostic(String kind) {
-        this.unsafeVariableReferencesRelatedDiagnostics.add(
-                "Error: Invalid code structure detected. Only function definitions are permitted in " +
-                        "the generated code. Found disallowed element: " + kind
-        );
+        JsonObject diagnostic = new JsonObject();
+        diagnostic.addProperty("message", "Error: Invalid code structure detected." +
+                " Only function definitions are permitted in the generated code. Found disallowed element: " + kind);
+        this.unsafeVariableReferencesRelatedDiagnostics.add(diagnostic);
     }
 }

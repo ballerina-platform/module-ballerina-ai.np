@@ -1,6 +1,7 @@
 package io.ballerina.lib.np.compilerplugin;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Qualifier;
@@ -49,10 +50,10 @@ class ConstantExpressionVisitor extends NodeVisitor {
     }
 
     private void addConstantReferencesDiagnostics(String name) {
-        this.constantExpressionDiagnostics.add(
-                String.format("Error: Generated code should only contains constant expressions. " +
-                        "(found: '%s')", name)
-        );
+        JsonObject diagnostic = new JsonObject();
+        diagnostic.addProperty("message", String.format("Error: Generated code should only " +
+                "contains constant expressions. (found: '%s')", name));
+        this.constantExpressionDiagnostics.add(diagnostic);
     }
 
     private boolean isConstExpressionNode(Node node) {

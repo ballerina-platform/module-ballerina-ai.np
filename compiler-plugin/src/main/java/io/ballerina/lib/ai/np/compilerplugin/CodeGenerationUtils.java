@@ -109,8 +109,9 @@ public class CodeGenerationUtils {
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
                     generatedPrompt);
             // TODO: check if we need to call repair, could get complicated.
-            // TODO: validate generated code to ensure only literals and constructors are present, regenerate if not.
-            return generatedCode.code;
+            return repairIfDiagnosticsExistForConstNaturalExpression(
+                    copilotUrl, copilotAccessToken, client, sourceFiles,
+                    generatedPrompt, generatedCode, semanticModel);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -181,6 +182,29 @@ public class CodeGenerationUtils {
         String repairResponse = repairCode(copilotUrl, copilotAccessToken, generatedFuncName, client, sourceFiles,
                 generatedPrompt, generatedCode, allDiagnostics);
 
+        return extractAndReturnTheBallerinaCode(repairResponse, generatedCode, sourceFiles);
+    }
+
+    private static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl, String copilotAccessToken,
+                               HttpClient client, JsonArray sourceFiles, String generatedPrompt,
+                               GeneratedCode generatedCode, SemanticModel semanticModel)
+            throws IOException, URISyntaxException, InterruptedException {
+        JsonArray constantExpressionDiagnostics = new ConstantExpressionVisitor(semanticModel)
+                .checkNonConstExpressions(NodeParser.parseModulePart(generatedCode.code));
+
+        if (constantExpressionDiagnostics.size() == 0) {
+            return generatedCode.code;
+        }
+
+        String repairResponse = repairCodeForConstNaturalExpressions(
+                copilotUrl, copilotAccessToken, client, sourceFiles,
+                generatedPrompt, generatedCode, constantExpressionDiagnostics);
+
+        return extractAndReturnTheBallerinaCode(repairResponse, generatedCode, sourceFiles);
+    }
+
+    private static String extractAndReturnTheBallerinaCode(String repairResponse, GeneratedCode generatedCode,
+                                                           JsonArray sourceFiles) {
         if (hasBallerinaCodeSnippet(repairResponse)) {
             String generatedFunctionSrc = extractBallerinaCodeSnippet(repairResponse);
             sourceFiles.get(sourceFiles.size() - 1).getAsJsonObject().addProperty(CONTENT, generatedFunctionSrc);
@@ -229,8 +253,24 @@ public class CodeGenerationUtils {
                                      GeneratedCode generatedCode, JsonArray diagnostics)
             throws URISyntaxException, IOException, InterruptedException {
         JsonObject codeReparationPayload =
-                constructCodeReparationPayload(generatedPrompt, generatedFuncName, generatedCode.functions,
+                constructCodeReparationPayload(generatedPrompt, generatedFuncName, generatedCode,
                         updatedSourceFiles, diagnostics);
+        return setAndCollectRepairResponse(copilotUrl, copilotAccessToken, client, codeReparationPayload);
+    }
+
+    private static String repairCodeForConstNaturalExpressions(String copilotUrl, String copilotAccessToken,
+                                     HttpClient client, JsonArray updatedSourceFiles, String generatedPrompt,
+                                     GeneratedCode generatedCode, JsonArray diagnostics)
+            throws URISyntaxException, IOException, InterruptedException {
+        JsonObject codeReparationPayload =
+                constructCodeReparationPayloadForConstNaturalExpressions(generatedPrompt, generatedCode,
+                        updatedSourceFiles, diagnostics);
+        return setAndCollectRepairResponse(copilotUrl, copilotAccessToken, client, codeReparationPayload);
+    }
+
+    private static String setAndCollectRepairResponse(String copilotUrl, String copilotAccessToken, HttpClient client,
+                                                      JsonObject codeReparationPayload)
+            throws URISyntaxException, IOException, InterruptedException {
         HttpRequest codeReparationRequest = HttpRequest.newBuilder()
                 .uri(new URI(copilotUrl + "/code/repair"))
                 .header("Authorization", "Bearer " + copilotAccessToken)
@@ -241,6 +281,7 @@ public class CodeGenerationUtils {
     }
 
     private static Optional<JsonArray> getDiagnostics(BuildProject project) {
+        JsonObject diagnosticObj;
         PackageCompilation compilation = project.currentPackage().getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
 
@@ -254,7 +295,10 @@ public class CodeGenerationUtils {
             if (diagnosticInfo.severity() != DiagnosticSeverity.ERROR) {
                 continue;
             }
-            diagnostics.add(diagnostic.toString());
+
+            diagnosticObj = new JsonObject();
+            diagnosticObj.addProperty("message", diagnostic.message());
+            diagnostics.add(diagnosticObj);
         }
 
         return Optional.of(diagnostics);
@@ -450,14 +494,29 @@ public class CodeGenerationUtils {
     }
 
     private static JsonObject constructCodeReparationPayload(String generatedPrompt, String generatedFuncName,
-                                                             JsonArray functions, JsonArray sourceFiles,
+                                                             GeneratedCode generatedCode, JsonArray sourceFiles,
                                                              JsonArray diagnostics) {
         JsonObject payload = new JsonObject();
 
         payload.addProperty(
                 "usecase", String.format("Fix issues in the generated '%s' function. " +
                         "Do not change anything other than the function body", generatedFuncName));
+        return updateResourcePayload(payload, generatedPrompt, generatedCode, diagnostics, sourceFiles);
+    }
 
+    private static JsonObject constructCodeReparationPayloadForConstNaturalExpressions(
+            String generatedPrompt, GeneratedCode generatedCode, JsonArray sourceFiles,
+            JsonArray diagnostics) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty(
+                "usecase", String.format("Fix issues in the generated ballerina expression. " +
+                        "Use only constant expressions inside the program"));
+
+        return updateResourcePayload(payload, generatedPrompt, generatedCode, diagnostics, sourceFiles);
+    }
+
+    private static JsonObject updateResourcePayload(JsonObject payload, String generatedPrompt,
+                        GeneratedCode generatedCode, JsonArray diagnostics, JsonArray sourceFiles) {
         payload.add("sourceFiles", sourceFiles);
 
         JsonObject chatHistoryMember = new JsonObject();
@@ -466,10 +525,12 @@ public class CodeGenerationUtils {
         JsonArray chatHistory = new JsonArray();
         chatHistory.add(chatHistoryMember);
         payload.add("chatHistory", chatHistory);
+        payload.add("functions", generatedCode.functions);
 
-        payload.add("functions", functions);
-
-        payload.add("diagnostics", diagnostics);
+        JsonObject diagnosticRequest = new JsonObject();
+        diagnosticRequest.add("diagnostics", diagnostics);
+        diagnosticRequest.addProperty("response", generatedCode.code);
+        payload.add("diagnosticRequest", diagnosticRequest);
 
         return payload;
     }
