@@ -15,6 +15,7 @@ import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
+import io.ballerina.compiler.syntax.tree.SingletonTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypeCastExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
@@ -57,12 +58,12 @@ class ConstantExpressionVisitor extends NodeVisitor {
             return true;
         }
 
-        if (expressionNode instanceof BasicLiteralNode) {
+        if (expressionNode instanceof BasicLiteralNode || expressionNode instanceof SingletonTypeDescriptorNode) {
             return true;
         } else if (expressionNode instanceof SimpleNameReferenceNode
                 || expressionNode instanceof QualifiedNameReferenceNode) {
             Optional<Symbol> symbol = this.semanticModel.symbol(expressionNode);
-            return symbol.isEmpty() || !(symbol.get() instanceof ConstantSymbol) ;
+            return symbol.isEmpty() || !(symbol.get() instanceof ConstantSymbol);
         } else if (expressionNode instanceof TemplateExpressionNode templateExpressionNode) {
             return checkNestedConstExpr(templateExpressionNode.content().stream().toList());
         } else if (expressionNode instanceof ConditionalExpressionNode conditionalExpressionNode) {

@@ -184,9 +184,9 @@ public class CodeGenerationUtils {
         return extractAndReturnTheBallerinaCode(repairResponse, generatedCode, sourceFiles);
     }
 
-    private static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl, String copilotAccessToken,
-                               HttpClient client, JsonArray sourceFiles, String generatedPrompt,
-                               GeneratedCode generatedCode, SemanticModel semanticModel)
+    private static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl,
+                    String copilotAccessToken, HttpClient client, JsonArray sourceFiles,
+                    String generatedPrompt, GeneratedCode generatedCode, SemanticModel semanticModel)
             throws IOException, URISyntaxException, InterruptedException {
         JsonArray constantExpressionDiagnostics = new ConstantExpressionVisitor(semanticModel)
                 .checkNonConstExpressions(NodeParser.parseModulePart(generatedCode.code));
@@ -435,8 +435,9 @@ public class CodeGenerationUtils {
                         The '%s' function should have exactly the same signature as the '%s' function.
                         Use only the parameters passed to the function and module-level clients that are clients \
                         from the ballerina and ballerinax module in the generated code.
-                        Do not use any configuration variables defined in the program. Respond with only the \
-                        generated code, nothing else. Ensure that there are NO compile-time errors.
+                        Do not use any configuration variables and module level variables defined in the program. 
+                        Respond with only the generated code, nothing else. 
+                        Ensure that there are NO compile-time errors.
                         
                         Respond with ONLY THE GENERATED FUNCTION AND ANY IMPORTS REQUIRED BY THE GENERATED FUNCTION.
                         """,
@@ -465,7 +466,8 @@ public class CodeGenerationUtils {
                 The value should belong to the type '%s'. This value will be used in the code in place of the
                 `const natural {...}` expression with the requirement.
                 
-                Do not use any configuration variables defined in the program inside the value expression.
+                Do not use any configuration variables and module level variables defined in the program \
+                inside the value expression.
                 Respond with ONLY THE VALUE EXPRESSION.
                 
                 Requirement:

@@ -128,13 +128,79 @@ public class CodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(CODE_PATH, "code-functions", "code_function_code_request.json");
-        assertRepairRequest();
+        assertRepairRequest("code-functions", "code_function_repair_request.json");
 
         // Validate that a second repair doesn't happen.
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
         Assert.assertNull(recordedRequest);
 
-        validateGeneratedCodeAndDeleteGeneratedDir();
+        validateGeneratedCodeAndDeleteGeneratedDir("code-functions");
+
+        Assert.assertEquals(
+                buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
+                "[{\"name\":\"David\",\"salary\":70000},{\"name\":\"Bob\",\"salary\":60000}," +
+                        "{\"name\":\"Alice\",\"salary\":50000},{\"name\":\"Charlie\",\"salary\":50000}]");
+    }
+
+    @Test
+    public void testCodeFunctionWithExternalImportStatements() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("code-functions-with-external-imports",
+                        "code_function_with_external_imports_code_response.txt"))
+                .setResponseCode(200));
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("code-functions-with-external-imports",
+                        "code_function_with_external_imports_repair_response.json"))
+                .setResponseCode(200)
+                .setHeader("Content-type", "application/json"));
+
+        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions-with-external-imports");
+        final Project naturalExprProject = loadPackageProject(projectPath);
+        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
+
+        assertRequest(CODE_PATH, "code-functions-with-external-imports",
+                "code_function_with_external_imports_request.json");
+        assertRepairRequest("code-functions-with-external-imports",
+                "code_function_with_external_imports_repair_request.json");
+
+        // Validate that a second repair doesn't happen.
+        RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
+        Assert.assertNull(recordedRequest);
+
+        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-external-imports");
+
+        Assert.assertEquals(
+                buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
+                "[{\"name\":\"David\",\"salary\":70000},{\"name\":\"Bob\",\"salary\":60000}," +
+                        "{\"name\":\"Alice\",\"salary\":50000},{\"name\":\"Charlie\",\"salary\":50000}]");
+    }
+
+    @Test
+    public void testCodeFunctionWithModuleLevelVariables() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("code-functions-with-module-var-reference",
+                        "code_function_with_module_var_reference_code_response.txt"))
+                .setResponseCode(200));
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("code-functions-with-module-var-reference",
+                        "code_function_with_module_var_reference_repair_response.json"))
+                .setResponseCode(200)
+                .setHeader("Content-type", "application/json"));
+
+        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions-with-module-var-reference");
+        final Project naturalExprProject = loadPackageProject(projectPath);
+        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
+
+        assertRequest(CODE_PATH, "code-functions-with-module-var-reference",
+                "code_function_with_module_var_references_request.json");
+        assertRepairRequest("code-functions-with-module-var-reference",
+                "code_function_with_module_var_reference_repair_request.json");
+
+        // Validate that a second repair doesn't happen.
+        RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
+        Assert.assertNull(recordedRequest);
+
+        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-module-var-reference");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
@@ -210,14 +276,18 @@ public class CodeGenerationTest {
         assertRequest(path, getExpectedPayload(directory, file));
     }
 
-    private void assertRepairRequest()
+    private void assertRepairRequest(String dirname, String repairRequestJsonFileName)
             throws InterruptedException, IOException {
-        JsonObject expectedPayload = getExpectedPayload("code-functions", "code_function_repair_request.json");
-        JsonArray diagnostics = expectedPayload.getAsJsonArray("diagnostics");
+        JsonObject expectedPayload = getExpectedPayload(dirname, repairRequestJsonFileName);
+        JsonObject diagnosticsRequest = expectedPayload.getAsJsonObject("diagnosticRequest");
+        JsonArray diagnostics = diagnosticsRequest.getAsJsonArray("diagnostics");
         for (int i = 0; i < diagnostics.size(); i++) {
-            diagnostics.set(i,
-                    new JsonPrimitive(diagnostics.get(i).getAsString().replace("generated/functions",
-                            String.format("generated%sfunctions", File.separator))));
+            String message = diagnostics.get(i).getAsJsonObject().getAsJsonPrimitive("message").
+                    getAsString().replace("generated/functions",
+                            String.format("generated%sfunctions", File.separator));
+            JsonObject messageObj = new JsonObject();
+            messageObj.addProperty("message", message);
+            diagnostics.set(i, messageObj);
         }
         assertRequest(REPAIR_PATH, expectedPayload);
     }
@@ -231,15 +301,15 @@ public class CodeGenerationTest {
         Assert.assertEquals(actualPayload, expectedPayload);
     }
 
-    private void validateGeneratedCodeAndDeleteGeneratedDir() throws IOException {
-        Path generatedDirPath = RESOURCE_DIRECTORY.resolve("code-functions").resolve("generated");
+    private void validateGeneratedCodeAndDeleteGeneratedDir(String dirName) throws IOException {
+        Path generatedDirPath = RESOURCE_DIRECTORY.resolve(dirName).resolve("generated");
         Assert.assertTrue(Files.isDirectory(generatedDirPath));
 
         Path generatedFuncFilePath = generatedDirPath.resolve("sortEmployees_np_generated.bal");
         Assert.assertTrue(Files.isRegularFile(generatedFuncFilePath));
         String actualCode = getFileContent(generatedFuncFilePath);
         String expectedCode = getFileContent(RESOURCE_DIRECTORY
-                .resolve("code-functions").resolve("expected").resolve("expected_function_source.bal"));
+                .resolve(dirName).resolve("expected").resolve("expected_function_source.bal"));
         Assert.assertEquals(actualCode, expectedCode);
 
         PrintStream out = System.out;
