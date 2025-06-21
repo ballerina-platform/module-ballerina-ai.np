@@ -21,7 +21,6 @@ package io.ballerina.lib.ai.np.compilerplugintests;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.JBallerinaBackend;
 import io.ballerina.projects.JvmTarget;
@@ -134,7 +133,8 @@ public class CodeGenerationTest {
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
         Assert.assertNull(recordedRequest);
 
-        validateGeneratedCodeAndDeleteGeneratedDir("code-functions");
+        validateGeneratedCodeAndDeleteGeneratedDir("code-functions",
+                "sortEmployees_np_generated.bal");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
@@ -167,7 +167,8 @@ public class CodeGenerationTest {
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
         Assert.assertNull(recordedRequest);
 
-        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-external-imports");
+        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-external-imports",
+                "sortEmployees_np_generated.bal");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
@@ -192,7 +193,7 @@ public class CodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(CODE_PATH, "code-functions-with-module-var-reference",
-                "code_function_with_module_var_references_request.json");
+                "code_function_with_module_var_reference_request.json");
         assertRepairRequest("code-functions-with-module-var-reference",
                 "code_function_with_module_var_reference_repair_request.json");
 
@@ -200,12 +201,12 @@ public class CodeGenerationTest {
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
         Assert.assertNull(recordedRequest);
 
-        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-module-var-reference");
+        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-module-var-reference",
+                "calculateThePrice_np_generated.bal");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
-                "[{\"name\":\"David\",\"salary\":70000},{\"name\":\"Bob\",\"salary\":60000}," +
-                        "{\"name\":\"Alice\",\"salary\":50000},{\"name\":\"Charlie\",\"salary\":50000}]");
+                "Total after discount: 540.0");
     }
 
     @AfterSuite
@@ -292,7 +293,7 @@ public class CodeGenerationTest {
         assertRequest(REPAIR_PATH, expectedPayload);
     }
 
-    private void assertRequest(String path, JsonObject expectedPayload) throws InterruptedException, IOException {
+    private void assertRequest(String path, JsonObject expectedPayload) throws InterruptedException {
         RecordedRequest recordedRequest = server.takeRequest();
         Assert.assertEquals(recordedRequest.getPath(), path);
         Assert.assertEquals(recordedRequest.getHeader("Authorization"), "Bearer not-a-real-token");
@@ -301,11 +302,11 @@ public class CodeGenerationTest {
         Assert.assertEquals(actualPayload, expectedPayload);
     }
 
-    private void validateGeneratedCodeAndDeleteGeneratedDir(String dirName) throws IOException {
+    private void validateGeneratedCodeAndDeleteGeneratedDir(String dirName, String generatedFileName) throws IOException {
         Path generatedDirPath = RESOURCE_DIRECTORY.resolve(dirName).resolve("generated");
         Assert.assertTrue(Files.isDirectory(generatedDirPath));
 
-        Path generatedFuncFilePath = generatedDirPath.resolve("sortEmployees_np_generated.bal");
+        Path generatedFuncFilePath = generatedDirPath.resolve(generatedFileName);
         Assert.assertTrue(Files.isRegularFile(generatedFuncFilePath));
         String actualCode = getFileContent(generatedFuncFilePath);
         String expectedCode = getFileContent(RESOURCE_DIRECTORY

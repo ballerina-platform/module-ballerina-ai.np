@@ -17,6 +17,7 @@ import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SingletonTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
+import io.ballerina.compiler.syntax.tree.TupleTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeCastExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
 import io.ballerina.compiler.syntax.tree.UnaryExpressionNode;
@@ -81,6 +82,8 @@ class ConstantExpressionVisitor extends NodeVisitor {
             return isConstExpressionNode(typeTestExpressionNode.expression());
         } else if (expressionNode instanceof ListConstructorExpressionNode listConstructorExpressionNode) {
             return checkNestedConstExpr(listConstructorExpressionNode.expressions().stream().toList());
+        } else if (expressionNode instanceof TupleTypeDescriptorNode typeDescriptorNode) {
+            return checkNestedConstExpr(typeDescriptorNode.memberTypeDesc().stream().toList());
         }
 
         return false;

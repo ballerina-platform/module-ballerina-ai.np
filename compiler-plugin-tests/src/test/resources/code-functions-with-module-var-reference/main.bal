@@ -1,24 +1,13 @@
 import ballerina/io;
 
-type Employee record {|
-    string name;
-    decimal salary;
-|};
+public final float DISCOUNT = 0.1;
 
-function sortEmployees(Employee[] employees) returns Employee[] = @code {
-    prompt: string `Give me a new array with the employees sorted by
-                        1. salary in descending order and then
-                        2. name in ascending order`
+function calculateThePrice(float[] prices) returns float = @code {
+    prompt: string `Calculate total price after discount`
 } external;
 
 public function main() {
-    Employee[] employees = [
-        {name: "Charlie", salary: 50000},
-        {name: "Bob", salary: 60000},
-        {name: "Alice", salary: 50000},
-        {name: "David", salary: 70000}
-    ];
-
-    Employee[] sortEmployeesResult = sortEmployees(employees);
-    io:println(sortEmployeesResult);
+    float[] cart = [100.0, 200.0, 300.0];
+    float total = calculateThePrice(cart);
+    io:println("Total after discount: " + total.toString());
 }
