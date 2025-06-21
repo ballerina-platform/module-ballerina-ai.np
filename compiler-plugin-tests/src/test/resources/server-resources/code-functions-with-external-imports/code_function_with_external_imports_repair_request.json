@@ -7,7 +7,7 @@
     },
     {
       "filePath": "generated/functions_sortEmployeesNPGenerated.bal",
-      "content": "\nfunction sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}\n"
+      "content": "\nimport xlib/pubsub as _;\nimport ballerina/http as _;\nimport xlib/pipe as _;\nfunction sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}\n"
     }
   ],
   "chatHistory": [
@@ -20,6 +20,12 @@
   "diagnosticRequest": {
     "diagnostics": [
       {
+        "message": "cannot resolve module 'xlib/pubsub as _'"
+      },
+      {
+        "message": "cannot resolve module 'xlib/pipe as _'"
+      },
+      {
         "message": "variable assignment is required"
       },
       {
@@ -30,8 +36,14 @@
       },
       {
         "message": "undefined parameter '$missingNode$_0'"
+      },
+      {
+        "message": "Error: Disallowed import 'xlib' detected, only 'ballerina/' or 'ballerinax/' packages are permitted"
+      },
+      {
+        "message": "Error: Disallowed import 'xlib' detected, only 'ballerina/' or 'ballerinax/' packages are permitted"
       }
     ],
-    "response": "\nfunction sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}\n"
+    "response": "\nimport xlib/pubsub as _;\nimport ballerina/http as _;\nimport xlib/pipe as _;\nfunction sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}\n"
   }
 }
