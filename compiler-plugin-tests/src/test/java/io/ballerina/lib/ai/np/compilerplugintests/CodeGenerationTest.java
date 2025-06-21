@@ -209,6 +209,39 @@ public class CodeGenerationTest {
                 "Total after discount: 540.0");
     }
 
+    @Test
+    public void testCodeFunctionWithConfigurableVariables() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("code-functions-with-config-var-reference",
+                        "code_function_with_config_var_reference_code_response.txt"))
+                .setResponseCode(200));
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse("code-functions-with-config-var-reference",
+                        "code_function_with_config_var_reference_repair_response.json"))
+                .setResponseCode(200)
+                .setHeader("Content-type", "application/json"));
+
+        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions-with-config-var-reference");
+        final Project naturalExprProject = loadPackageProject(projectPath);
+        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
+
+        assertRequest(CODE_PATH, "code-functions-with-config-var-reference",
+                "code_function_with_config_var_reference_request.json");
+        assertRepairRequest("code-functions-with-config-var-reference",
+                "code_function_with_config_var_reference_repair_request.json");
+
+        // Validate that a second repair doesn't happen.
+        RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
+        Assert.assertNull(recordedRequest);
+
+        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-config-var-reference",
+                "calculateThePrice_np_generated.bal");
+
+        Assert.assertEquals(
+                buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
+                "Total after discount: 540.0");
+    }
+
     @AfterSuite
     void tearDown() throws Exception {
         server.shutdown();

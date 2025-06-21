@@ -1,0 +1,50 @@
+event: resp_start
+
+event: libraries
+data: ["ballerina/http"]
+
+event: functions
+data: []
+
+event: message_start
+
+event: content_block_delta
+data: {"text":"I will help you to generate the calculateThePriceNPGenerated function.\n\n"}
+
+event: content_block_delta
+data: {"text":"<code filename=\"main.bal\">\n"}
+
+event: content_block_delta
+data: {"text":"```ballerina\n"}
+
+event: content_block_delta
+data: {"text":"function calculateThePriceNPGenerated(float[] prices) returns float {\n"}
+
+event: content_block_delta
+data: {"text":"    float subtotal = 0;\n"}
+
+event: content_block_delta
+data: {"text":"    foreach float price in prices {\n"}
+
+event: content_block_delta
+data: {"text":"        subtotal += price;\n"}
+
+event: content_block_delta
+data: {"text":"    }\n"}
+
+event: content_block_delta
+data: {"text":"    return subtotal * (1 - discount);\n"}
+
+event: content_block_delta
+data: {"text":"}\n"}
+
+event: content_block_delta
+data: {"text":"```\n"}
+
+event: content_block_delta
+data: {"text":"<\/code>\n\n"}
+
+event: content_block_delta
+data: {"text":"You can run the above code by giving the prices list."}
+
+event: message_stop
