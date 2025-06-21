@@ -193,8 +193,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             String prompt = getPrompt(functionDefinition, semanticModel);
             String generatedCode = generateCodeForFunction(copilotUrl, copilotAccessToken, funcName,
                     generatedFuncName, prompt, getHttpClient(),
-                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor(),
-                    module.moduleId());
+                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor());
             handleGeneratedCode(funcName, generatedCode);
             ExpressionFunctionBodyNode expressionFunctionBody =
                     NodeFactory.createExpressionFunctionBodyNode(
@@ -283,7 +282,6 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                 writer.println(Formatter.format(generatedCode));
             } catch (IOException | FormatterException e) {
                 // Shouldn't be a showstopper?
-                return;
             }
         }
     }

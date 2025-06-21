@@ -3,29 +3,17 @@ package io.ballerina.lib.np.compilerplugin;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Qualifier;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
-import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
-import io.ballerina.compiler.syntax.tree.BinaryExpressionNode;
-import io.ballerina.compiler.syntax.tree.ConditionalExpressionNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.Token;
-import io.ballerina.compiler.syntax.tree.TypeCastExpressionNode;
-import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
-import io.ballerina.compiler.syntax.tree.UnaryExpressionNode;
 import io.ballerina.projects.Document;
 
-import java.util.List;
 import java.util.Optional;
 
 class VariableReferenceVisitor extends NodeVisitor {
@@ -62,10 +50,10 @@ class VariableReferenceVisitor extends NodeVisitor {
         this.semanticModel.symbol(this.document.get(), simpleNameReferenceNode.location()
                 .lineRange().startLine()).ifPresent(symbol -> {
             if (symbol instanceof VariableSymbol variableSymbol) {
-                variableSymbol.qualifiers().stream()
-                        .filter(qualifier -> qualifier == Qualifier.CONFIGURABLE)
-                        .findFirst()
-                        .ifPresent(qualifier -> addConfigVariableReferencesDiagnostics(simpleNameReferenceNode.name()));
+                if (isConfigVariable(variableSymbol)) {
+                    addConfigVariableReferencesDiagnostics(simpleNameReferenceNode.name());
+                    return;
+                }
 
                 boolean isModuleLevelSymbol = semanticModel.moduleSymbols().contains(variableSymbol);
                 if (isModuleLevelSymbol) {
@@ -77,15 +65,30 @@ class VariableReferenceVisitor extends NodeVisitor {
 
     @Override
     public void visit(QualifiedNameReferenceNode qualifiedNameReferenceNode) {
-        Optional<Symbol> symbol = semanticModel.symbol(qualifiedNameReferenceNode);
-        if (symbol.isEmpty()) {
+        Optional<Symbol> symbolOpt = semanticModel.symbol(qualifiedNameReferenceNode);
+        if (symbolOpt.isEmpty()) {
             return;
         }
 
-        boolean isModuleLevelSymbol = semanticModel.moduleSymbols().contains(symbol.get());
-        if (isModuleLevelSymbol) {
+        Symbol symbol = symbolOpt.get();
+        boolean isModuleLevelSymbol = semanticModel.moduleSymbols().contains(symbol);
+        if (isModuleLevelSymbol && !isConfigVariable(symbol)) {
             addModuleVariableReferencesDiagnostics(qualifiedNameReferenceNode.identifier());
         }
+    }
+
+    private boolean isConfigVariable(Symbol symbol) {
+        if (symbol instanceof VariableSymbol variableSymbol) {
+            Optional<Qualifier> qualifiersOpt = variableSymbol.qualifiers().stream()
+                    .filter(qualifier -> qualifier == Qualifier.CONFIGURABLE)
+                    .findFirst();
+            if (qualifiersOpt.isEmpty()) {
+                return false;
+            }
+
+            return true;
+        }
+        return false;
     }
 
     private void addModuleVariableReferencesDiagnostics(Token name) {

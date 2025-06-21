@@ -26,6 +26,7 @@ import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
+import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.InterpolationNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
@@ -39,7 +40,6 @@ import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
 import io.ballerina.projects.ModuleDescriptor;
-import io.ballerina.projects.ModuleId;
 import io.ballerina.projects.PackageCompilation;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.util.ProjectUtils;
@@ -81,8 +81,7 @@ public class CodeGenerationUtils {
 
     static String generateCodeForFunction(String copilotUrl, String copilotAccessToken, String originalFuncName,
                                           String generatedFuncName, String prompt, HttpClient client,
-                                          JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
-                                          ModuleId moduleId) {
+                                          JsonArray sourceFiles, ModuleDescriptor moduleDescriptor) {
         try {
             String generatedPrompt = generatePrompt(originalFuncName, generatedFuncName, prompt);
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
@@ -90,7 +89,7 @@ public class CodeGenerationUtils {
 
             updateSourceFilesWithGeneratedContent(sourceFiles, generatedFuncName, generatedCode);
             return repairCode(copilotUrl, copilotAccessToken, generatedFuncName, client, sourceFiles, moduleDescriptor,
-                    generatedPrompt, generatedCode, moduleId);
+                    generatedPrompt, generatedCode);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -135,13 +134,13 @@ public class CodeGenerationUtils {
 
     private static String repairCode(String copilotUrl, String copilotAccessToken, String generatedFuncName,
                                      HttpClient client, JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
-                                     String generatedPrompt, GeneratedCode generatedCode, ModuleId moduleId)
+                                     String generatedPrompt, GeneratedCode generatedCode)
             throws IOException, URISyntaxException, InterruptedException {
         String generatedFunctionSrc = repairIfDiagnosticsExist(copilotUrl, copilotAccessToken, client, sourceFiles,
-                moduleDescriptor, generatedFuncName, generatedPrompt, generatedCode, moduleId);
+                moduleDescriptor, generatedFuncName, generatedPrompt, generatedCode);
         return repairIfDiagnosticsExist(copilotUrl, copilotAccessToken, client, sourceFiles, moduleDescriptor,
                 generatedFuncName, generatedPrompt,
-                new GeneratedCode(generatedFunctionSrc, generatedCode.functions), moduleId);
+                new GeneratedCode(generatedFunctionSrc, generatedCode.functions));
     }
 
     private static Optional<Document> findDocumentByName(Module module, String generateFuncName) {
@@ -158,7 +157,7 @@ public class CodeGenerationUtils {
     private static String repairIfDiagnosticsExist(String copilotUrl, String copilotAccessToken, HttpClient client,
                                                    JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
                                                    String generatedFuncName, String generatedPrompt,
-                                                   GeneratedCode generatedCode, ModuleId moduleId)
+                                                   GeneratedCode generatedCode)
             throws IOException, URISyntaxException, InterruptedException {
         ModulePartNode modulePartNode = NodeParser.parseModulePart(generatedCode.code);
 
@@ -175,7 +174,7 @@ public class CodeGenerationUtils {
         JsonArray allDiagnostics = mergeDiagnostics(compilerDiagnostics, externalImportsDiagnostics,
                 variableReferenceDiagnostics);
 
-        if (allDiagnostics.size() == 0) {
+        if (allDiagnostics.isEmpty()) {
             return generatedCode.code;
         }
 
@@ -192,7 +191,7 @@ public class CodeGenerationUtils {
         JsonArray constantExpressionDiagnostics = new ConstantExpressionVisitor(semanticModel)
                 .checkNonConstExpressions(NodeParser.parseModulePart(generatedCode.code));
 
-        if (constantExpressionDiagnostics.size() == 0) {
+        if (constantExpressionDiagnostics.isEmpty()) {
             return generatedCode.code;
         }
 
@@ -236,16 +235,26 @@ public class CodeGenerationUtils {
             NodeList<ImportDeclarationNode> imports) {
         Stream<ImportDeclarationNode> externalImports = imports.stream()
                     .filter(importNode -> {
-                        String moduleName = importNode.moduleName().toString();
+                        String moduleName = importNode.orgName().get().toString();
                         return !moduleName.startsWith(BALLERINA) && !moduleName.startsWith(BALLERINAX);
                     });
-        if (externalImports.count() == 0) {
+
+        JsonArray diagnostics = externalImports.map(CodeGenerationUtils::generateExternalImportDiagnostic)
+                .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+        if (diagnostics.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.of(externalImports.map(importNode -> String.format("Error: Disallowed import '%s' detected," +
-                        " only 'ballerina/' or 'ballerinax/' packages are permitted", importNode.moduleName()))
-                .collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+        return Optional.of(diagnostics);
+    }
+
+    private static JsonObject generateExternalImportDiagnostic(ImportDeclarationNode importNode) {
+        JsonObject diagnostic = new JsonObject();
+        Optional<ImportOrgNameNode> importOrgNameNode = importNode.orgName();
+        String orgName = importOrgNameNode.isEmpty() ? "" : importOrgNameNode.get().orgName().text();
+        diagnostic.addProperty("message", String.format("Error: Disallowed import '%s' detected," +
+                " only 'ballerina/' or 'ballerinax/' packages are permitted", orgName));
+        return diagnostic;
     }
 
     private static String repairCode(String copilotUrl, String copilotAccessToken, String generatedFuncName,
@@ -425,7 +434,7 @@ public class CodeGenerationUtils {
                         
                         The '%s' function should have exactly the same signature as the '%s' function.
                         Use only the parameters passed to the function and module-level clients that are clients \
-                        from the ballerina and ballerinax module in the generated code. 
+                        from the ballerina and ballerinax module in the generated code.
                         Do not use any configuration variables defined in the program. Respond with only the \
                         generated code, nothing else. Ensure that there are NO compile-time errors.
                         
@@ -509,8 +518,8 @@ public class CodeGenerationUtils {
             JsonArray diagnostics) {
         JsonObject payload = new JsonObject();
         payload.addProperty(
-                "usecase", String.format("Fix issues in the generated ballerina expression. " +
-                        "Use only constant expressions inside the program"));
+                "usecase", "Fix issues in the generated ballerina expression. " +
+                        "Use only constant expressions inside the program");
 
         return updateResourcePayload(payload, generatedPrompt, generatedCode, diagnostics, sourceFiles);
     }
