@@ -96,6 +96,31 @@ public class CodeGenerationTest {
     }
 
     @Test
+    public void testConstNaturalExpressionsInProjectWithNonConstExpressions() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse(
+                        "const-natural-expressions", "non_const_natural_expr_response.txt"))
+                .setResponseCode(200));
+        server.enqueue(new MockResponse()
+                .setBody(getCodeMockResponse(
+                        "const-natural-expressions", "non_const_natural_expr_repair_response.json"))
+                .setResponseCode(200));
+
+        final Path projectPath = RESOURCE_DIRECTORY
+                .resolve("const-natural-expressions")
+                .resolve("const_natural_expr_with_error_handling");
+        final Project naturalExprProject = loadPackageProject(projectPath);
+        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
+
+        assertRequest(CODE_PATH, "const-natural-expressions", "non_const_natural_expr_request.json");
+        assertRequest(REPAIR_PATH, "const-natural-expressions", "non_const_natural_expr_repair_request.json");
+
+        Assert.assertEquals(
+                buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
+                "[2,-2,99998,99996,\"a\",\"a\",2,1,6,3]");
+    }
+
+    @Test
     public void testConstNaturalExpressionsInSingleBalFile() throws IOException, InterruptedException {
         server.enqueue(new MockResponse()
                 .setBody(getCodeMockResponse("const-natural-expressions", "const_natural_expr_response.txt"))
@@ -335,7 +360,8 @@ public class CodeGenerationTest {
         Assert.assertEquals(actualPayload, expectedPayload);
     }
 
-    private void validateGeneratedCodeAndDeleteGeneratedDir(String dirName, String generatedFileName) throws IOException {
+    private void validateGeneratedCodeAndDeleteGeneratedDir(String dirName,
+                                                            String generatedFileName) throws IOException {
         Path generatedDirPath = RESOURCE_DIRECTORY.resolve(dirName).resolve("generated");
         Assert.assertTrue(Files.isDirectory(generatedDirPath));
 

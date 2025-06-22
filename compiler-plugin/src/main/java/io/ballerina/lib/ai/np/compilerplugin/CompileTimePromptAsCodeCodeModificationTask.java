@@ -210,7 +210,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             }
             String generatedCode = generateCodeForNaturalExpression(copilotUrl, copilotAccessToken,
                     semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get(),
-                    naturalExpressionNode, getHttpClient(), this.getSourceFiles(), semanticModel);
+                    naturalExpressionNode, getHttpClient(), this.getSourceFiles(), semanticModel, this.document);
             return NodeParser.parseExpression(generatedCode);
         }
 

@@ -1,0 +1,86 @@
+event: resp_start
+
+event: libraries
+data: []
+
+event: functions
+data: []
+
+event: message_start
+
+event: content_block_delta
+data: {"text":"\n\nHere's the value"}
+
+event: content_block_delta
+data: {"text":" expression:\n\n<code filename"}
+
+event: content_block_delta
+data: {"text":"=\"main.bal\">"}
+
+event: content_block_delta
+data: {"text":"\n```ballerina\n["}
+
+event: content_block_delta
+data: {"text":"(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"],"}
+
+event: content_block_delta
+data: {"text":"(<map<int>>{\"a\": 1, \"b\": 2})[testStr()],"}
+
+event: content_block_delta
+data: {"text":"(<map<int>>{\"a\": test(), \"b\": 2})[\"a\"],"}
+
+event: content_block_delta
+data: {"text":"1 + 1,"}
+
+event: content_block_delta
+data: {"text":"n + 1,"}
+
+event: content_block_delta
+data: {"text":"-n,"}
+
+event: content_block_delta
+data: {"text":"-2,"}
+
+event: content_block_delta
+data: {"text":"END-2,"}
+
+event: content_block_delta
+data: {"text":"END > 3 ? END - 4: END - 2,"}
+
+event: content_block_delta
+data: {"text":"string `a`,"}
+
+event: content_block_delta
+data: {"text":"string `abc${testStr()}def`,"}
+
+event: content_block_delta
+data: {"text":"<string>string `abc${testStr()}def`,"}
+
+event: content_block_delta
+data: {"text":"<string>string `a`,"}
+
+event: content_block_delta
+data: {"text":"<int>2,"}
+
+event: content_block_delta
+data: {"text":"[1, 2, 3][0],"}
+
+event: content_block_delta
+data: {"text":"[1, test(), 3][0],"}
+
+event: content_block_delta
+data: {"text":"END is int ? 6 : 7,"}
+
+event: content_block_delta
+data: {"text":"n is int ? 6 : n + 1,"}
+
+event: content_block_delta
+data: {"text":"[...[3, 4, 5]][0]"}
+
+event: content_block_delta
+data: {"text":"]\n```\n"}
+
+event: content_block_delta
+data: {"text":"</code>"}
+
+event: message_stop

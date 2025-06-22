@@ -102,7 +102,7 @@ public class CodeGenerationUtils {
     static String generateCodeForNaturalExpression(String copilotUrl, String copilotAccessToken,
                                                    TypeSymbol expectedType, NaturalExpressionNode naturalExpressionNode,
                                                    HttpClient client, JsonArray sourceFiles,
-                                                   SemanticModel semanticModel) {
+                                                   SemanticModel semanticModel, Document document) {
         try {
             String generatedPrompt = generatePrompt(naturalExpressionNode, expectedType, semanticModel);
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
@@ -110,7 +110,7 @@ public class CodeGenerationUtils {
             // TODO: check if we need to call repair, could get complicated.
             return repairIfDiagnosticsExistForConstNaturalExpression(
                     copilotUrl, copilotAccessToken, client, sourceFiles,
-                    generatedPrompt, generatedCode, semanticModel);
+                    generatedPrompt, generatedCode, semanticModel, document);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -185,11 +185,12 @@ public class CodeGenerationUtils {
     }
 
     private static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl,
-                    String copilotAccessToken, HttpClient client, JsonArray sourceFiles,
-                    String generatedPrompt, GeneratedCode generatedCode, SemanticModel semanticModel)
+                                    String copilotAccessToken, HttpClient client, JsonArray sourceFiles,
+                                    String generatedPrompt, GeneratedCode generatedCode, SemanticModel semanticModel,
+                                    Document document)
             throws IOException, URISyntaxException, InterruptedException {
-        JsonArray constantExpressionDiagnostics = new ConstantExpressionVisitor(semanticModel)
-                .checkNonConstExpressions(NodeParser.parseModulePart(generatedCode.code));
+        JsonArray constantExpressionDiagnostics = new ConstantExpressionVisitor(semanticModel, document)
+                .checkNonConstExpressions(NodeParser.parseExpression(generatedCode.code));
 
         if (constantExpressionDiagnostics.isEmpty()) {
             return generatedCode.code;
