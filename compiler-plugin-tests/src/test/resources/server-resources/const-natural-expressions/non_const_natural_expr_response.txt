@@ -132,7 +132,13 @@ event: content_block_delta
 data: {"text" :"(xml `<a>1</a>`/*).toString(), \n"}
 
 event: content_block_delta
-data: {"text" :"[...[3, 4, 5]][0] \n"}
+data: {"text" :"[...[3, 4, 5]][0], \n"}
+
+event: content_block_delta
+data: {"text" :"x->workerName, \n"}
+
+event: content_block_delta
+data: {"text" :"cl->/.post({}), , \n"}
 
 event: content_block_delta
 data: {"text":"]\n```\n"}

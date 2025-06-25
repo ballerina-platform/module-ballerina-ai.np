@@ -16,6 +16,18 @@
   "diagnosticRequest": {
     "diagnostics": [
       {
+        "message": "action invocation as an expression not allowed here"
+      },
+      {
+        "message": "action invocation as an expression not allowed here"
+      },
+      {
+        "message": "missing identifier"
+      },
+      {
+        "message": "missing identifier"
+      },
+      {
         "message": "Error: Generated code should only contains constant expressions. (found: 'testStr()')"
       },
       {
@@ -65,8 +77,17 @@
       },
       {
         "message": "Error: Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`/*')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'x->workerName')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'cl->/.post({})')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: '')"
       }
     ],
-    "response": "\n[<int>(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"], \n<int>(<map<int>>{\"a\": 1, \"b\": 2})[testStr()], \n<int>(<map<int>>{\"a\": test(), \"b\": 2})[\"a\"], \n1 + 1, \n(<int[2]>[1,2])[0], \n1 + 1,check testIntOrError(), \nerror(\"a\").message(), \nnew C(1).a, \n<int & readonly> 1, \nlet int p = 1 in p, \nnew C(1).getA(), \n(base64 `0xAA`).toString(), \n(<record {|string value;|}> \n(A.@testAnnot)).value, \nn + 1, \n-n,-2, \n<int>[<object {}>new C(1),  \n1, object{},  \n((<record{|int a?;|}>{a: 1})?.a),  \n(<table<A>> table[{a: 1}])][1], \n<string>([(), \"a\"][1]), \nEND-2,<1>1, \n(<int[]>(from int i in (<stream<int>>([1].toStream())) select i))[0], \n<string>[(trap testStr()) is error ? \"error\" : \"success\", <[int]>[1],  typeof n, typeof 1,  n is int,  1 is int,  <int|string>2][0], \nEND > 3 ? END - 4: END - 2, \nstring `a`, \nstring `abc${testStr()}def`, \n<string>string `abc${testStr()}def`, \n<string>string `a`, \n<int>2, \n[1, 2, 3][0], \n[1, test(), 3][0], \nEND is int ? 6 : 7, \nn is int ? 6 : n + 1, \nxml `<a>1</a>`.<a>.toString(), \n(xml `<a>1</a>`/*).toString(), \n[...[3, 4, 5]][0] \n]\n"
+    "response": "\n[<int>(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"], \n<int>(<map<int>>{\"a\": 1, \"b\": 2})[testStr()], \n<int>(<map<int>>{\"a\": test(), \"b\": 2})[\"a\"], \n1 + 1, \n(<int[2]>[1,2])[0], \n1 + 1,check testIntOrError(), \nerror(\"a\").message(), \nnew C(1).a, \n<int & readonly> 1, \nlet int p = 1 in p, \nnew C(1).getA(), \n(base64 `0xAA`).toString(), \n(<record {|string value;|}> \n(A.@testAnnot)).value, \nn + 1, \n-n,-2, \n<int>[<object {}>new C(1),  \n1, object{},  \n((<record{|int a?;|}>{a: 1})?.a),  \n(<table<A>> table[{a: 1}])][1], \n<string>([(), \"a\"][1]), \nEND-2,<1>1, \n(<int[]>(from int i in (<stream<int>>([1].toStream())) select i))[0], \n<string>[(trap testStr()) is error ? \"error\" : \"success\", <[int]>[1],  typeof n, typeof 1,  n is int,  1 is int,  <int|string>2][0], \nEND > 3 ? END - 4: END - 2, \nstring `a`, \nstring `abc${testStr()}def`, \n<string>string `abc${testStr()}def`, \n<string>string `a`, \n<int>2, \n[1, 2, 3][0], \n[1, test(), 3][0], \nEND is int ? 6 : 7, \nn is int ? 6 : n + 1, \nxml `<a>1</a>`.<a>.toString(), \n(xml `<a>1</a>`/*).toString(), \n[...[3, 4, 5]][0], \nx->workerName, \ncl->/.post({}), , \n]\n"
   }
 }

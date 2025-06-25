@@ -25,6 +25,7 @@ import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.InterpolationNode;
@@ -178,11 +179,11 @@ public class CodeGenerationUtils {
         return extractAndReturnTheBallerinaCode(repairResponse, generatedCode, sourceFiles);
     }
 
-    public static JsonArray getDiagnosticsOfNaturalExpressionNode(NaturalExpressionNode naturalExpressionNode,
-                                  SemanticModel semanticModel, Document document,
-                                  GeneratedCode generatedCode) {
+    public static JsonArray getDiagnosticsOfNaturalExpressionNode(ExpressionNode expNode,
+                                                                  SemanticModel semanticModel, Document document,
+                                                                  GeneratedCode generatedCode) {
         JsonArray diagnostics = new JsonArray();
-        Iterable<Diagnostic> projectDiagnostics = naturalExpressionNode.diagnostics();
+        Iterable<Diagnostic> projectDiagnostics = expNode.diagnostics();
 
         projectDiagnostics.forEach(diagnostic -> {
             JsonObject diagnosticObj = new JsonObject();
@@ -193,7 +194,7 @@ public class CodeGenerationUtils {
         JsonArray constantExpressionDiagnostics = new ConstantExpressionVisitor(semanticModel, document)
                 .checkNonConstExpressions(NodeParser.parseExpression(generatedCode.code));
         diagnostics.addAll(constantExpressionDiagnostics);
-        return constantExpressionDiagnostics;
+        return diagnostics;
     }
 
     public static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl,

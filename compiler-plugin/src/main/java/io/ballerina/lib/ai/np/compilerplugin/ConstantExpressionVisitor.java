@@ -343,7 +343,7 @@ class ConstantExpressionVisitor extends NodeVisitor {
     }
 
     public void visit(ExpressionNode expressionNode) {
-        visitSyntaxNode(expressionNode);
+        super.visitSyntaxNode(expressionNode);
     }
 
     public void visitSyntaxNode(Node node) {

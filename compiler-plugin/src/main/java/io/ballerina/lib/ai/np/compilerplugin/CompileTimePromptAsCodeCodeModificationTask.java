@@ -231,7 +231,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
 
             ExpressionNode modifiedExpressionNode = NodeParser.parseExpression(generatedCode.code());
             JsonArray diagnostics =
-                    getDiagnosticsOfNaturalExpressionNode(naturalExpressionNode, semanticModel, document,
+                    getDiagnosticsOfNaturalExpressionNode(modifiedExpressionNode, semanticModel, document,
                             generatedCode);
             if (!diagnostics.isEmpty()) {
                 try {
