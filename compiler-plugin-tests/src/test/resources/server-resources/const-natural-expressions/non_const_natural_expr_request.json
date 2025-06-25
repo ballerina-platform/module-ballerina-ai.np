@@ -3,7 +3,7 @@
   "sourceFiles": [
     {
       "filePath": "main.bal",
-      "content": "import ballerina/io;\n\nconst END = 100000;\n\nint n = 3;\n\nfunction getIntegers() returns (int|string)[]|error => const natural {\n    Give me an array of with integers between 1000 and ${END} and strings.\n};\n\npublic function main() {\n    io:println(getIntegers());\n}\n\nfunction test() returns int {\n    return END;\n}\n\nfunction testStr() returns string {\n    return \"1\";\n}\n"
+      "content": "import ballerina/io;\nimport ballerina/http;\n\nconst END = 100000;\n\nint n = 3;\n\nfinal http:Client cl = check new (\"http://localhost:9090\");\n\nconst annotation record{|string value;|} testAnnot on type;\n\n@testAnnot {\n    value: \"val\"\n}\ntype A record {\n    int a;\n};\n\nclass C {\n    public int a = 1;\n    function init(int a) {\n        self.a = a;\n    }\n\n    public function getA() returns int {\n        return self.a;\n    }\n}\n\nfunction getIntegers() returns (int|string)[]|error => const natural {\n    Give me an array of with integers between 1000 and ${END} and strings.\n};\n\npublic function main() {\n    worker workerName {\n\n    }\n\n    io:println(getIntegers());\n}\n\nfunction test() returns int {\n    return END;\n}\n\nfunction testIntOrError() returns int|error {\n    return END;\n}\n\nfunction testStr() returns string {\n    return \"1\";\n}\n"
     }
   ]
 }

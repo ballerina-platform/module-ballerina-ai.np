@@ -99,18 +99,12 @@ public class CodeGenerationUtils {
         }
     }
 
-    static String generateCodeForNaturalExpression(String copilotUrl, String copilotAccessToken,
-                                                   TypeSymbol expectedType, NaturalExpressionNode naturalExpressionNode,
-                                                   HttpClient client, JsonArray sourceFiles,
-                                                   SemanticModel semanticModel, Document document) {
+    static GeneratedCode generateCodeForNaturalExpression(String copilotUrl, String copilotAccessToken,
+                                                  HttpClient client, JsonArray sourceFiles, String generatedPrompt) {
         try {
-            String generatedPrompt = generatePrompt(naturalExpressionNode, expectedType, semanticModel);
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
                     generatedPrompt);
-            // TODO: check if we need to call repair, could get complicated.
-            return repairIfDiagnosticsExistForConstNaturalExpression(
-                    copilotUrl, copilotAccessToken, client, sourceFiles,
-                    generatedPrompt, generatedCode, semanticModel, document);
+            return generatedCode;
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -184,21 +178,31 @@ public class CodeGenerationUtils {
         return extractAndReturnTheBallerinaCode(repairResponse, generatedCode, sourceFiles);
     }
 
-    private static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl,
-                                    String copilotAccessToken, HttpClient client, JsonArray sourceFiles,
-                                    String generatedPrompt, GeneratedCode generatedCode, SemanticModel semanticModel,
-                                    Document document)
-            throws IOException, URISyntaxException, InterruptedException {
+    public static JsonArray getDiagnosticsOfNaturalExpressionNode(NaturalExpressionNode naturalExpressionNode,
+                                  SemanticModel semanticModel, Document document,
+                                  GeneratedCode generatedCode) {
+        JsonArray diagnostics = new JsonArray();
+        Iterable<Diagnostic> projectDiagnostics = naturalExpressionNode.diagnostics();
+
+        projectDiagnostics.forEach(diagnostic -> {
+            JsonObject diagnosticObj = new JsonObject();
+            diagnosticObj.addProperty("message", diagnostic.message());
+            diagnostics.add(diagnosticObj);
+        });
+
         JsonArray constantExpressionDiagnostics = new ConstantExpressionVisitor(semanticModel, document)
                 .checkNonConstExpressions(NodeParser.parseExpression(generatedCode.code));
+        diagnostics.addAll(constantExpressionDiagnostics);
+        return constantExpressionDiagnostics;
+    }
 
-        if (constantExpressionDiagnostics.isEmpty()) {
-            return generatedCode.code;
-        }
-
+    public static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl,
+                                   String copilotAccessToken, HttpClient client, JsonArray sourceFiles,
+                                   String generatedPrompt, GeneratedCode generatedCode, JsonArray diagnostics)
+            throws IOException, URISyntaxException, InterruptedException {
         String repairResponse = repairCodeForConstNaturalExpressions(
                 copilotUrl, copilotAccessToken, client, sourceFiles,
-                generatedPrompt, generatedCode, constantExpressionDiagnostics);
+                generatedPrompt, generatedCode, diagnostics);
 
         return extractAndReturnTheBallerinaCode(repairResponse, generatedCode, sourceFiles);
     }
@@ -408,7 +412,7 @@ public class CodeGenerationUtils {
                 responseBodyString.lastIndexOf(TRIPLE_BACKTICK));
     }
 
-    private record GeneratedCode(String code, JsonArray functions) { }
+    public record GeneratedCode(String code, JsonArray functions) { }
 
     private static JsonObject constructCodeGenerationPayload(String prompt, JsonArray sourceFiles) {
         JsonObject payload = new JsonObject();
@@ -445,7 +449,7 @@ public class CodeGenerationUtils {
                 originalFuncName, prompt, generatedFuncName, generatedFuncName, originalFuncName);
     }
 
-    private static String generatePrompt(NaturalExpressionNode naturalExpressionNode,
+    public static String generatePrompt(NaturalExpressionNode naturalExpressionNode,
                                          TypeSymbol expectedType, SemanticModel semanticModel) {
         NodeList<Node> userPromptContent = naturalExpressionNode.prompt();
         StringBuilder sb = new StringBuilder(String.format("""

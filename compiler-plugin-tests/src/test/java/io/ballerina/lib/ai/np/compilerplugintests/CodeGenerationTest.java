@@ -108,7 +108,7 @@ public class CodeGenerationTest {
 
         final Path projectPath = RESOURCE_DIRECTORY
                 .resolve("const-natural-expressions")
-                .resolve("const_natural_expr_with_error_handling");
+                .resolve("const_natural_expr_with_validation");
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
@@ -168,103 +168,36 @@ public class CodeGenerationTest {
     }
 
     @Test
-    public void testCodeFunctionWithExternalImportStatements() throws IOException, InterruptedException {
+    public void testCodeFunctionWithValidation() throws IOException, InterruptedException {
         server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions-with-external-imports",
-                        "code_function_with_external_imports_code_response.txt"))
+                .setBody(getCodeMockResponse("code-functions-with-validations",
+                        "code_function_with_validations_code_response.txt"))
                 .setResponseCode(200));
         server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions-with-external-imports",
-                        "code_function_with_external_imports_repair_response.json"))
+                .setBody(getCodeMockResponse("code-functions-with-validations",
+                        "code_function_with_validations_repair_response.json"))
                 .setResponseCode(200)
                 .setHeader("Content-type", "application/json"));
 
-        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions-with-external-imports");
+        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions-with-validations");
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(CODE_PATH, "code-functions-with-external-imports",
-                "code_function_with_external_imports_request.json");
-        assertRepairRequest("code-functions-with-external-imports",
-                "code_function_with_external_imports_repair_request.json");
+        assertRequest(CODE_PATH, "code-functions-with-validations",
+                "code_function_with_validations_code_request.json");
+        assertRepairRequest("code-functions-with-validations",
+                "code_function_with_validations_repair_request.json");
 
         // Validate that a second repair doesn't happen.
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
         Assert.assertNull(recordedRequest);
 
-        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-external-imports",
-                "sortEmployees_np_generated.bal");
+        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-validations",
+                "calculateTotalPrice_np_generated.bal");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
-                "[{\"name\":\"David\",\"salary\":70000},{\"name\":\"Bob\",\"salary\":60000}," +
-                        "{\"name\":\"Alice\",\"salary\":50000},{\"name\":\"Charlie\",\"salary\":50000}]");
-    }
-
-    @Test
-    public void testCodeFunctionWithModuleLevelVariables() throws IOException, InterruptedException {
-        server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions-with-module-var-reference",
-                        "code_function_with_module_var_reference_code_response.txt"))
-                .setResponseCode(200));
-        server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions-with-module-var-reference",
-                        "code_function_with_module_var_reference_repair_response.json"))
-                .setResponseCode(200)
-                .setHeader("Content-type", "application/json"));
-
-        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions-with-module-var-reference");
-        final Project naturalExprProject = loadPackageProject(projectPath);
-        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
-
-        assertRequest(CODE_PATH, "code-functions-with-module-var-reference",
-                "code_function_with_module_var_reference_request.json");
-        assertRepairRequest("code-functions-with-module-var-reference",
-                "code_function_with_module_var_reference_repair_request.json");
-
-        // Validate that a second repair doesn't happen.
-        RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
-        Assert.assertNull(recordedRequest);
-
-        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-module-var-reference",
-                "calculateThePrice_np_generated.bal");
-
-        Assert.assertEquals(
-                buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
-                "Total after discount: 540.0");
-    }
-
-    @Test
-    public void testCodeFunctionWithConfigurableVariables() throws IOException, InterruptedException {
-        server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions-with-config-var-reference",
-                        "code_function_with_config_var_reference_code_response.txt"))
-                .setResponseCode(200));
-        server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions-with-config-var-reference",
-                        "code_function_with_config_var_reference_repair_response.json"))
-                .setResponseCode(200)
-                .setHeader("Content-type", "application/json"));
-
-        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions-with-config-var-reference");
-        final Project naturalExprProject = loadPackageProject(projectPath);
-        naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
-
-        assertRequest(CODE_PATH, "code-functions-with-config-var-reference",
-                "code_function_with_config_var_reference_request.json");
-        assertRepairRequest("code-functions-with-config-var-reference",
-                "code_function_with_config_var_reference_repair_request.json");
-
-        // Validate that a second repair doesn't happen.
-        RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
-        Assert.assertNull(recordedRequest);
-
-        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-config-var-reference",
-                "calculateThePrice_np_generated.bal");
-
-        Assert.assertEquals(
-                buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
-                "Total after discount: 540.0");
+                "Total price: 110.54556");
     }
 
     @AfterSuite
@@ -339,7 +272,15 @@ public class CodeGenerationTest {
             throws InterruptedException, IOException {
         JsonObject expectedPayload = getExpectedPayload(dirname, repairRequestJsonFileName);
         JsonObject diagnosticsRequest = expectedPayload.getAsJsonObject("diagnosticRequest");
+        if (diagnosticsRequest == null) {
+            Assert.fail("Expected 'diagnosticRequest' field not found in the payload");
+        }
+
         JsonArray diagnostics = diagnosticsRequest.getAsJsonArray("diagnostics");
+        if (diagnostics == null) {
+            Assert.fail("Expected 'diagnostics' array not found in the payload");
+        }
+
         for (int i = 0; i < diagnostics.size(); i++) {
             String message = diagnostics.get(i).getAsJsonObject().getAsJsonPrimitive("message").
                     getAsString().replace("generated/functions",

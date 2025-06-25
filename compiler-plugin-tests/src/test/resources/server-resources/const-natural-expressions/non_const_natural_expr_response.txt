@@ -21,61 +21,118 @@ event: content_block_delta
 data: {"text":"\n```ballerina\n["}
 
 event: content_block_delta
-data: {"text":"(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"],"}
+data: {"text" :"<int>(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"], \n"}
 
 event: content_block_delta
-data: {"text":"(<map<int>>{\"a\": 1, \"b\": 2})[testStr()],"}
+data: {"text" :"<int>(<map<int>>{\"a\": 1, \"b\": 2})[testStr()], \n"}
 
 event: content_block_delta
-data: {"text":"(<map<int>>{\"a\": test(), \"b\": 2})[\"a\"],"}
+data: {"text" :"<int>(<map<int>>{\"a\": test(), \"b\": 2})[\"a\"], \n"}
 
 event: content_block_delta
-data: {"text":"1 + 1,"}
+data: {"text" :"1 + 1, \n"}
 
 event: content_block_delta
-data: {"text":"n + 1,"}
+data: {"text" :"(<int[2]>[1,2])[0], \n"}
 
 event: content_block_delta
-data: {"text":"-n,"}
+data: {"text" :"1 + 1,check testIntOrError(), \n"}
 
 event: content_block_delta
-data: {"text":"-2,"}
+data: {"text" :"error(\"a\").message(), \n"}
 
 event: content_block_delta
-data: {"text":"END-2,"}
+data: {"text" :"new C(1).a, \n"}
 
 event: content_block_delta
-data: {"text":"END > 3 ? END - 4: END - 2,"}
+data: {"text" :"<int & readonly> 1, \n"}
 
 event: content_block_delta
-data: {"text":"string `a`,"}
+data: {"text" :"let int p = 1 in p, \n"}
 
 event: content_block_delta
-data: {"text":"string `abc${testStr()}def`,"}
+data: {"text" :"new C(1).getA(), \n"}
 
 event: content_block_delta
-data: {"text":"<string>string `abc${testStr()}def`,"}
+data: {"text" :"(base64 `0xAA`).toString(), \n"}
 
 event: content_block_delta
-data: {"text":"<string>string `a`,"}
+data: {"text" :"(<record {|string value;|}> \n"}
 
 event: content_block_delta
-data: {"text":"<int>2,"}
+data: {"text" :"(A.@testAnnot)).value, \n"}
 
 event: content_block_delta
-data: {"text":"[1, 2, 3][0],"}
+data: {"text" :"n + 1, \n"}
 
 event: content_block_delta
-data: {"text":"[1, test(), 3][0],"}
+data: {"text" :"-n,-2, \n"}
+
+event: content_block_data
+data: {"text" :"io:COLON, \n"}
 
 event: content_block_delta
-data: {"text":"END is int ? 6 : 7,"}
+data: {"text" :"<int>[<object {}>new C(1),  \n"}
 
 event: content_block_delta
-data: {"text":"n is int ? 6 : n + 1,"}
+data: {"text" :"1, object{},  \n"}
 
 event: content_block_delta
-data: {"text":"[...[3, 4, 5]][0]"}
+data: {"text" :"((<record{|int a?;|}>{a: 1})?.a),  \n"}
+
+event: content_block_delta
+data: {"text" :"(<table<A>> table[{a: 1}])][1], \n"}
+
+event: content_block_delta
+data: {"text" :"<string>([(), \"a\"][1]), \n"}
+
+event: content_block_delta
+data: {"text" :"END-2,<1>1, \n"}
+
+event: content_block_delta
+data: {"text" :"(<int[]>(from int i in (<stream<int>>([1].toStream())) select i))[0], \n"}
+
+event: content_block_delta
+data: {"text" :"<string>[(trap testStr()) is error ? \"error\" : \"success\", <[int]>[1],  typeof n, typeof 1,  n is int,  1 is int,  <int|string>2][0], \n"}
+
+event: content_block_delta
+data: {"text" :"END > 3 ? END - 4: END - 2, \n"}
+
+event: content_block_delta
+data: {"text" :"string `a`, \n"}
+
+event: content_block_delta
+data: {"text" :"string `abc${testStr()}def`, \n"}
+
+event: content_block_delta
+data: {"text" :"<string>string `abc${testStr()}def`, \n"}
+
+event: content_block_delta
+data: {"text" :"<string>string `a`, \n"}
+
+event: content_block_delta
+data: {"text" :"<int>2, \n"}
+
+event: content_block_delta
+data: {"text" :"[1, 2, 3][0], \n"}
+
+event: content_block_delta
+data: {"text" :"[1, test(), 3][0], \n"}
+
+event: content_block_delta
+data: {"text" :"END is int ? 6 : 7, \n"}
+
+event: content_block_delta
+data: {"text" :"n is int ? 6 : n + 1, \n"}
+
+event: content_block_delta
+data: {"text" :"xml `<a>1</a>`.<a>.toString(), \n"}
+
+event: content_block_delta
+data: {"text" :"(xml `<a>1</a>`/*).toString(), \n"}
+
+event: content_block_delta
+data: {"text" :"[...[3, 4, 5]][0] \n"}
 
 event: content_block_delta
 data: {"text":"]\n```\n"}

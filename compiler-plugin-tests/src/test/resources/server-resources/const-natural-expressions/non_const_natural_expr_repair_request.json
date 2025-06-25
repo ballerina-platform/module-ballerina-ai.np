@@ -3,7 +3,7 @@
   "sourceFiles": [
     {
       "filePath": "main.bal",
-      "content": "import ballerina/io;\n\nconst END = 100000;\n\nint n = 3;\n\nfunction getIntegers() returns (int|string)[]|error => const natural {\n    Give me an array of with integers between 1000 and ${END} and strings.\n};\n\npublic function main() {\n    io:println(getIntegers());\n}\n\nfunction test() returns int {\n    return END;\n}\n\nfunction testStr() returns string {\n    return \"1\";\n}\n"
+      "content": "import ballerina/io;\nimport ballerina/http;\n\nconst END = 100000;\n\nint n = 3;\n\nfinal http:Client cl = check new (\"http://localhost:9090\");\n\nconst annotation record{|string value;|} testAnnot on type;\n\n@testAnnot {\n    value: \"val\"\n}\ntype A record {\n    int a;\n};\n\nclass C {\n    public int a = 1;\n    function init(int a) {\n        self.a = a;\n    }\n\n    public function getA() returns int {\n        return self.a;\n    }\n}\n\nfunction getIntegers() returns (int|string)[]|error => const natural {\n    Give me an array of with integers between 1000 and ${END} and strings.\n};\n\npublic function main() {\n    worker workerName {\n\n    }\n\n    io:println(getIntegers());\n}\n\nfunction test() returns int {\n    return END;\n}\n\nfunction testIntOrError() returns int|error {\n    return END;\n}\n\nfunction testStr() returns string {\n    return \"1\";\n}\n"
     }
   ],
   "chatHistory": [
@@ -19,15 +19,54 @@
         "message": "Error: Generated code should only contains constant expressions. (found: 'testStr()')"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: '\"a\": test()')"
-      },
-      {
-        "message": "Error: Generated code should only contains constant expressions. (found: '${testStr()}')"
-      },
-      {
         "message": "Error: Generated code should only contains constant expressions. (found: 'test()')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'check testIntOrError()')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'error(\"a\")')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'new C(1)')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'let int p = 1 in p')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'A.@testAnnot')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'n ')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'n')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'object{}')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'a')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'END')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'from int i in (<stream<int>>([1].toStream())) select i')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'trap testStr()')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'END ')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`.<a>')"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`/*')"
       }
     ],
-    "response": "\n[(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"],(<map<int>>{\"a\": 1, \"b\": 2})[testStr()],(<map<int>>{\"a\": test(), \"b\": 2})[\"a\"],1 + 1,n + 1,-n,-2,END-2,END > 3 ? END - 4: END - 2,string `a`,string `abc${testStr()}def`,<string>string `abc${testStr()}def`,<string>string `a`,<int>2,[1, 2, 3][0],[1, test(), 3][0],END is int ? 6 : 7,n is int ? 6 : n + 1,[...[3, 4, 5]][0]]\n"
+    "response": "\n[<int>(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"], \n<int>(<map<int>>{\"a\": 1, \"b\": 2})[testStr()], \n<int>(<map<int>>{\"a\": test(), \"b\": 2})[\"a\"], \n1 + 1, \n(<int[2]>[1,2])[0], \n1 + 1,check testIntOrError(), \nerror(\"a\").message(), \nnew C(1).a, \n<int & readonly> 1, \nlet int p = 1 in p, \nnew C(1).getA(), \n(base64 `0xAA`).toString(), \n(<record {|string value;|}> \n(A.@testAnnot)).value, \nn + 1, \n-n,-2, \n<int>[<object {}>new C(1),  \n1, object{},  \n((<record{|int a?;|}>{a: 1})?.a),  \n(<table<A>> table[{a: 1}])][1], \n<string>([(), \"a\"][1]), \nEND-2,<1>1, \n(<int[]>(from int i in (<stream<int>>([1].toStream())) select i))[0], \n<string>[(trap testStr()) is error ? \"error\" : \"success\", <[int]>[1],  typeof n, typeof 1,  n is int,  1 is int,  <int|string>2][0], \nEND > 3 ? END - 4: END - 2, \nstring `a`, \nstring `abc${testStr()}def`, \n<string>string `abc${testStr()}def`, \n<string>string `a`, \n<int>2, \n[1, 2, 3][0], \n[1, test(), 3][0], \nEND is int ? 6 : 7, \nn is int ? 6 : n + 1, \nxml `<a>1</a>`.<a>.toString(), \n(xml `<a>1</a>`/*).toString(), \n[...[3, 4, 5]][0] \n]\n"
   }
 }

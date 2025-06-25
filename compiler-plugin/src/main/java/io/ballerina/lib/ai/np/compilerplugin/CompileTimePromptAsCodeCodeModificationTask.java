@@ -26,6 +26,7 @@ import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ExternalFunctionSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.BaseNodeModifier;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
@@ -83,6 +84,18 @@ import static io.ballerina.lib.ai.np.compilerplugin.Commons.CONTENT;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.FILE_PATH;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.isCodeAnnotation;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.isLangNaturalModule;
+import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
+import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForNaturalExpression;
+import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generatePrompt;
+import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.getDiagnosticsOfNaturalExpressionNode;
+import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.repairIfDiagnosticsExistForConstNaturalExpression;
+import static io.ballerina.lib.np.compilerplugin.Commons.BAL_EXT;
+import static io.ballerina.lib.np.compilerplugin.Commons.CODE_ANNOTATION;
+import static io.ballerina.lib.np.compilerplugin.Commons.CONTENT;
+import static io.ballerina.lib.np.compilerplugin.Commons.FILE_PATH;
+import static io.ballerina.lib.np.compilerplugin.Commons.LANG_ANNOTATIONS_MODULE;
+import static io.ballerina.lib.np.compilerplugin.Commons.isCodeAnnotation;
+import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
 
 /**
  * Code modification task to replace generate code based on a prompt and replace.
@@ -208,10 +221,29 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             if (naturalExpressionNode.constKeyword().isEmpty()) {
                 return naturalExpressionNode;
             }
-            String generatedCode = generateCodeForNaturalExpression(copilotUrl, copilotAccessToken,
-                    semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get(),
-                    naturalExpressionNode, getHttpClient(), this.getSourceFiles(), semanticModel, this.document);
-            return NodeParser.parseExpression(generatedCode);
+
+            TypeSymbol expectedType =
+                    semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get();
+            String generatedPrompt = generatePrompt(naturalExpressionNode, expectedType, semanticModel);
+            CodeGenerationUtils.GeneratedCode
+                    generatedCode = generateCodeForNaturalExpression(copilotUrl, copilotAccessToken,
+                    getHttpClient(), this.getSourceFiles(), generatedPrompt);
+
+            ExpressionNode modifiedExpressionNode = NodeParser.parseExpression(generatedCode.code());
+            JsonArray diagnostics =
+                    getDiagnosticsOfNaturalExpressionNode(naturalExpressionNode, semanticModel, document,
+                            generatedCode);
+            if (!diagnostics.isEmpty()) {
+                try {
+                    String repairedExpression = repairIfDiagnosticsExistForConstNaturalExpression(
+                            copilotUrl, copilotAccessToken, client, sourceFiles,
+                            generatedPrompt, generatedCode, diagnostics);
+                    return NodeParser.parseExpression(repairedExpression);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return modifiedExpressionNode;
         }
 
         private void handleGeneratedCode(String originalFuncName, String generatedCode) {
