@@ -1,8 +1,5 @@
 [package]
-org = "admin"
-name = "const_natural_expr_with_error_handling"
+org = "np_test"
+name = "const_natural_expr_with_validation"
 version = "0.1.0"
-distribution = "2201.13.0-m2"
-
-[build-options]
-observabilityIncluded = true
+distribution = "2201.13.0"
