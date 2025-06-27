@@ -27,6 +27,9 @@ event: content_block_delta
 data: {"text":"import ballerina/io as _;\n"}
 
 event: content_block_delta
+data: {"text":"import ballerina/http;\n"}
+
+event: content_block_delta
 data: {"text":"import xlibb/test2 as _;\n"}
 
 event: content_block_delta
@@ -70,6 +73,12 @@ data: {"text":"    }\n"}
 
 event: content_block_delta
 data: {"text":"    decimal tax = discountedTotal * taxRate;\n"}
+
+event: content_block_delta
+data: {"text":"   _ = http:defaultListenerPort; // added for test qualified config references;\n"}
+
+event: content_block_delta
+data: {"text":"   _ = http:AUTH_HEADER; // added for test qualified module level references;\n"}
 
 event: content_block_delta
 data: {"text":"    decimal finalTotal = discountedTotal + tax;\n"}

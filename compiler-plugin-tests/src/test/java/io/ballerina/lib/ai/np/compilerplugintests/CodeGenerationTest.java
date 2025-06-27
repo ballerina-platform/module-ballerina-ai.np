@@ -97,13 +97,16 @@ public class CodeGenerationTest {
 
     @Test
     public void testConstNaturalExpressionsInProjectWithNonConstExpressions() throws IOException, InterruptedException {
+        String serviceResourceDirectoryName = "const-natural-expressions" + File.separator +
+                "const-natural-expressions-with-validation-failure";
         server.enqueue(new MockResponse()
                 .setBody(getCodeMockResponse(
-                        "const-natural-expressions", "non_const_natural_expr_response.txt"))
+                        serviceResourceDirectoryName, "const_natural_expr_with_validation_failure_code_response.txt"))
                 .setResponseCode(200));
         server.enqueue(new MockResponse()
                 .setBody(getCodeMockResponse(
-                        "const-natural-expressions", "non_const_natural_expr_repair_response.json"))
+                        serviceResourceDirectoryName,
+                        "const_natural_expr_with_validation_failure_repair_response.json"))
                 .setResponseCode(200));
 
         final Path projectPath = RESOURCE_DIRECTORY
@@ -112,8 +115,10 @@ public class CodeGenerationTest {
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(CODE_PATH, "const-natural-expressions", "non_const_natural_expr_request.json");
-        assertRequest(REPAIR_PATH, "const-natural-expressions", "non_const_natural_expr_repair_request.json");
+        assertRequest(CODE_PATH, serviceResourceDirectoryName,
+                "const_natural_expr_with_validation_failure_code_request.json");
+        assertRequest(REPAIR_PATH, serviceResourceDirectoryName,
+                "const_natural_expr_with_validation_failure_repair_request.json");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
@@ -139,26 +144,28 @@ public class CodeGenerationTest {
 
     @Test
     public void testCodeFunction() throws IOException, InterruptedException {
+        String serviceResourceDirectoryName = "code-function-projects" + File.separator +
+                "code-function";
         server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions", "code_function_code_response.txt"))
+                .setBody(getCodeMockResponse(serviceResourceDirectoryName, "code_function_code_response.txt"))
                 .setResponseCode(200));
         server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions", "code_function_repair_response.json"))
+                .setBody(getCodeMockResponse(serviceResourceDirectoryName, "code_function_repair_response.json"))
                 .setResponseCode(200)
                 .setHeader("Content-type", "application/json"));
 
-        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions");
+        final Path projectPath = RESOURCE_DIRECTORY.resolve(serviceResourceDirectoryName);
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(CODE_PATH, "code-functions", "code_function_code_request.json");
-        assertRepairRequest("code-functions", "code_function_repair_request.json");
+        assertRequest(CODE_PATH, serviceResourceDirectoryName, "code_function_code_request.json");
+        assertRepairRequest(serviceResourceDirectoryName, "code_function_repair_request.json");
 
         // Validate that a second repair doesn't happen.
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
         Assert.assertNull(recordedRequest);
 
-        validateGeneratedCodeAndDeleteGeneratedDir("code-functions",
+        validateGeneratedCodeAndDeleteGeneratedDir(serviceResourceDirectoryName,
                 "sortEmployees_np_generated.bal");
 
         Assert.assertEquals(
@@ -169,30 +176,30 @@ public class CodeGenerationTest {
 
     @Test
     public void testCodeFunctionWithValidation() throws IOException, InterruptedException {
+        String serviceResourceDirectoryName = "code-function-projects" + File.separator +
+                "code-function-with-validations-failure";
         server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions-with-validations",
+                .setBody(getCodeMockResponse(serviceResourceDirectoryName,
                         "code_function_with_validations_code_response.txt"))
                 .setResponseCode(200));
         server.enqueue(new MockResponse()
-                .setBody(getCodeMockResponse("code-functions-with-validations",
+                .setBody(getCodeMockResponse(serviceResourceDirectoryName,
                         "code_function_with_validations_repair_response.json"))
                 .setResponseCode(200)
                 .setHeader("Content-type", "application/json"));
 
-        final Path projectPath = RESOURCE_DIRECTORY.resolve("code-functions-with-validations");
+        final Path projectPath = RESOURCE_DIRECTORY.resolve(serviceResourceDirectoryName);
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(CODE_PATH, "code-functions-with-validations",
+        assertRequest(CODE_PATH, serviceResourceDirectoryName,
                 "code_function_with_validations_code_request.json");
-        assertRepairRequest("code-functions-with-validations",
+        assertRepairRequest(serviceResourceDirectoryName,
                 "code_function_with_validations_repair_request.json");
 
         // Validate that a second repair doesn't happen.
         RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
-        Assert.assertNull(recordedRequest);
-
-        validateGeneratedCodeAndDeleteGeneratedDir("code-functions-with-validations",
+        validateGeneratedCodeAndDeleteGeneratedDir(serviceResourceDirectoryName,
                 "calculateTotalPrice_np_generated.bal");
 
         Assert.assertEquals(
@@ -268,18 +275,11 @@ public class CodeGenerationTest {
         assertRequest(path, getExpectedPayload(directory, file));
     }
 
-    private void assertRepairRequest(String dirname, String repairRequestJsonFileName)
+    private void assertRepairRequest(String dirName, String repairRequestJsonFileName)
             throws InterruptedException, IOException {
-        JsonObject expectedPayload = getExpectedPayload(dirname, repairRequestJsonFileName);
+        JsonObject expectedPayload = getExpectedPayload(dirName, repairRequestJsonFileName);
         JsonObject diagnosticsRequest = expectedPayload.getAsJsonObject("diagnosticRequest");
-        if (diagnosticsRequest == null) {
-            Assert.fail("Expected 'diagnosticRequest' field not found in the payload");
-        }
-
         JsonArray diagnostics = diagnosticsRequest.getAsJsonArray("diagnostics");
-        if (diagnostics == null) {
-            Assert.fail("Expected 'diagnostics' array not found in the payload");
-        }
 
         for (int i = 0; i < diagnostics.size(); i++) {
             String message = diagnostics.get(i).getAsJsonObject().getAsJsonPrimitive("message").

@@ -1,29 +1,30 @@
-import ballerina/io;
 import ballerina/http;
+import ballerina/io;
 
 const END = 100000;
 
-int n = 3;
+int number = 3;
 
-final http:Client cl = check new ("http://localhost:9090");
+final http:Client 'client = check new ("http://localhost:9090");
 
-const annotation record{|string value;|} testAnnot on type;
+const annotation record {|string value;|} RecordAnnot on type;
 
-@testAnnot {
+@RecordAnnot {
     value: "val"
 }
-type A record {
+type recordType record {
     int a;
 };
 
-class C {
-    public int a = 1;
-    function init(int a) {
-        self.a = a;
+class TestClass {
+    public int num;
+
+    function init(int num) {
+        self.num = num;
     }
 
-    public function getA() returns int {
-        return self.a;
+    public function getNum() returns int {
+        return self.num;
     }
 }
 
@@ -32,14 +33,14 @@ function getIntegers() returns (int|string)[]|error => const natural {
 };
 
 public function main() {
-    worker workerName {
+    worker w1 {
 
     }
 
     io:println(getIntegers());
 }
 
-function test() returns int {
+function getInteger() returns int {
     return END;
 }
 
@@ -47,6 +48,6 @@ function testIntOrError() returns int|error {
     return END;
 }
 
-function testStr() returns string {
+function getString() returns string {
     return "1";
 }

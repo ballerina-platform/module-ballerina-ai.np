@@ -73,7 +73,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.lib.ai.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
@@ -86,9 +85,6 @@ import static io.ballerina.lib.ai.np.compilerplugin.Commons.isCodeAnnotation;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.isLangNaturalModule;
 import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
 import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForNaturalExpression;
-import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generatePrompt;
-import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.getDiagnosticsOfNaturalExpressionNode;
-import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.repairIfDiagnosticsExistForConstNaturalExpression;
 import static io.ballerina.lib.np.compilerplugin.Commons.BAL_EXT;
 import static io.ballerina.lib.np.compilerplugin.Commons.CODE_ANNOTATION;
 import static io.ballerina.lib.np.compilerplugin.Commons.CONTENT;
@@ -206,7 +202,8 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             String prompt = getPrompt(functionDefinition, semanticModel);
             String generatedCode = generateCodeForFunction(copilotUrl, copilotAccessToken, funcName,
                     generatedFuncName, prompt, getHttpClient(),
-                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor());
+                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor(),
+                    document.module().project().currentPackage().packageOrg().value());
             handleGeneratedCode(funcName, generatedCode);
             ExpressionFunctionBodyNode expressionFunctionBody =
                     NodeFactory.createExpressionFunctionBodyNode(
@@ -224,33 +221,14 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
 
             TypeSymbol expectedType =
                     semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get();
-            String generatedPrompt = generatePrompt(naturalExpressionNode, expectedType, semanticModel);
-            CodeGenerationUtils.GeneratedCode
-                    generatedCode = generateCodeForNaturalExpression(copilotUrl, copilotAccessToken,
-                    getHttpClient(), this.getSourceFiles(), generatedPrompt);
-
-            ExpressionNode modifiedExpressionNode = NodeParser.parseExpression(generatedCode.code());
-            JsonArray diagnostics =
-                    getDiagnosticsOfNaturalExpressionNode(modifiedExpressionNode, semanticModel, document,
-                            generatedCode);
-            if (!diagnostics.isEmpty()) {
-                try {
-                    String repairedExpression = repairIfDiagnosticsExistForConstNaturalExpression(
-                            copilotUrl, copilotAccessToken, client, sourceFiles,
-                            generatedPrompt, generatedCode, diagnostics);
-                    return NodeParser.parseExpression(repairedExpression);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return modifiedExpressionNode;
+            return generateCodeForNaturalExpression(naturalExpressionNode, copilotUrl, copilotAccessToken,
+                    getHttpClient(), this.getSourceFiles(), semanticModel, expectedType);
         }
 
         private void handleGeneratedCode(String originalFuncName, String generatedCode) {
             ModulePartNode modulePartNode = NodeParser.parseModulePart(generatedCode);
             persistInGeneratedDirectory(originalFuncName, generatedCode);
-            Stream<ImportDeclarationNode> importStream = modulePartNode.imports().stream();
-            this.newImports.addAll(importStream.toList());
+            this.newImports.addAll(modulePartNode.imports().stream().toList());
             this.newMembers.addAll(modulePartNode.members().stream().toList());
         }
 

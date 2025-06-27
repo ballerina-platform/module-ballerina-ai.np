@@ -26,8 +26,6 @@ import io.ballerina.compiler.api.symbols.ConstantSymbol;
 import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
-import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.InterpolationNode;
 import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
@@ -77,12 +75,11 @@ public class CodeGenerationUtils {
     private static final String BALLERINA_TOML_FILE = "Ballerina.toml";
     private static final String TRIPLE_BACKTICK_BALLERINA = "```ballerina";
     private static final String TRIPLE_BACKTICK = "```";
-    static final String BALLERINA = "ballerina";
-    static final String BALLERINAX = "ballerinax";
 
     static String generateCodeForFunction(String copilotUrl, String copilotAccessToken, String originalFuncName,
                                           String generatedFuncName, String prompt, HttpClient client,
-                                          JsonArray sourceFiles, ModuleDescriptor moduleDescriptor) {
+                                          JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
+                                          String packageOrgName) {
         try {
             String generatedPrompt = generatePrompt(originalFuncName, generatedFuncName, prompt);
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
@@ -90,7 +87,7 @@ public class CodeGenerationUtils {
 
             updateSourceFilesWithGeneratedContent(sourceFiles, generatedFuncName, generatedCode);
             return repairCode(copilotUrl, copilotAccessToken, generatedFuncName, client, sourceFiles, moduleDescriptor,
-                    generatedPrompt, generatedCode);
+                    generatedPrompt, generatedCode, packageOrgName);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -100,12 +97,25 @@ public class CodeGenerationUtils {
         }
     }
 
-    static GeneratedCode generateCodeForNaturalExpression(String copilotUrl, String copilotAccessToken,
-                                                  HttpClient client, JsonArray sourceFiles, String generatedPrompt) {
+    public static ExpressionNode generateCodeForNaturalExpression(NaturalExpressionNode naturalExpressionNode,
+                                                           String copilotUrl, String copilotAccessToken,
+                                                           HttpClient client, JsonArray sourceFiles,
+                                                           SemanticModel semanticModel,
+                                                           TypeSymbol expectedType) {
         try {
+            String generatedPrompt = generatePrompt(naturalExpressionNode, expectedType, semanticModel);
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
                     generatedPrompt);
-            return generatedCode;
+            ExpressionNode modifiedExpressionNode = NodeParser.parseExpression(generatedCode.code());
+            JsonArray diagnostics =
+                    collectConstNaturalExpressionDiagnostics(modifiedExpressionNode, generatedCode);
+            if (!diagnostics.isEmpty()) {
+                String repairedExpression = repairIfDiagnosticsExistForConstNaturalExpression(
+                        copilotUrl, copilotAccessToken, client, sourceFiles,
+                        generatedPrompt, generatedCode, diagnostics);
+                return NodeParser.parseExpression(repairedExpression);
+            }
+            return modifiedExpressionNode;
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -129,17 +139,17 @@ public class CodeGenerationUtils {
 
     private static String repairCode(String copilotUrl, String copilotAccessToken, String generatedFuncName,
                                      HttpClient client, JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
-                                     String generatedPrompt, GeneratedCode generatedCode)
+                                     String generatedPrompt, GeneratedCode generatedCode, String packageOrgName)
             throws IOException, URISyntaxException, InterruptedException {
         String generatedFunctionSrc = repairIfDiagnosticsExist(copilotUrl, copilotAccessToken, client, sourceFiles,
-                moduleDescriptor, generatedFuncName, generatedPrompt, generatedCode);
+                moduleDescriptor, generatedFuncName, generatedPrompt, generatedCode, packageOrgName);
         return repairIfDiagnosticsExist(copilotUrl, copilotAccessToken, client, sourceFiles, moduleDescriptor,
                 generatedFuncName, generatedPrompt,
-                new GeneratedCode(generatedFunctionSrc, generatedCode.functions));
+                new GeneratedCode(generatedFunctionSrc, generatedCode.functions), packageOrgName);
     }
 
     private static Optional<Document> findDocumentByName(Module module, String generateFuncName) {
-        String documentName = generateSourceFileNameForGeneratedFunction(generateFuncName);
+        String documentName = getGeneratedBalFileName(generateFuncName);
         for (DocumentId docId : module.documentIds()) {
             Document doc = module.document(docId);
             if (doc.name().contains(documentName)) {
@@ -152,22 +162,20 @@ public class CodeGenerationUtils {
     private static String repairIfDiagnosticsExist(String copilotUrl, String copilotAccessToken, HttpClient client,
                                                    JsonArray sourceFiles, ModuleDescriptor moduleDescriptor,
                                                    String generatedFuncName, String generatedPrompt,
-                                                   GeneratedCode generatedCode)
+                                                   GeneratedCode generatedCode, String packageOrgName)
             throws IOException, URISyntaxException, InterruptedException {
         ModulePartNode modulePartNode = NodeParser.parseModulePart(generatedCode.code);
 
         BuildProject project = createProject(sourceFiles, moduleDescriptor);
         Optional<JsonArray> compilerDiagnostics = getDiagnostics(project);
-        Optional<JsonArray> externalImportsDiagnostics = generateDiagnosticsForExternalImports(
-                modulePartNode.imports());
         Module module = project.currentPackage().module(
                 project.currentPackage().modules().iterator().next().moduleId());
-        JsonArray variableReferenceDiagnostics = new VariableReferenceVisitor(
+        JsonArray codeGeneratorDiagnostics = new CodeGenerationValidator(
                     project.currentPackage().getCompilation().getSemanticModel(module.moduleId()),
-                    findDocumentByName(module, generatedFuncName)
-                ).checkUnsafeVariableReferences(modulePartNode);
-        JsonArray allDiagnostics = mergeDiagnostics(compilerDiagnostics, externalImportsDiagnostics,
-                variableReferenceDiagnostics);
+                    findDocumentByName(module, generatedFuncName), packageOrgName
+                ).checkCodeGenerationDiagnostics(modulePartNode);
+        JsonArray allDiagnostics = mergeDiagnostics(compilerDiagnostics,
+                codeGeneratorDiagnostics);
 
         if (allDiagnostics.isEmpty()) {
             return generatedCode.code;
@@ -176,12 +184,11 @@ public class CodeGenerationUtils {
         String repairResponse = repairCode(copilotUrl, copilotAccessToken, generatedFuncName, client, sourceFiles,
                 generatedPrompt, generatedCode, allDiagnostics);
 
-        return extractAndReturnTheBallerinaCode(repairResponse, generatedCode, sourceFiles);
+        return updateResourcesWithCodeSnippet(repairResponse, generatedCode, sourceFiles);
     }
 
-    public static JsonArray getDiagnosticsOfNaturalExpressionNode(ExpressionNode expNode,
-                                                                  SemanticModel semanticModel, Document document,
-                                                                  GeneratedCode generatedCode) {
+    private static JsonArray collectConstNaturalExpressionDiagnostics(ExpressionNode expNode,
+                                                                     GeneratedCode generatedCode) {
         JsonArray diagnostics = new JsonArray();
         Iterable<Diagnostic> projectDiagnostics = expNode.diagnostics();
 
@@ -191,13 +198,13 @@ public class CodeGenerationUtils {
             diagnostics.add(diagnosticObj);
         });
 
-        JsonArray constantExpressionDiagnostics = new ConstantExpressionVisitor(semanticModel, document)
+        JsonArray constantExpressionDiagnostics = new ConstantExpressionValidator()
                 .checkNonConstExpressions(NodeParser.parseExpression(generatedCode.code));
         diagnostics.addAll(constantExpressionDiagnostics);
         return diagnostics;
     }
 
-    public static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl,
+    private static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl,
                                    String copilotAccessToken, HttpClient client, JsonArray sourceFiles,
                                    String generatedPrompt, GeneratedCode generatedCode, JsonArray diagnostics)
             throws IOException, URISyntaxException, InterruptedException {
@@ -205,11 +212,11 @@ public class CodeGenerationUtils {
                 copilotUrl, copilotAccessToken, client, sourceFiles,
                 generatedPrompt, generatedCode, diagnostics);
 
-        return extractAndReturnTheBallerinaCode(repairResponse, generatedCode, sourceFiles);
+        return updateResourcesWithCodeSnippet(repairResponse, generatedCode, sourceFiles);
     }
 
-    private static String extractAndReturnTheBallerinaCode(String repairResponse, GeneratedCode generatedCode,
-                                                           JsonArray sourceFiles) {
+    private static String updateResourcesWithCodeSnippet(String repairResponse, GeneratedCode generatedCode,
+                                                         JsonArray sourceFiles) {
         if (hasBallerinaCodeSnippet(repairResponse)) {
             String generatedFunctionSrc = extractBallerinaCodeSnippet(repairResponse);
             sourceFiles.get(sourceFiles.size() - 1).getAsJsonObject().addProperty(CONTENT, generatedFunctionSrc);
@@ -218,49 +225,12 @@ public class CodeGenerationUtils {
         return generatedCode.code;
     }
 
-    private static JsonArray mergeDiagnostics(Optional<JsonArray> diagnostics,
-                                              Optional<JsonArray> externalImportsDiagnostics,
-                                              JsonArray configVariableUsageDiagnostics) {
+    private static JsonArray mergeDiagnostics(Optional<JsonArray> projectDiagnostics,
+                                              JsonArray validationDiagnostics) {
         JsonArray merged = new JsonArray();
-        Stream.of(diagnostics, externalImportsDiagnostics)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(array -> {
-                    for (int i = 0; i < array.size(); i++) {
-                        merged.add(array.get(i));
-                    }
-                });
-
-        for (int i = 0; i < configVariableUsageDiagnostics.size(); i++) {
-            merged.add(configVariableUsageDiagnostics.get(i));
-        }
+        projectDiagnostics.ifPresent(merged::addAll);
+        merged.addAll(validationDiagnostics);
         return merged;
-    }
-
-    private static Optional<JsonArray> generateDiagnosticsForExternalImports(
-            NodeList<ImportDeclarationNode> imports) {
-        Stream<ImportDeclarationNode> externalImports = imports.stream()
-                    .filter(importNode -> {
-                        String moduleName = importNode.orgName().get().toString();
-                        return !moduleName.startsWith(BALLERINA) && !moduleName.startsWith(BALLERINAX);
-                    });
-
-        JsonArray diagnostics = externalImports.map(CodeGenerationUtils::generateExternalImportDiagnostic)
-                .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
-        if (diagnostics.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(diagnostics);
-    }
-
-    private static JsonObject generateExternalImportDiagnostic(ImportDeclarationNode importNode) {
-        JsonObject diagnostic = new JsonObject();
-        Optional<ImportOrgNameNode> importOrgNameNode = importNode.orgName();
-        String orgName = importOrgNameNode.isEmpty() ? "" : importOrgNameNode.get().orgName().text();
-        diagnostic.addProperty("message", String.format("Error: Disallowed import '%s' detected," +
-                " only 'ballerina/' or 'ballerinax/' packages are permitted", orgName));
-        return diagnostic;
     }
 
     private static String repairCode(String copilotUrl, String copilotAccessToken, String generatedFuncName,
@@ -270,7 +240,7 @@ public class CodeGenerationUtils {
         JsonObject codeReparationPayload =
                 constructCodeReparationPayload(generatedPrompt, generatedFuncName, generatedCode,
                         updatedSourceFiles, diagnostics);
-        return setAndCollectRepairResponse(copilotUrl, copilotAccessToken, client, codeReparationPayload);
+        return getRepairResponse(copilotUrl, copilotAccessToken, client, codeReparationPayload);
     }
 
     private static String repairCodeForConstNaturalExpressions(String copilotUrl, String copilotAccessToken,
@@ -280,11 +250,11 @@ public class CodeGenerationUtils {
         JsonObject codeReparationPayload =
                 constructCodeReparationPayloadForConstNaturalExpressions(generatedPrompt, generatedCode,
                         updatedSourceFiles, diagnostics);
-        return setAndCollectRepairResponse(copilotUrl, copilotAccessToken, client, codeReparationPayload);
+        return getRepairResponse(copilotUrl, copilotAccessToken, client, codeReparationPayload);
     }
 
-    private static String setAndCollectRepairResponse(String copilotUrl, String copilotAccessToken, HttpClient client,
-                                                      JsonObject codeReparationPayload)
+    private static String getRepairResponse(String copilotUrl, String copilotAccessToken, HttpClient client,
+                                            JsonObject codeReparationPayload)
             throws URISyntaxException, IOException, InterruptedException {
         HttpRequest codeReparationRequest = HttpRequest.newBuilder()
                 .uri(new URI(copilotUrl + "/code/repair"))
@@ -413,7 +383,7 @@ public class CodeGenerationUtils {
                 responseBodyString.lastIndexOf(TRIPLE_BACKTICK));
     }
 
-    public record GeneratedCode(String code, JsonArray functions) { }
+    private record GeneratedCode(String code, JsonArray functions) { }
 
     private static JsonObject constructCodeGenerationPayload(String prompt, JsonArray sourceFiles) {
         JsonObject payload = new JsonObject();
@@ -435,22 +405,20 @@ public class CodeGenerationUtils {
                         %s
                         ```
                         
-                        Your task is to generate a function named '%s' with the code that needs to satisfy this user 
+                        Your task is to generate a function named '%s' with the code that needs to satisfy this user
                         prompt.
                         
                         The '%s' function should have exactly the same signature as the '%s' function.
                         Use only the parameters passed to the function and module-level clients that are clients \
                         from the ballerina and ballerinax module in the generated code.
-                        Do not use any configuration variables and module level variables defined in the program. 
-                        Respond with only the generated code, nothing else. 
-                        Ensure that there are NO compile-time errors.
+                        Do not use any configurable variables or module-level variables defined in the program.
                         
                         Respond with ONLY THE GENERATED FUNCTION AND ANY IMPORTS REQUIRED BY THE GENERATED FUNCTION.
                         """,
                 originalFuncName, prompt, generatedFuncName, generatedFuncName, originalFuncName);
     }
 
-    public static String generatePrompt(NaturalExpressionNode naturalExpressionNode,
+    private static String generatePrompt(NaturalExpressionNode naturalExpressionNode,
                                          TypeSymbol expectedType, SemanticModel semanticModel) {
         NodeList<Node> userPromptContent = naturalExpressionNode.prompt();
         StringBuilder sb = new StringBuilder(String.format("""
@@ -471,9 +439,6 @@ public class CodeGenerationUtils {
                 
                 The value should belong to the type '%s'. This value will be used in the code in place of the
                 `const natural {...}` expression with the requirement.
-                
-                Do not use any configuration variables and module level variables defined in the program \
-                inside the value expression.
                 Respond with ONLY THE VALUE EXPRESSION.
                 
                 Requirement:
@@ -497,16 +462,12 @@ public class CodeGenerationUtils {
     private static void updateSourceFilesWithGeneratedContent(JsonArray sourceFiles, String generatedFuncName,
                                                               GeneratedCode generatedCode) {
         JsonObject sourceFile = new JsonObject();
-        sourceFile.addProperty(FILE_PATH, generateSourceFilePathForGeneratedFunction(generatedFuncName));
+        sourceFile.addProperty(FILE_PATH, String.format("generated/functions_%s.bal", generatedFuncName));
         sourceFile.addProperty(CONTENT, generatedCode.code);
         sourceFiles.add(sourceFile);
     }
 
-    private static String generateSourceFilePathForGeneratedFunction(String generatedFuncName) {
-        return String.format("generated/functions_%s.bal", generatedFuncName);
-    }
-
-    private static String generateSourceFileNameForGeneratedFunction(String generatedFuncName) {
+    private static String getGeneratedBalFileName(String generatedFuncName) {
         return String.format("functions_%s.bal", generatedFuncName);
     }
 
@@ -525,9 +486,9 @@ public class CodeGenerationUtils {
             String generatedPrompt, GeneratedCode generatedCode, JsonArray sourceFiles,
             JsonArray diagnostics) {
         JsonObject payload = new JsonObject();
-        payload.addProperty(
-                "usecase", "Fix issues in the generated ballerina expression. " +
-                        "Use only constant expressions inside the program");
+        payload.addProperty("usecase",
+              "Generated expression returns following errors. " +
+                    "Fix the errors and return the new constant expression.");
 
         return updateResourcePayload(payload, generatedPrompt, generatedCode, diagnostics, sourceFiles);
     }
