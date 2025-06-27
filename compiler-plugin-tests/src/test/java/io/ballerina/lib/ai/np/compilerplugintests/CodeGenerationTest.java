@@ -197,8 +197,6 @@ public class CodeGenerationTest {
         assertRepairRequest(serviceResourceDirectoryName,
                 "code_function_with_validations_repair_request.json");
 
-        // Validate that a second repair doesn't happen.
-        RecordedRequest recordedRequest = server.takeRequest(3L, TimeUnit.SECONDS);
         validateGeneratedCodeAndDeleteGeneratedDir(serviceResourceDirectoryName,
                 "calculateTotalPrice_np_generated.bal");
 

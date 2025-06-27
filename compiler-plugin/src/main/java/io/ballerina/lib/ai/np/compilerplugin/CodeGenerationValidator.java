@@ -25,12 +25,12 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.projects.Document;
 
 import java.util.Optional;
@@ -94,31 +94,16 @@ class CodeGenerationValidator extends NodeVisitor {
     public void visit(SimpleNameReferenceNode simpleNameReferenceNode) {
         this.semanticModel.symbol(this.document.get(), simpleNameReferenceNode.location()
                 .lineRange().startLine()).ifPresent(symbol -> {
-            if (!(symbol instanceof VariableSymbol variableSymbol)) {
-                return;
-            }
-            if (isConfigVariable(variableSymbol)) {
-                addConfigVariableReferencesDiagnostics(simpleNameReferenceNode.name());
-                return;
-            }
-
-            if (isModuleLevelSymbol(symbol)) {
-                addModuleVariableReferencesDiagnostics(simpleNameReferenceNode.name());
-            }
+            addDiagnosticsForVariableReference(symbol, simpleNameReferenceNode.name());
         });
     }
 
     @Override
     public void visit(QualifiedNameReferenceNode qualifiedNameReferenceNode) {
-        Optional<Symbol> symbolOpt = semanticModel.symbol(qualifiedNameReferenceNode);
-        if (symbolOpt.isEmpty()) {
-            return;
-        }
-
-        Symbol symbol = symbolOpt.get();
-        if (isModuleLevelSymbol(symbol) && !isConfigVariable(symbol)) {
-            addModuleVariableReferencesDiagnostics(qualifiedNameReferenceNode.identifier());
-        }
+        this.semanticModel.symbol(this.document.get(), qualifiedNameReferenceNode.identifier().location()
+                .lineRange().startLine()).ifPresent(symbol -> {
+            addDiagnosticsForVariableReference(symbol, qualifiedNameReferenceNode);
+        });
     }
 
     private boolean isConfigVariable(Symbol symbol) {
@@ -135,21 +120,21 @@ class CodeGenerationValidator extends NodeVisitor {
         return false;
     }
 
-    private void addModuleVariableReferencesDiagnostics(Token name) {
+    private void addModuleVariableReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
-        NodeLocation location = name.location();
+        NodeLocation location = node.location();
         diagnostic.addProperty("message", String.format("Module level variables " +
                 "cannot be used inside the generated code. (found: '%s') in location(start line: %s, end line: %s)",
-                name, location.lineRange().startLine().line(), location.lineRange().endLine().line()));
+                node.toSourceCode(), location.lineRange().startLine().line(), location.lineRange().endLine().line()));
         this.diagnostics.add(diagnostic);
     }
 
-    private void addConfigVariableReferencesDiagnostics(Token name) {
+    private void addConfigVariableReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
-        NodeLocation location = name.location();
+        NodeLocation location = node.location();
         diagnostic.addProperty("message", String.format("Config variables cannot be used " +
                 "inside the generated code. (found: '%s') in location(start line: %s, end line: %s)",
-                name, location.lineRange().startLine().line(), location.lineRange().endLine().line()));
+                node.toSourceCode(), location.lineRange().startLine().line(), location.lineRange().endLine().line()));
         this.diagnostics.add(diagnostic);
     }
 
@@ -172,5 +157,19 @@ class CodeGenerationValidator extends NodeVisitor {
 
     private boolean isModuleLevelSymbol(Symbol symbol) {
         return semanticModel.moduleSymbols().contains(symbol);
+    }
+
+    private void addDiagnosticsForVariableReference(Symbol symbol, Node node) {
+        if (!(symbol instanceof VariableSymbol variableSymbol)) {
+            return;
+        }
+        if (isConfigVariable(variableSymbol)) {
+            addConfigVariableReferencesDiagnostics(node);
+            return;
+        }
+
+        if (isModuleLevelSymbol(symbol)) {
+            addModuleVariableReferencesDiagnostics(node);
+        }
     }
 }
