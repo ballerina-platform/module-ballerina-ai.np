@@ -26,22 +26,22 @@
         "message": "cannot resolve module 'xlibb/test2 as _'"
       },
       {
-        "message": "Disallowed import '\nimport xlibb/test as _;\n' detected, only 'ballerina/' or 'ballerinax/' packages are permitted"
+        "message": "Disallowed import '\nimport xlibb/test as _;\n' detected in location(start line: 1, end line: 1), only 'ballerina/' or 'ballerinax/' packages are permitted"
       },
       {
-        "message": "Disallowed import 'import xlibb/test2 as _;\n' detected, only 'ballerina/' or 'ballerinax/' packages are permitted"
+        "message": "Disallowed import 'import xlibb/test2 as _;\n' detected in location(start line: 4, end line: 4), only 'ballerina/' or 'ballerinax/' packages are permitted"
       },
       {
-        "message": "Module level variables cannot be used inside the generated code. (found: 'MINIMUM_ITEM_PRICE')"
+        "message": "Module level variables cannot be used inside the generated code. (found: 'MINIMUM_ITEM_PRICE') in location(start line: 8, end line: 8)"
       },
       {
-        "message": "Config variables cannot be used inside the generated code. (found: 'discountThreshold')"
+        "message": "Config variables cannot be used inside the generated code. (found: 'discountThreshold') in location(start line: 14, end line: 14)"
       },
       {
-        "message": "Module level variables cannot be used inside the generated code. (found: 'DISCOUNT_RATE')"
+        "message": "Module level variables cannot be used inside the generated code. (found: 'DISCOUNT_RATE') in location(start line: 15, end line: 15)"
       },
       {
-        "message": "Config variables cannot be used inside the generated code. (found: 'taxRate')"
+        "message": "Config variables cannot be used inside the generated code. (found: 'taxRate') in location(start line: 18, end line: 18)"
       }
     ],
     "response": "\nimport xlibb/test as _;\nimport ballerina/io as _;\nimport ballerina/http;\nimport xlibb/test2 as _;\npublic function calculateTotalPriceNPGenerated(decimal[] itemPrices) returns decimal {\n    decimal subtotal = 0.0; \n    foreach decimal price in itemPrices {\n        if (price < MINIMUM_ITEM_PRICE) {\n            continue;\n        }\n        subtotal += price;\n    }\n    decimal discountedTotal = subtotal;\n    if (subtotal > discountThreshold) {\n        decimal discount = subtotal * DISCOUNT_RATE;\n        discountedTotal = subtotal - discount;\n    }\n    decimal tax = discountedTotal * taxRate;\n   _ = http:defaultListenerPort; // added for test qualified config references;\n   _ = http:AUTH_HEADER; // added for test qualified module level references;\n    decimal finalTotal = discountedTotal + tax;\n    return finalTotal;\n}\n\n"

@@ -25,6 +25,7 @@ import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.api.symbols.VariableSymbol;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
+import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
@@ -93,15 +94,16 @@ class CodeGenerationValidator extends NodeVisitor {
     public void visit(SimpleNameReferenceNode simpleNameReferenceNode) {
         this.semanticModel.symbol(this.document.get(), simpleNameReferenceNode.location()
                 .lineRange().startLine()).ifPresent(symbol -> {
-            if (symbol instanceof VariableSymbol variableSymbol) {
-                if (isConfigVariable(variableSymbol)) {
-                    addConfigVariableReferencesDiagnostics(simpleNameReferenceNode.name());
-                    return;
-                }
+            if (!(symbol instanceof VariableSymbol variableSymbol)) {
+                return;
+            }
+            if (isConfigVariable(variableSymbol)) {
+                addConfigVariableReferencesDiagnostics(simpleNameReferenceNode.name());
+                return;
+            }
 
-                if (isModuleLevelSymbol(symbol)) {
-                    addModuleVariableReferencesDiagnostics(simpleNameReferenceNode.name());
-                }
+            if (isModuleLevelSymbol(symbol)) {
+                addModuleVariableReferencesDiagnostics(simpleNameReferenceNode.name());
             }
         });
     }
@@ -135,15 +137,19 @@ class CodeGenerationValidator extends NodeVisitor {
 
     private void addModuleVariableReferencesDiagnostics(Token name) {
         JsonObject diagnostic = new JsonObject();
+        NodeLocation location = name.location();
         diagnostic.addProperty("message", String.format("Module level variables " +
-                "cannot be used inside the generated code. (found: '%s')", name));
+                "cannot be used inside the generated code. (found: '%s') in location(start line: %s, end line: %s)",
+                name, location.lineRange().startLine().line(), location.lineRange().endLine().line()));
         this.diagnostics.add(diagnostic);
     }
 
     private void addConfigVariableReferencesDiagnostics(Token name) {
         JsonObject diagnostic = new JsonObject();
+        NodeLocation location = name.location();
         diagnostic.addProperty("message", String.format("Config variables cannot be used " +
-                "inside the generated code. (found: '%s')", name));
+                "inside the generated code. (found: '%s') in location(start line: %s, end line: %s)",
+                name, location.lineRange().startLine().line(), location.lineRange().endLine().line()));
         this.diagnostics.add(diagnostic);
     }
 
@@ -156,8 +162,11 @@ class CodeGenerationValidator extends NodeVisitor {
 
     private static JsonObject addExternalImportDiagnostic(ImportDeclarationNode importNode) {
         JsonObject diagnostic = new JsonObject();
-        diagnostic.addProperty("message", String.format("Disallowed import '%s' detected," +
-                " only 'ballerina/' or 'ballerinax/' packages are permitted", importNode.toSourceCode()));
+        NodeLocation location = importNode.location();
+        diagnostic.addProperty("message", String.format("Disallowed import '%s' detected in " +
+                        "location(start line: %s, end line: %s)," +
+                        " only 'ballerina/' or 'ballerinax/' packages are permitted", importNode.toSourceCode(),
+                location.lineRange().startLine().line(), location.lineRange().endLine().line()));
         return diagnostic;
     }
 

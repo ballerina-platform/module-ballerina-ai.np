@@ -34,67 +34,97 @@
         "message": "missing identifier"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'getString()')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'getString()' in location (start line: 2, end line: 2))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'getInteger()')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'getInteger()' in location (start line: 3, end line: 3))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'check testIntOrError()')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'check testIntOrError()' in location (start line: 6, end line: 6))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'error(\"a\")')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'error(\"a\")' in location (start line: 7, end line: 7))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'new TestClass(1)')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'new TestClass(1)' in location (start line: 8, end line: 8))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'let int p = 1 in p')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'let int p = 1 in p' in location (start line: 10, end line: 10))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'recordType.@RecordAnnot')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'new TestClass(1)' in location (start line: 11, end line: 11))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'number ')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'recordType.@RecordAnnot' in location (start line: 14, end line: 14))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'number')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'number ' in location (start line: 15, end line: 15))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'object{}')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'number' in location (start line: 16, end line: 16))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'a')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'new TestClass(1)' in location (start line: 17, end line: 17))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'END')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'object{}' in location (start line: 18, end line: 18))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'from int i in (<stream<int>>([1].toStream())) select i')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'a' in location (start line: 19, end line: 19))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'trap getString()')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'END' in location (start line: 22, end line: 22))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'END ')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'from int i in (<stream<int>>([1].toStream())) select i' in location (start line: 23, end line: 23))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`.<a>')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'trap getString()' in location (start line: 24, end line: 24))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`/*')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'number' in location (start line: 24, end line: 24))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: 'x->w1')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'number ' in location (start line: 24, end line: 24))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: ''client')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'END ' in location (start line: 25, end line: 25))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: ''->/.post({})')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'getString()' in location (start line: 27, end line: 27))"
       },
       {
-        "message": "Error: Generated code should only contains constant expressions. (found: '')"
+        "message": "Error: Generated code should only contains constant expressions. (found: 'getString()' in location (start line: 28, end line: 28))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'getInteger()' in location (start line: 32, end line: 32))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'END ' in location (start line: 33, end line: 33))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'number ' in location (start line: 34, end line: 34))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`.<a>' in location (start line: 35, end line: 35))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`/*' in location (start line: 36, end line: 36))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: 'x->w1' in location (start line: 38, end line: 38))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: ''client' in location (start line: 39, end line: 39))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: ''->/.post({})' in location (start line: 39, end line: 39))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: '' in location (start line: 39, end line: 39))"
+      },
+      {
+        "message": "Error: Generated code should only contains constant expressions. (found: '' in location (start line: 40, end line: 40))"
       }
     ],
     "response": "\n[<int>(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"], \n<int>(<map<int>>{\"a\": 1, \"b\": 2})[getString()], \n<int>(<map<int>>{\"a\": getInteger(), \"b\": 2})[\"a\"], \n1 + 1, \n(<int[2]>[1,2])[0], \n1 + 1,check testIntOrError(), \nerror(\"a\").message(), \nnew TestClass(1).a, \n<int & readonly> 1, \nlet int p = 1 in p, \nnew TestClass(1).getNum(), \n(base64 `0xAA`).toString(), \n(<record {|string value;|}> \n(recordType.@RecordAnnot)).value, \nnumber + 1, \n-number,-2, \n<int>[<object {}>new TestClass(1),  \n1, object{},  \n((<record{|int a?;|}>{a: 1})?.a),  \n(<table<A>> table[{a: 1}])][1], \n<string>([(), \"a\"][1]), \nEND-2,<1>1, \n(<int[]>(from int i in (<stream<int>>([1].toStream())) select i))[0], \n<string>[(trap getString()) is error ? \"error\" : \"success\", <[int]>[1],  typeof number, typeof 1,  number is int,  1 is int,  <int|string>2][0], \nEND > 3 ? END - 4: END - 2, \nstring `a`, \nstring `abc${getString()}def`, \n<string>string `abc${getString()}def`, \n<string>string `a`, \n<int>2, \n[1, 2, 3][0], \n[1, getInteger(), 3][0], \nEND is int ? 6 : 7, \nnumber is int ? 6 : number + 1, \nxml `<a>1</a>`.<a>.toString(), \n(xml `<a>1</a>`/*).toString(), \n[...[3, 4, 5]][0], \nx->w1, \n'client'->/.post({}), , \n]\n"

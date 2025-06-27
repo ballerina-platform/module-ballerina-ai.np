@@ -49,6 +49,7 @@ import io.ballerina.compiler.syntax.tree.MethodCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.ObjectConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.ObjectTypeDescriptorNode;
@@ -90,21 +91,24 @@ class ConstantExpressionValidator extends NodeVisitor {
         return filterUniqueMessages(this.constantExpressionDiagnostics);
     }
 
-    private void addConstantReferencesDiagnostics(String name) {
+    private void addConstantReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
+        NodeLocation location = node.location();
         diagnostic.addProperty("message", String.format("Error: Generated code should only " +
-                "contains constant expressions. (found: '%s')", name));
+                "contains constant expressions. (found: '%s' in " +
+                "location (start line: %s, end line: %s))", node.toSourceCode(),
+                location.lineRange().startLine().line(), node.lineRange().endLine().line()));
         this.constantExpressionDiagnostics.add(diagnostic);
     }
 
     @Override
     public void visit(AnnotAccessExpressionNode annotAccessExpressionNode) {
-        addConstantReferencesDiagnostics(annotAccessExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(annotAccessExpressionNode);
     }
 
     @Override
     public void visit(ArrayTypeDescriptorNode arrayTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(arrayTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(arrayTypeDescriptorNode);
     }
 
     @Override
@@ -135,7 +139,7 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(CheckExpressionNode checkExpressionNode) {
-        addConstantReferencesDiagnostics(checkExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(checkExpressionNode);
     }
 
     @Override
@@ -147,24 +151,22 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(DistinctTypeDescriptorNode distinctTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(distinctTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(distinctTypeDescriptorNode);
     }
 
     @Override
     public void visit(ErrorConstructorExpressionNode errorConstructorExpressionNode) {
-        addConstantReferencesDiagnostics(errorConstructorExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(errorConstructorExpressionNode);
     }
 
     @Override
     public void visit(ExplicitAnonymousFunctionExpressionNode explicitAnonymousFunctionExpressionNode) {
-        addConstantReferencesDiagnostics(explicitAnonymousFunctionExpressionNode.functionKeyword().toSourceCode()
-                + explicitAnonymousFunctionExpressionNode.functionSignature().toSourceCode()
-                + explicitAnonymousFunctionExpressionNode.functionBody().toSourceCode());
+        addConstantReferencesDiagnostics(explicitAnonymousFunctionExpressionNode);
     }
 
     @Override
     public void visit(ExplicitNewExpressionNode explicitNewExpressionNode) {
-       addConstantReferencesDiagnostics(explicitNewExpressionNode.toSourceCode());
+       addConstantReferencesDiagnostics(explicitNewExpressionNode);
     }
 
     @Override
@@ -174,22 +176,22 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(FunctionCallExpressionNode functionCallExpressionNode) {
-        addConstantReferencesDiagnostics(functionCallExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(functionCallExpressionNode);
     }
 
     @Override
     public void visit(FunctionTypeDescriptorNode functionTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(functionTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(functionTypeDescriptorNode);
     }
 
     @Override
     public void visit(ImplicitAnonymousFunctionExpressionNode implicitAnonymousFunctionExpressionNode) {
-        addConstantReferencesDiagnostics(implicitAnonymousFunctionExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(implicitAnonymousFunctionExpressionNode);
     }
 
     @Override
     public void visit(ImplicitNewExpressionNode implicitNewExpressionNode) {
-        addConstantReferencesDiagnostics(implicitNewExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(implicitNewExpressionNode);
     }
 
     @Override
@@ -200,12 +202,12 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(IntersectionTypeDescriptorNode intersectionTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(intersectionTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(intersectionTypeDescriptorNode);
     }
 
     @Override
     public void visit(LetExpressionNode letExpressionNode) {
-        addConstantReferencesDiagnostics(letExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(letExpressionNode);
     }
 
     @Override
@@ -220,7 +222,7 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(MapTypeDescriptorNode mapTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(mapTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(mapTypeDescriptorNode);
     }
 
     @Override
@@ -231,17 +233,17 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(SimpleNameReferenceNode nameReferenceNode) {
-        addConstantReferencesDiagnostics(nameReferenceNode.toSourceCode());
+        addConstantReferencesDiagnostics(nameReferenceNode);
     }
 
     @Override
     public void visit(QualifiedNameReferenceNode nameReferenceNode) {
-        addConstantReferencesDiagnostics(nameReferenceNode.toSourceCode());
+        addConstantReferencesDiagnostics(nameReferenceNode);
     }
 
     @Override
     public void visit(NaturalExpressionNode naturalExpressionNode) {
-        addConstantReferencesDiagnostics(naturalExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(naturalExpressionNode);
     }
 
     @Override
@@ -251,12 +253,12 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(ObjectConstructorExpressionNode objectConstructorExpressionNode) {
-        addConstantReferencesDiagnostics(objectConstructorExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(objectConstructorExpressionNode);
     }
 
     @Override
     public void visit(ObjectTypeDescriptorNode objectTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(objectTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(objectTypeDescriptorNode);
     }
 
     @Override
@@ -267,17 +269,17 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(QueryExpressionNode queryExpressionNode) {
-        addConstantReferencesDiagnostics(queryExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(queryExpressionNode);
     }
 
     @Override
     public void visit(QueryActionNode queryActionNode) {
-        addConstantReferencesDiagnostics(queryActionNode.toSourceCode());
+        addConstantReferencesDiagnostics(queryActionNode);
     }
 
     @Override
     public void visit(RecordTypeDescriptorNode recordTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(recordTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(recordTypeDescriptorNode);
     }
 
     @Override
@@ -287,7 +289,7 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(StreamTypeDescriptorNode streamTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(streamTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(streamTypeDescriptorNode);
     }
 
     @Override
@@ -307,17 +309,17 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(TransactionalExpressionNode transactionalExpressionNode) {
-        addConstantReferencesDiagnostics(transactionalExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(transactionalExpressionNode);
     }
 
     @Override
     public void visit(TrapExpressionNode trapExpressionNode) {
-        addConstantReferencesDiagnostics(trapExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(trapExpressionNode);
     }
 
     @Override
     public void visit(TupleTypeDescriptorNode tupleTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(tupleTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(tupleTypeDescriptorNode);
     }
 
     @Override
@@ -342,17 +344,17 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     @Override
     public void visit(UnionTypeDescriptorNode unionTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(unionTypeDescriptorNode.toSourceCode());
+        addConstantReferencesDiagnostics(unionTypeDescriptorNode);
     }
 
     @Override
     public void visit(XMLFilterExpressionNode xmlFilterExpressionNode) {
-        addConstantReferencesDiagnostics(xmlFilterExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(xmlFilterExpressionNode);
     }
 
     @Override
     public void visit(XMLStepExpressionNode xmlStepExpressionNode) {
-        addConstantReferencesDiagnostics(xmlStepExpressionNode.toSourceCode());
+        addConstantReferencesDiagnostics(xmlStepExpressionNode);
     }
 
     public void visit(ExpressionNode expressionNode) {
