@@ -14,22 +14,76 @@
 // specific language governing permissions and limitations
 // under the License.
 
-type OpenAIChatCompletionRequestUserMessage record {
-    string content;
-    "user" role;
-    string name?;
+import ballerina/data.jsondata;
+
+public type ChatCompletionFunctionParameters record {
 };
 
-type OpenAICreateChatCompletionRequest record {
-    OpenAIChatCompletionRequestUserMessage[1] messages;
+public type ChatCompletionRequestMessage record {
+    ChatCompletionRequestMessageRole role;
+};
+
+public type ChatCompletionRequestMessageRole "system"|"user"|"assistant"|"tool"|"function";
+
+public type ChatCompletionToolChoiceOption "none"|"auto"|ChatCompletionNamedToolChoice;
+
+public type ChatCompletionNamedToolChoice record {
+    ChatCompletionNamedToolChoice_function 'function?;
+    "function" 'type?;
+};
+
+public type ChatCompletionNamedToolChoice_function record {
+    string name;
+};
+
+public type ChatCompletionTool_function record {
+    string description?;
+    string name;
+    ChatCompletionFunctionParameters parameters;
+};
+
+public type ChatCompletionTool record {
+    ChatCompletionTool_function 'function;
+    ChatCompletionToolType 'type;
+};
+
+public type ChatCompletionToolType "function";
+
+public type CreateChatCompletionRequest record {
+    ChatCompletionRequestMessage[] messages;
+    ChatCompletionTool[] tools?;
+};
+
+public type ChatCompletionResponseObject "chat.completion";
+
+public type ChatCompletionsResponseCommon record {
+    string id;
+    ChatCompletionResponseObject 'object;
+    int created;
     string model;
-    boolean? store = false;
-    decimal? frequency_penalty = 0;
-    boolean? logprobs = false;
-    int? n = 1;
-    decimal? presence_penalty = 0;
-    "auto"|"default"? service_tier = "auto";
-    boolean? 'stream = false;
-    decimal? temperature = 1;
-    decimal? top_p = 1;
+};
+
+public type ToolCallType "function";
+
+public type ChatCompletionMessageToolCall record {
+    string id;
+    ToolCallType 'type;
+    ChatCompletionMessageToolCall_function 'function;
+};
+
+public type ChatCompletionMessageToolCall_function record {
+    string name;
+    string arguments;
+};
+
+public type ChatCompletionResponseMessage record {
+    @jsondata:Name {value: "tool_calls"}
+    ChatCompletionMessageToolCall[] toolCalls?;
+};
+
+public type CreateChatCompletionResponse record {
+    *ChatCompletionsResponseCommon;
+    record {
+        ChatCompletionResponseMessage message?;
+    }[] choices;
 };

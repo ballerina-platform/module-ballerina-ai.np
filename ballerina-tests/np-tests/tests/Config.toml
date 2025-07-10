@@ -1,4 +1,2 @@
-[ballerina.np.defaultModelConfig]
-serviceUrl = "http://localhost:8080/llm/openai"
-model = "gpt-4o-mini"
-connectionConfig.auth.token = "not-a-real-token"
+serviceUrl = "http://localhost:8080/llm/azureopenai/deployments/gpt4onew"
+accessToken = "not-a-real-token"

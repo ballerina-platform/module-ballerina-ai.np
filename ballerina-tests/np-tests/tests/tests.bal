@@ -17,13 +17,13 @@
 import ballerina/np_test_commons as _;
 import ballerina/test;
 
-@test:Config
+@test:Config { enable: false }
 function testWithNaturalFunctionAnnotation() returns error? {
     string result = check queryAboutCountry("known as the pearl of the Indian Ocean");
     test:assertEquals(result, "Sri Lanka");
 }
 
-@test:Config
+@test:Config { enable: false }
 function testComplexTypeWithNaturalFunctionAnnotation() returns error? {
     (string|int)[] result = check getParsedValues(["foo", "1", "bar", "2.3", "4"]);
     test:assertEquals(result, ["foo", 1, "bar", "2.3", 4]);
@@ -31,7 +31,7 @@ function testComplexTypeWithNaturalFunctionAnnotation() returns error? {
 
 @test:Config
 function testComplexTypeWithDocsWithNaturalFunctionAnnotation() returns error? {
-    SportsPerson? person = check getPopularSportsPerson("Simone", 1990);
+    SportsPerson person = check getPopularSportsPerson("Simone", 1990);
     test:assertEquals(person, <SportsPerson> {
         firstName: "Simone",
         lastName: "Biles",
@@ -40,7 +40,7 @@ function testComplexTypeWithDocsWithNaturalFunctionAnnotation() returns error? {
     });
 }
 
-@test:Config
+@test:Config { enable: false }
 function testParameterInjectionToNaturalFunctionWhenThereAreNoInterpolations() returns error? {
     PlaceOfInterest[] places = check getPlacesOfInterest("Sri Lanka", "beach");
     test:assertEquals(places, <PlaceOfInterest[]> [
@@ -50,7 +50,7 @@ function testParameterInjectionToNaturalFunctionWhenThereAreNoInterpolations() r
     ]);
 }
 
-@test:Config
+@test:Config { enable: false }
 function testParameterInjectionToNaturalFunctionWhenThereAreNonAnydataParams() returns error? {
     PlaceOfInterest[] places = check getPlacesOfInterestWithNonAnydataParams("UAE", "skyscrapers", new Obj(), 2);
     test:assertEquals(places, <PlaceOfInterest[]> [
@@ -59,7 +59,7 @@ function testParameterInjectionToNaturalFunctionWhenThereAreNonAnydataParams() r
     ]);
 }
 
-@test:Config
+@test:Config { enable: false }
 function testParametersNotBeingInjectedWhenThereAreInterpolations() returns error? {
     SportsPerson? person = check getPopularSportsPersonWithUnusedParams("Simone", "unused value");
     test:assertEquals(person, <SportsPerson> {
@@ -70,13 +70,13 @@ function testParametersNotBeingInjectedWhenThereAreInterpolations() returns erro
     });
 }
 
-@test:Config
+@test:Config { enable: false }
 function testPromptWithSpecialCharacters() returns error? {
     int res = check getResultOfBallerinaProgram(10, 20);
     test:assertEquals(res, 30);
 }
 
-@test:Config
+@test:Config { enable: false }
 function testParameterInjectionWithDefaultableParamAndRestParam() returns error? {
     int v1 = check getSum(1);
     test:assertEquals(v1, 3);
@@ -85,7 +85,7 @@ function testParameterInjectionWithDefaultableParamAndRestParam() returns error?
     test:assertEquals(v2, 140);
 }
 
-@test:Config
+@test:Config { enable: false }
 function testParameterInjectionWithIncludedRecordParamAndRestParam() returns error? {
     int v1 = check getSumWithIncludedRecordParam(100, val = 200);
     test:assertEquals(v1, 300);

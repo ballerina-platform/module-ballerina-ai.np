@@ -18,49 +18,91 @@ import ballerina/http;
 import ballerina/test;
 
 service /llm on new http:Listener(8080) {
-    resource function post openai/chat/completions(OpenAICreateChatCompletionRequest payload)
-            returns json|error {
-        OpenAIChatCompletionRequestUserMessage message = payload.messages[0];
-        anydata content = message["content"];
-        string contentStr = content.toString();
+    resource function post azureopenai/deployments/gpt4onew/chat/completions(CreateChatCompletionRequest payload)
+            returns CreateChatCompletionResponse|error {
+        ChatCompletionRequestMessage message = payload.messages[0];
+
+        string? content = check message["content"].ensureType();
+        if content is () {
+            test:assertFail("Expected content in the payload");
+        }
+
+        test:assertEquals(content, getExpectedPrompt(content));
         test:assertEquals(message.role, "user");
-        test:assertEquals(content, getExpectedPrompt(content.toString()));
+        ChatCompletionTool[]? tools = payload.tools;
+        if tools is () || tools.length() == 0 {
+            test:assertFail("No tools in the payload");
+        }
 
-        test:assertEquals(payload.model, "gpt-4o-mini");
-        return {
-            'object: "chat.completion",
-            created: 0,
-            model: "",
-            id: "",
-            choices: [
-                {
-                    finish_reason: "stop",
-                    index: 0,
-                    logprobs: (),
-                    message: {
-                        role: "assistant",
-                        content: getMockLLMResponse(contentStr),
-                        refusal: ()
-                    }
-                }
-            ]
-        };
-    }
+        map<json>? parameters = check tools[0].'function?.parameters.toJson().cloneWithType();
+        if parameters is () {
+            test:assertFail("No parameters in the expected tool");
+        }
 
-    resource function post 'default/chat/complete(@http:Payload string contentStr)
-            returns json|error {
-        test:assertEquals(contentStr, getExpectedPrompt(contentStr.toString()));
-        return {
-            content: [getMockLLMResponse(contentStr)]
-        };
+        test:assertEquals(parameters, getExpectedParameterSchema(content), string `Test failed for prompt:- ${content}`);
+        return getTestServiceResponse(content);
     }
 }
+
+function getExpectedParameterSchema(string content) returns json {
+    return {
+        "type": "object",
+        "required": [
+            "firstName",
+            "lastName",
+            "sport",
+            "yearOfBirth"
+        ],
+        "properties": {
+            "firstName": {
+                "type": "string",
+                "description": "First name of the person"
+            },
+            "lastName": {
+                "type": "string",
+                "description": "Last name of the person"
+            },
+            "yearOfBirth": {
+                "type": "integer",
+                "description": "Year the person was born",
+                "format": "int64"
+            },
+            "sport": {
+                "type": "string",
+                "description": "Sport that the person plays"
+            }
+        }
+    };
+    }
+
+isolated function getTestServiceResponse(string content) returns CreateChatCompletionResponse => {
+    id: "test-id",
+    'object: "chat.completion",
+    created: 1234567890,
+    model: "gpt-4o",
+    choices: [
+        {
+            message: {
+                toolCalls: [
+                    {
+                        id: "tool-call-id",
+                        'type: "function",
+                        'function: {
+                            name: "getResults",
+                            arguments: getMockLLMResponse(content)
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+};
 
 isolated function getExpectedPrompt(string prompt) returns string {
     string trimmedPrompt = prompt.trim();
 
     if trimmedPrompt.startsWith("Which country") {
-        return  string `Which country is known as the pearl of the Indian Ocean?
+        return string `Which country is known as the pearl of the Indian Ocean?
         ---
 
         The output should be a JSON value that satisfies the following JSON schema, 
@@ -85,14 +127,7 @@ isolated function getExpectedPrompt(string prompt) returns string {
 
     if trimmedPrompt.startsWith("Who is a popular sportsperson") {
         return string `Who is a popular sportsperson that was born in the decade starting
-    from 1990 with Simone in their name?
-        ---
-
-        The output should be a JSON value that satisfies the following JSON schema, 
-        returned within a markdown snippet enclosed within ${"```json"} and ${"```"}
-        
-        Schema:
-        {"type":"object", "anyOf":[{"required":["firstName", "lastName", "sport", "yearOfBirth"], "type":"object", "properties":{"firstName":{"type":"string", "description":"First name of the person"}, "lastName":{"type":"string", "description":"Last name of the person"}, "yearOfBirth":{"type":"integer", "description":"Year the person was born", "format":"int64"}, "sport":{"type":"string", "description":"Sport that the person plays"}}}, {"type":null}]}`;
+    from 1990 with Simone in their name?`;
     }
 
     if trimmedPrompt.includes("Tell me about places in the specified country") && trimmedPrompt.includes("Sri Lanka") {
@@ -297,7 +332,7 @@ ${"```"}
     test:assertFail("Unexpected prompt: " + trimmedPrompt);
 }
 
-isolated function getMockLLMResponse(string message) returns string? {
+isolated function getMockLLMResponse(string message) returns string {
     if message.startsWith("Which country") {
         return "```\n\"Sri Lanka\"\n```";
     }
@@ -307,7 +342,7 @@ isolated function getMockLLMResponse(string message) returns string? {
     }
 
     if message.startsWith("Who is a popular sportsperson") {
-        return "```\n{\"firstName\":\"Simone\",\"lastName\":\"Biles\",\"yearOfBirth\":1997,\"sport\":\"Gymnastics\"}\n```";
+        return "{\"firstName\": \"Simone\", \"lastName\": \"Biles\", \"yearOfBirth\": 1997, \"sport\": \"Gymnastics\"}";
     }
 
     if message.includes("Tell me about places in the specified country") && message.includes("Sri Lanka") {

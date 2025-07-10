@@ -14,11 +14,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function queryAboutCountry(string query) returns string|error => natural {
+import ballerina/ai;
+
+configurable string serviceUrl = ?;
+configurable string accessToken = ?;
+
+final ai:Wso2ModelProvider mp = check new (serviceUrl, accessToken);
+
+function queryAboutCountry(string query) returns string|error => natural (mp) {
     Which country is ${query}?
 };
 
-function getParsedValues(string[] arr) returns (string|int)[]|error => natural {
+function getParsedValues(string[] arr) returns (string|int)[]|error => natural (mp) {
     For each string value in the given array if the value can be parsed
     as an integer give an integer, if not give the same string value. Please preserve the order.
     Array value: ${arr}
@@ -37,7 +44,7 @@ type SportsPerson record {|
 |};
 
 function getPopularSportsPerson(string nameSegment, int decadeStart)
-      returns SportsPerson|error? => natural {
+      returns SportsPerson|error => natural (mp) {
     Who is a popular sportsperson that was born in the decade starting
     from ${decadeStart} with ${nameSegment} in their name?
 };
@@ -56,7 +63,7 @@ type PlaceOfInterest record {|
 
 function getPlacesOfInterest(string country, 
                              string interest,
-                             int count = 3) returns PlaceOfInterest[]|error => natural {
+                             int count = 3) returns PlaceOfInterest[]|error => natural (mp) {
     Tell me about places in the specified country that could be a good destination 
     to someone who has the specified interest.
 
@@ -70,7 +77,7 @@ public class Obj {
 function getPlacesOfInterestWithNonAnydataParams(string country, 
                              string interest,
                              Obj operator,
-                             int count = 3) returns PlaceOfInterest[]|error => natural {
+                             int count = 3) returns PlaceOfInterest[]|error => natural (mp) {
     Tell me about places in the specified country that could be a good destination 
     to someone who has the specified interest.
 
@@ -81,12 +88,12 @@ function getPopularSportsPersonWithUnusedParams(string nameSegment,
                                 string thisParamIsNotUsed,
                                 int alsoNotUsed = 4, 
                                 int decadeStart = 1990)
-      returns SportsPerson|error? => natural {
+      returns SportsPerson|error? => natural (mp) {
     Who is a popular sportsperson that was born in the decade starting
     from ${decadeStart} with ${nameSegment} in their name?
 };
 
-function getResultOfBallerinaProgram(int x, int y) returns int|error => natural {
+function getResultOfBallerinaProgram(int x, int y) returns int|error => natural (mp) {
     What's the output of the Ballerina code below?
 
     ```ballerina
@@ -100,7 +107,7 @@ function getResultOfBallerinaProgram(int x, int y) returns int|error => natural 
     ```
 };
 
-function getSum(int a, int b = 2, int... c) returns int|error => natural {
+function getSum(int a, int b = 2, int... c) returns int|error => natural (mp) {
     What's the sum of these values?
 };
 
@@ -108,6 +115,9 @@ type IntRecord record {|
     int val;
 |};
 
-function getSumWithIncludedRecordParam(int d, *IntRecord e, int... f) returns int|error => natural {
-    Give me the sum of these values
-};
+function getSumWithIncludedRecordParam(int d, *IntRecord e, int... f) returns int|error {
+    int|error res = natural (mp) {
+        Give me the sum of these values
+    };
+    return res;
+}
