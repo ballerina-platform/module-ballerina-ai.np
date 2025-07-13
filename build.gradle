@@ -117,7 +117,6 @@ release {
 
 task build {
     dependsOn('np-compiler-plugin:build')
-    dependsOn('np-native:build')
     dependsOn('np-ballerina:build')
     dependsOn('np-compiler-plugin-tests:test')
     dependsOn('np-ballerina-tests:test')

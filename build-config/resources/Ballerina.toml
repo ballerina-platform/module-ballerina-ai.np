@@ -11,8 +11,3 @@ distribution = "2201.11.0"
 [platform.java21]
 graalvmCompatible = true
 
-[[platform.java21.dependency]]
-groupId = "io.ballerina.lib"
-artifactId = "np-native"
-version = "@toml.version@"
-path = "../native/build/libs/np-native-@project.version@.jar"
