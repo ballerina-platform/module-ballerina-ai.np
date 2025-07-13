@@ -5,13 +5,13 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.13.0-20250713-112700-c9a7be1a"
+distribution-version = "2201.13.0-m3"
 
 [[package]]
 org = "ballerina"
-name = "np"
+name = "ai.np"
 version = "0.4.0"
 modules = [
-	{org = "ballerina", packageName = "np", moduleName = "np"}
+	{org = "ballerina", packageName = "ai.np", moduleName = "ai.np"}
 ]
 
