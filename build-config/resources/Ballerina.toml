@@ -1,6 +1,6 @@
 [package]
 org = "ballerina"
-name = "np"
+name = "ai.np"
 version = "@toml.version@"
 authors = ["Ballerina"]
 keywords = ["natural programming", "ai"]

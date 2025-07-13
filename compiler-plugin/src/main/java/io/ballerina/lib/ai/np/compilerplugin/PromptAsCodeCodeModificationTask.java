@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.lib.np.compilerplugin;
+package io.ballerina.lib.ai.np.compilerplugin;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
@@ -64,8 +64,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.lib.np.compilerplugin.Commons.AI_MODULE_NAME;
-import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.AI_MODULE_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.ORG_NAME;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
 /**

@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/np_test_commons as _;
+import ballerina/ai.np_test_commons as _;
 import ballerina/test;
 
 @test:Config { enable: false }

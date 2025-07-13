@@ -5,7 +5,20 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.13.0-20250713-112700-c9a7be1a"
+distribution-version = "2201.13.0-m3"
+
+[[package]]
+org = "ballerina"
+name = "ai.np_test_commons"
+version = "0.4.0"
+dependencies = [
+	{org = "ballerina", name = "data.jsondata"},
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "test"}
+]
+modules = [
+	{org = "ballerina", packageName = "ai.np_test_commons", moduleName = "ai.np_test_commons"}
+]
 
 [[package]]
 org = "ballerina"
@@ -234,19 +247,6 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.int"},
 	{org = "ballerina", name = "log"}
-]
-
-[[package]]
-org = "ballerina"
-name = "np_test_commons"
-version = "0.4.0"
-dependencies = [
-	{org = "ballerina", name = "data.jsondata"},
-	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "test"}
-]
-modules = [
-	{org = "ballerina", packageName = "np_test_commons", moduleName = "np_test_commons"}
 ]
 
 [[package]]

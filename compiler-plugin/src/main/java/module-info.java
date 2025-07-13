@@ -16,7 +16,7 @@
  * under the License.
  */
 
-module io.ballerina.lib.np.compilerplugin {
+module io.ballerina.lib.ai.np.compilerplugin {
     requires java.net.http;
     requires com.google.gson;
     requires io.ballerina.lang;

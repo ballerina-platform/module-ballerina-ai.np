@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.lib.np.compilerplugin;
+package io.ballerina.lib.ai.np.compilerplugin;
 
 import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
@@ -37,12 +37,12 @@ import io.ballerina.tools.diagnostics.Location;
 
 import java.util.Optional;
 
-import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
-import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.ORG_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.DiagnosticLog.DiagnosticCode
         .CODE_GEN_WITH_CODE_ANNOT_NOT_YET_SUPPORTED;
-import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.CONST_NATURAL_EXPR_NOT_YET_SUPPORTED;
-import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.DiagnosticCode.NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED;
-import static io.ballerina.lib.np.compilerplugin.DiagnosticLog.reportError;
+import static io.ballerina.lib.ai.np.compilerplugin.DiagnosticLog.DiagnosticCode.CONST_NATURAL_EXPR_NOT_YET_SUPPORTED;
+import static io.ballerina.lib.ai.np.compilerplugin.DiagnosticLog.DiagnosticCode.NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED;
+import static io.ballerina.lib.ai.np.compilerplugin.DiagnosticLog.reportError;
 
 /**
  * Natural programming function signature validator.

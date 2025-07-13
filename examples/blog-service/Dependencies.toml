@@ -230,7 +230,7 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
-name = "np"
+name = "ai.np"
 version = "0.3.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
@@ -238,7 +238,7 @@ dependencies = [
 	{org = "ballerina", name = "url"}
 ]
 modules = [
-	{org = "ballerina", packageName = "np", moduleName = "np"}
+	{org = "ballerina", packageName = "ai.np", moduleName = "ai.np"}
 ]
 
 [[package]]
@@ -349,7 +349,7 @@ version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "log"},
-	{org = "ballerina", name = "np"},
+	{org = "ballerina", name = "ai.np"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "mysql"},
 	{org = "ballerinax", name = "mysql.driver"}
