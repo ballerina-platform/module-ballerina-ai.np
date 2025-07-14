@@ -30,7 +30,6 @@ import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.Document;
 
 import java.util.Optional;
@@ -62,12 +61,6 @@ class CodeGenerationValidator extends NodeVisitor {
 
     @Override
     public void visit(ModulePartNode modulePartNode) {
-        modulePartNode.members().forEach(member -> {
-            if (member.kind() != SyntaxKind.FUNCTION_DEFINITION) {
-                addInvalidProgramStructureDiagnostic(member.kind().stringValue());
-            }
-        });
-
         if (this.document.isEmpty()) {
             return;
         }
@@ -107,51 +100,41 @@ class CodeGenerationValidator extends NodeVisitor {
     }
 
     private boolean isConfigVariable(Symbol symbol) {
-        if (symbol instanceof VariableSymbol variableSymbol) {
-            Optional<Qualifier> qualifiersOpt = variableSymbol.qualifiers().stream()
-                    .filter(qualifier -> qualifier == Qualifier.CONFIGURABLE)
-                    .findFirst();
-            if (qualifiersOpt.isEmpty()) {
-                return false;
-            }
-
-            return true;
-        }
-        return false;
+        return symbol instanceof VariableSymbol variableSymbol &&
+            variableSymbol.qualifiers().stream()
+                    .anyMatch(qualifier -> qualifier == Qualifier.CONFIGURABLE);
     }
 
     private void addModuleVariableReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
         NodeLocation location = node.location();
-        diagnostic.addProperty("message", String.format("Module level variables " +
-                "cannot be used inside the generated code. (found: '%s') in location(start line: %s, end line: %s)",
-                node.toSourceCode(), location.lineRange().startLine().line(), location.lineRange().endLine().line()));
+        diagnostic.addProperty("message", String.format("ERROR [%s:(%s:%s,%s:%s)] Module level variables " +
+                "cannot be used inside the generated code. (found: '%s')",
+            document.get().name(), location.lineRange().startLine().line(),
+            location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
+            location.lineRange().endLine().offset(), node.toSourceCode()));
         this.diagnostics.add(diagnostic);
     }
 
     private void addConfigVariableReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
         NodeLocation location = node.location();
-        diagnostic.addProperty("message", String.format("Config variables cannot be used " +
-                "inside the generated code. (found: '%s') in location(start line: %s, end line: %s)",
-                node.toSourceCode(), location.lineRange().startLine().line(), location.lineRange().endLine().line()));
+        diagnostic.addProperty("message", String.format("ERROR [%s:(%s:%s,%s:%s)] Config variables" +
+                " cannot be used inside the generated code. (found: '%s')",
+            document.get().name(), location.lineRange().startLine().line(),
+            location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
+            location.lineRange().endLine().offset(), node.toSourceCode()));
         this.diagnostics.add(diagnostic);
     }
 
-    private void addInvalidProgramStructureDiagnostic(String kind) {
-        JsonObject diagnostic = new JsonObject();
-        diagnostic.addProperty("message", "Invalid code structure detected." +
-                " Only function definitions are permitted in the generated code. Found disallowed element: " + kind);
-        this.diagnostics.add(diagnostic);
-    }
-
-    private static JsonObject addExternalImportDiagnostic(ImportDeclarationNode importNode) {
+    private JsonObject addExternalImportDiagnostic(ImportDeclarationNode importNode) {
         JsonObject diagnostic = new JsonObject();
         NodeLocation location = importNode.location();
-        diagnostic.addProperty("message", String.format("Disallowed import '%s' detected in " +
-                        "location(start line: %s, end line: %s)," +
-                        " only 'ballerina/' or 'ballerinax/' packages are permitted", importNode.toSourceCode(),
-                location.lineRange().startLine().line(), location.lineRange().endLine().line()));
+        diagnostic.addProperty("message", String.format("ERROR [%s:(%s:%s,%s:%s)] Disallowed import '%s'" +
+                " detected in location, only 'ballerina/' or 'ballerinax/' " +
+                "packages are permitted", document.get().name(), location.lineRange().startLine().line(),
+            location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
+            location.lineRange().endLine().offset(), importNode.toSourceCode()));
         return diagnostic;
     }
 

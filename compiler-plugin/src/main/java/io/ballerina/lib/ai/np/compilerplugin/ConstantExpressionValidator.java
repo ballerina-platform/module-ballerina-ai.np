@@ -18,6 +18,7 @@
 package io.ballerina.lib.np.compilerplugin;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.ballerina.compiler.syntax.tree.AnnotAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
@@ -73,10 +74,10 @@ import io.ballerina.compiler.syntax.tree.UnaryExpressionNode;
 import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.XMLFilterExpressionNode;
 import io.ballerina.compiler.syntax.tree.XMLStepExpressionNode;
+import io.ballerina.projects.Document;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 /**
  * Validates that the expressions in the generated code are constant expressions.
@@ -85,6 +86,11 @@ import java.util.stream.IntStream;
  */
 class ConstantExpressionValidator extends NodeVisitor {
     private final JsonArray constantExpressionDiagnostics = new JsonArray();
+    private final Document document;
+
+    public ConstantExpressionValidator(Document document) {
+        this.document = document;
+    }
 
     protected JsonArray checkNonConstExpressions(Node node) {
         visitSyntaxNode(node);
@@ -94,10 +100,7 @@ class ConstantExpressionValidator extends NodeVisitor {
     private void addConstantReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
         NodeLocation location = node.location();
-        diagnostic.addProperty("message", String.format("Error: Generated code should only " +
-                "contains constant expressions. (found: '%s' in " +
-                "location (start line: %s, end line: %s))", node.toSourceCode(),
-                location.lineRange().startLine().line(), node.lineRange().endLine().line()));
+        diagnostic.addProperty("message", constructDiagnosticMessage(node, location));
         this.constantExpressionDiagnostics.add(diagnostic);
     }
 
@@ -377,14 +380,22 @@ class ConstantExpressionValidator extends NodeVisitor {
         Set<String> seenMessages = new HashSet<>();
         JsonArray uniqueArray = new JsonArray();
 
-        IntStream.range(0, originalArray.size()).mapToObj(i -> originalArray.get(i).getAsJsonObject()).forEach(obj -> {
+        for (JsonElement elem : originalArray) {
+            JsonObject obj = elem.getAsJsonObject();
             String message = obj.getAsJsonPrimitive("message").getAsString();
-            if (!seenMessages.contains(message)) {
-                seenMessages.add(message);
+            if (seenMessages.add(message)) {
                 uniqueArray.add(obj);
             }
-        });
+        }
 
         return uniqueArray;
+    }
+
+    private String constructDiagnosticMessage(Node node, NodeLocation location) {
+        return String.format("ERROR [%s:(%s:%s,%s:%s)] Generated code should only " +
+                        "contains constant expressions. (found: '%s')",
+            this.document.name(), location.lineRange().startLine().line(),
+            location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
+            location.lineRange().endLine().offset(), node.toSourceCode());
     }
 }

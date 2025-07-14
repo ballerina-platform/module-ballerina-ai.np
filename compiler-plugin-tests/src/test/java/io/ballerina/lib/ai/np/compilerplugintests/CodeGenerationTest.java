@@ -177,14 +177,14 @@ public class CodeGenerationTest {
     @Test
     public void testCodeFunctionWithValidation() throws IOException, InterruptedException {
         String serviceResourceDirectoryName = "code-function-projects" + File.separator +
-                "code-function-with-validations-failure";
+                "code-function-with-validation-failure";
         server.enqueue(new MockResponse()
                 .setBody(getCodeMockResponse(serviceResourceDirectoryName,
-                        "code_function_with_validations_code_response.txt"))
+                        "code_function_with_validation_code_response.txt"))
                 .setResponseCode(200));
         server.enqueue(new MockResponse()
                 .setBody(getCodeMockResponse(serviceResourceDirectoryName,
-                        "code_function_with_validations_repair_response.json"))
+                        "code_function_with_validation_repair_response.json"))
                 .setResponseCode(200)
                 .setHeader("Content-type", "application/json"));
 
@@ -193,9 +193,9 @@ public class CodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(CODE_PATH, serviceResourceDirectoryName,
-                "code_function_with_validations_code_request.json");
+                "code_function_with_validation_code_request.json");
         assertRepairRequest(serviceResourceDirectoryName,
-                "code_function_with_validations_repair_request.json");
+                "code_function_with_validation_repair_request.json");
 
         validateGeneratedCodeAndDeleteGeneratedDir(serviceResourceDirectoryName,
                 "calculateTotalPrice_np_generated.bal");

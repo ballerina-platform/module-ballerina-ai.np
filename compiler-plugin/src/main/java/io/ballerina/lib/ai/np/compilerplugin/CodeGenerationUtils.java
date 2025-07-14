@@ -97,25 +97,25 @@ public class CodeGenerationUtils {
         }
     }
 
-    public static ExpressionNode generateCodeForNaturalExpression(NaturalExpressionNode naturalExpressionNode,
+    static ExpressionNode generateCodeForNaturalExpression(NaturalExpressionNode naturalExpressionNode,
                                                            String copilotUrl, String copilotAccessToken,
                                                            HttpClient client, JsonArray sourceFiles,
                                                            SemanticModel semanticModel,
-                                                           TypeSymbol expectedType) {
+                                                           TypeSymbol expectedType, Document document) {
         try {
             String generatedPrompt = generatePrompt(naturalExpressionNode, expectedType, semanticModel);
             GeneratedCode generatedCode = generateCode(copilotUrl, copilotAccessToken, client, sourceFiles,
                     generatedPrompt);
             ExpressionNode modifiedExpressionNode = NodeParser.parseExpression(generatedCode.code());
             JsonArray diagnostics =
-                    collectConstNaturalExpressionDiagnostics(modifiedExpressionNode, generatedCode);
-            if (!diagnostics.isEmpty()) {
-                String repairedExpression = repairIfDiagnosticsExistForConstNaturalExpression(
-                        copilotUrl, copilotAccessToken, client, sourceFiles,
-                        generatedPrompt, generatedCode, diagnostics);
-                return NodeParser.parseExpression(repairedExpression);
+                    collectConstNaturalExpressionDiagnostics(modifiedExpressionNode, generatedCode, document);
+            if (diagnostics.isEmpty()) {
+                return modifiedExpressionNode;
             }
-            return modifiedExpressionNode;
+            String repairedExpression = repairIfDiagnosticsExistForConstNaturalExpression(
+                    copilotUrl, copilotAccessToken, client, sourceFiles,
+                    generatedPrompt, generatedCode, diagnostics);
+            return NodeParser.parseExpression(repairedExpression);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate code, invalid URI for Copilot");
         } catch (ConnectException e) {
@@ -188,17 +188,17 @@ public class CodeGenerationUtils {
     }
 
     private static JsonArray collectConstNaturalExpressionDiagnostics(ExpressionNode expNode,
-                                                                     GeneratedCode generatedCode) {
+                                                                      GeneratedCode generatedCode, Document document) {
         JsonArray diagnostics = new JsonArray();
         Iterable<Diagnostic> projectDiagnostics = expNode.diagnostics();
 
         projectDiagnostics.forEach(diagnostic -> {
             JsonObject diagnosticObj = new JsonObject();
-            diagnosticObj.addProperty("message", diagnostic.message());
+            diagnosticObj.addProperty("message", diagnostic.toString());
             diagnostics.add(diagnosticObj);
         });
 
-        JsonArray constantExpressionDiagnostics = new ConstantExpressionValidator()
+        JsonArray constantExpressionDiagnostics = new ConstantExpressionValidator(document)
                 .checkNonConstExpressions(NodeParser.parseExpression(generatedCode.code));
         diagnostics.addAll(constantExpressionDiagnostics);
         return diagnostics;
@@ -405,7 +405,7 @@ public class CodeGenerationUtils {
                         %s
                         ```
                         
-                        Your task is to generate a function named '%s' with the code that needs to satisfy this user
+                        Your task is to generate a function named '%s' with the code that is needed to satisfy this user
                         prompt.
                         
                         The '%s' function should have exactly the same signature as the '%s' function.
@@ -439,6 +439,7 @@ public class CodeGenerationUtils {
                 
                 The value should belong to the type '%s'. This value will be used in the code in place of the
                 `const natural {...}` expression with the requirement.
+
                 Respond with ONLY THE VALUE EXPRESSION.
                 
                 Requirement:
@@ -487,8 +488,8 @@ public class CodeGenerationUtils {
             JsonArray diagnostics) {
         JsonObject payload = new JsonObject();
         payload.addProperty("usecase",
-              "Generated expression returns following errors. " +
-                    "Fix the errors and return the new constant expression.");
+              "The generated expression results in the following errors. " +
+                    "Fix the errors and return a new constant expression.");
 
         return updateResourcePayload(payload, generatedPrompt, generatedCode, diagnostics, sourceFiles);
     }

@@ -26,7 +26,6 @@ import io.ballerina.compiler.api.symbols.AnnotationAttachmentSymbol;
 import io.ballerina.compiler.api.symbols.AnnotationSymbol;
 import io.ballerina.compiler.api.symbols.ExternalFunctionSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
-import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.values.ConstantValue;
 import io.ballerina.compiler.syntax.tree.BaseNodeModifier;
 import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
@@ -219,10 +218,9 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                 return naturalExpressionNode;
             }
 
-            TypeSymbol expectedType =
-                    semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get();
             return generateCodeForNaturalExpression(naturalExpressionNode, copilotUrl, copilotAccessToken,
-                    getHttpClient(), this.getSourceFiles(), semanticModel, expectedType);
+                    getHttpClient(), this.getSourceFiles(), semanticModel, semanticModel
+                        .expectedType(document, naturalExpressionNode.lineRange().startLine()).get(), document);
         }
 
         private void handleGeneratedCode(String originalFuncName, String generatedCode) {
