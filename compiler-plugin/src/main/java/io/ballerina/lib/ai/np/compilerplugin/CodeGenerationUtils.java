@@ -45,6 +45,8 @@ import io.ballerina.projects.util.ProjectUtils;
 import io.ballerina.tools.diagnostics.Diagnostic;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import io.ballerina.tools.diagnostics.DiagnosticSeverity;
+import io.ballerina.tools.text.LinePosition;
+import io.ballerina.tools.text.LineRange;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -194,7 +196,8 @@ public class CodeGenerationUtils {
 
         projectDiagnostics.forEach(diagnostic -> {
             JsonObject diagnosticObj = new JsonObject();
-            diagnosticObj.addProperty("message", diagnostic.toString());
+            diagnosticObj.addProperty("message", constructProjectDiagnosticMessage(expNode, 
+                    diagnostic.message(), document));
             diagnostics.add(diagnosticObj);
         });
 
@@ -202,6 +205,14 @@ public class CodeGenerationUtils {
                 .checkNonConstExpressions(NodeParser.parseExpression(generatedCode.code));
         diagnostics.addAll(constantExpressionDiagnostics);
         return diagnostics;
+    }
+
+    private static String constructProjectDiagnosticMessage(Node node, String message, Document document) {
+        LineRange lineRange = node.location().lineRange();
+        LinePosition startLine = lineRange.startLine();
+        LinePosition endLine = lineRange.endLine();
+        return String.format("ERROR [%s:(%s:%s,%s:%s)] %s.",
+                document.name(), startLine.line(), startLine.offset(), endLine.line(), endLine.offset(), message);
     }
 
     private static String repairIfDiagnosticsExistForConstNaturalExpression(String copilotUrl,

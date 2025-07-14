@@ -16,22 +16,22 @@
   "diagnosticRequest": {
     "diagnostics": [
       {
-        "message": "ERROR [null:(38:0,38:1)] action invocation as an expression not allowed here"
+        "message": "ERROR [main.bal:(1:0,40:1)] action invocation as an expression not allowed here."
       },
       {
-        "message": "ERROR [null:(39:7,39:7)] missing comma token"
+        "message": "ERROR [main.bal:(1:0,40:1)] missing comma token."
       },
       {
-        "message": "ERROR [null:(39:7,39:8)] incomplete quoted identifier"
+        "message": "ERROR [main.bal:(1:0,40:1)] incomplete quoted identifier."
       },
       {
-        "message": "ERROR [null:(39:7,39:8)] action invocation as an expression not allowed here"
+        "message": "ERROR [main.bal:(1:0,40:1)] action invocation as an expression not allowed here."
       },
       {
-        "message": "ERROR [null:(39:22,39:22)] missing identifier"
+        "message": "ERROR [main.bal:(1:0,40:1)] missing identifier."
       },
       {
-        "message": "ERROR [null:(40:0,40:0)] missing identifier"
+        "message": "ERROR [main.bal:(1:0,40:1)] missing identifier."
       },
       {
         "message": "ERROR [main.bal:(2:34,2:45)] Generated code should only contains constant expressions. (found: 'getString()')"

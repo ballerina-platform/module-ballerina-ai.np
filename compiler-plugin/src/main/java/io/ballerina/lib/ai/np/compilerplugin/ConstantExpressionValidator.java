@@ -75,6 +75,8 @@ import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.XMLFilterExpressionNode;
 import io.ballerina.compiler.syntax.tree.XMLStepExpressionNode;
 import io.ballerina.projects.Document;
+import io.ballerina.tools.text.LinePosition;
+import io.ballerina.tools.text.LineRange;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -100,7 +102,7 @@ class ConstantExpressionValidator extends NodeVisitor {
     private void addConstantReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
         NodeLocation location = node.location();
-        diagnostic.addProperty("message", constructDiagnosticMessage(node, location));
+        diagnostic.addProperty("message", constructDiagnosticMessage(node));
         this.constantExpressionDiagnostics.add(diagnostic);
     }
 
@@ -391,11 +393,13 @@ class ConstantExpressionValidator extends NodeVisitor {
         return uniqueArray;
     }
 
-    private String constructDiagnosticMessage(Node node, NodeLocation location) {
+    private String constructDiagnosticMessage(Node node) {
+        LineRange lineRange = node.location().lineRange();
+        LinePosition startLine = lineRange.startLine();
+        LinePosition endLine = lineRange.endLine();
         return String.format("ERROR [%s:(%s:%s,%s:%s)] Generated code should only " +
                         "contains constant expressions. (found: '%s')",
-            this.document.name(), location.lineRange().startLine().line(),
-            location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
-            location.lineRange().endLine().offset(), node.toSourceCode());
+            this.document.name(), startLine.line(), startLine.offset(), endLine.line(),
+            endLine.offset(), node.toSourceCode());
     }
 }
