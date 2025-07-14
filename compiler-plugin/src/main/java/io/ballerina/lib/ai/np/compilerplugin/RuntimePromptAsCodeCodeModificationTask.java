@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.lib.np.compilerplugin;
+package io.ballerina.lib.ai.np.compilerplugin;
 
 import io.ballerina.compiler.api.SemanticModel;
 import io.ballerina.compiler.api.symbols.ArrayTypeSymbol;
@@ -90,13 +90,13 @@ import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
 import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.lib.np.compilerplugin.Commons.CALL_LLM;
-import static io.ballerina.lib.np.compilerplugin.Commons.MODULE_NAME;
-import static io.ballerina.lib.np.compilerplugin.Commons.ORG_NAME;
-import static io.ballerina.lib.np.compilerplugin.Commons.getParameterName;
-import static io.ballerina.lib.np.compilerplugin.Commons.getParameterType;
-import static io.ballerina.lib.np.compilerplugin.Commons.isNotNPCallCall;
-import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.CALL_LLM;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.MODULE_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.ORG_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.getParameterName;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.getParameterType;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.isNotNPCallCall;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.isRuntimeNaturalExpression;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
 /**

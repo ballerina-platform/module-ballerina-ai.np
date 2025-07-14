@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package io.ballerina.lib.np.compilerplugin;
+package io.ballerina.lib.ai.np.compilerplugin;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -55,8 +55,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static io.ballerina.lib.np.compilerplugin.Commons.CONTENT;
-import static io.ballerina.lib.np.compilerplugin.Commons.FILE_PATH;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.CONTENT;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.FILE_PATH;
 
 /**
  * Methods to generate code at compile-time.

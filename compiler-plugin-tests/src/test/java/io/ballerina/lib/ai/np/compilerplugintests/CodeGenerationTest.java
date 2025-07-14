@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.lib.np.compilerplugintests;
+package io.ballerina.lib.ai.np.compilerplugintests;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

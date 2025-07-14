@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.lib.np.compilerplugintests;
+package io.ballerina.lib.ai.np.compilerplugintests;
 
 import io.ballerina.projects.BuildOptions;
 import io.ballerina.projects.DiagnosticResult;

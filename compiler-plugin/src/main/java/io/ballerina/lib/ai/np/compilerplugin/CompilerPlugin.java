@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.lib.np.compilerplugin;
+package io.ballerina.lib.ai.np.compilerplugin;
 
 import io.ballerina.projects.plugins.CompilerPluginContext;
 

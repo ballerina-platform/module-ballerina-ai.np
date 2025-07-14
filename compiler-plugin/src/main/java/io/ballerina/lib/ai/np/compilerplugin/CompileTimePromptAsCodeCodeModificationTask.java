@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package io.ballerina.lib.np.compilerplugin;
+package io.ballerina.lib.ai.np.compilerplugin;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -74,15 +74,15 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
-import static io.ballerina.lib.np.compilerplugin.CodeGenerationUtils.generateCodeForNaturalExpression;
-import static io.ballerina.lib.np.compilerplugin.Commons.BAL_EXT;
-import static io.ballerina.lib.np.compilerplugin.Commons.CODE_ANNOTATION;
-import static io.ballerina.lib.np.compilerplugin.Commons.CONTENT;
-import static io.ballerina.lib.np.compilerplugin.Commons.FILE_PATH;
-import static io.ballerina.lib.np.compilerplugin.Commons.LANG_ANNOTATIONS_MODULE;
-import static io.ballerina.lib.np.compilerplugin.Commons.isCodeAnnotation;
-import static io.ballerina.lib.np.compilerplugin.Commons.isRuntimeNaturalExpression;
+import static io.ballerina.lib.ai.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
+import static io.ballerina.lib.ai.np.compilerplugin.CodeGenerationUtils.generateCodeForNaturalExpression;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.BAL_EXT;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.CODE_ANNOTATION;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.CONTENT;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.FILE_PATH;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.LANG_ANNOTATIONS_MODULE;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.isCodeAnnotation;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.isRuntimeNaturalExpression;
 
 /**
  * Code modification task to replace generate code based on a prompt and replace.
