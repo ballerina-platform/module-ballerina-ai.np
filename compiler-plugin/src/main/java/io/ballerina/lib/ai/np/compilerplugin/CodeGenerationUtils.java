@@ -297,7 +297,7 @@ public class CodeGenerationUtils {
 
     private static String generatePrompt(String originalFuncName, String generatedFuncName, String prompt) {
         return String.format("""
-                        An `external` function with the `@code` Ballerina annotation needs to be replaced at
+                        An `external` function with the `@natural:code` Ballerina annotation needs to be replaced at
                         compile-time with the code necessary to achieve the requirement specified as the `prompt`
                         field in the annotation.
                         

@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 import static io.ballerina.projects.util.ProjectConstants.BALLERINA_HOME;
 
 /**
- * This class tests compile-time code generation with const natural expressions and @code annotations.
+ * This class tests compile-time code generation with const natural expressions and @natural:code annotations.
  *
  * @since 0.4.0
  */
