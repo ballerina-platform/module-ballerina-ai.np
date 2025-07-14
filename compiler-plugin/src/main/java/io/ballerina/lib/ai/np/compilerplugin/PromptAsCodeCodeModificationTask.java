@@ -65,7 +65,7 @@ import java.util.Set;
 
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.AI_MODULE_NAME;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.ORG_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.BALLERINA_ORG_NAME;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
 /**
@@ -133,7 +133,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
         ModulePartNode modulePartNode = document.syntaxTree().rootNode();
         for (ImportDeclarationNode importDeclarationNode : modulePartNode.imports()) {
             Optional<ImportOrgNameNode> importOrgNameNode = importDeclarationNode.orgName();
-            if (importOrgNameNode.isEmpty() || !ORG_NAME.equals(importOrgNameNode.get().orgName().text())) {
+            if (importOrgNameNode.isEmpty() || !BALLERINA_ORG_NAME.equals(importOrgNameNode.get().orgName().text())) {
                 continue;
             }
 
@@ -273,7 +273,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
     private static boolean containsBallerinaAIImport(NodeList<ImportDeclarationNode> imports) {
         for (ImportDeclarationNode importDeclarationNode : imports) {
             Optional<ImportOrgNameNode> importOrgNameNode = importDeclarationNode.orgName();
-            if (importOrgNameNode.isPresent() && importOrgNameNode.get().orgName().text().equals(ORG_NAME)
+            if (importOrgNameNode.isPresent() && importOrgNameNode.get().orgName().text().equals(BALLERINA_ORG_NAME)
                     && importDeclarationNode.moduleName().get(0).text().equals(AI_MODULE_NAME)) {
                 return true;
             }
@@ -297,7 +297,7 @@ public class PromptAsCodeCodeModificationTask implements ModifierTask<SourceModi
 
     private static ImportDeclarationNode createImportDeclarationForAiModule() {
         // TODO: handle the `ai` prefix already being used
-        return NodeParser.parseImportDeclaration(String.format("import %s/%s;", ORG_NAME, AI_MODULE_NAME));
+        return NodeParser.parseImportDeclaration(String.format("import %s/%s;", BALLERINA_ORG_NAME, AI_MODULE_NAME));
     }
 
     private static void populateTypeSchema(TypeSymbol memberType, TypeMapper typeMapper,

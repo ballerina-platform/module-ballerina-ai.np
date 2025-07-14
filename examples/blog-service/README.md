@@ -23,6 +23,8 @@ When a blog post is submitted, the system attempts to determine the most appropr
 
     ```ballerina
     import ballerina/ai;
+  
+    final ai:ModelProvider model = check ai:getDefaultModelProvider();
 
     # Represents a blog entry with title and content.
     public type Blog record {|
@@ -41,7 +43,7 @@ When a blog post is submitted, the system attempts to determine the most appropr
     |};
 
     public isolated function reviewBlog(Blog blog) returns Review|error => 
-        natural (check ai:getDefaultModelProvider()) {
+        natural (model) {
             You are an expert content reviewer for a blog site that 
                 categorizes posts under the following categories: ${categories}
 

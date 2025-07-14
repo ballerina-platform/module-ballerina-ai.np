@@ -24,9 +24,11 @@ Use a natural function to find a popular sportsperson who has the specified name
 
     ```ballerina
     import ballerina/ai;
+   
+    final ai:ModelProvider model = check ai:getDefaultModelProvider();
 
     function getPopularSportsPerson(string nameSegment, int decadeStart) 
-            returns SportsPerson|error? => natural (check ai:getDefaultModelProvider()) {
+            returns SportsPerson|error? => natural (model) {
         Who is a popular sportsperson that was born in the decade starting 
         from ${decadeStart} with ${nameSegment} in their name?
     };
@@ -55,7 +57,7 @@ Use a natural function to find a popular sportsperson who has the specified name
 
 4. Provide configuration for the default model provider via the Config.toml file. You can use the default model made available via WSO2 Copilot. Log in to WSO2 Copilot, open up the VS Code command palette (`Ctrl + Shift + P` or `command + shift + P`), and run `Configure Default Model for Natural Functions`. This will add configuration for the default model into the Config.toml file. Please note that this will require VS Code being open in the relevant directory.
 
-    You can use your own keys and configuration for providers such as OpenAI or Azure OpenAI by using a value of the model provider from the relevant `ballerinax/ai.<provider>` package, instead of `check ai:getDefaultModelProvider()`.
+    You can use your own keys and configuration for providers such as OpenAI or Azure OpenAI by using a value of the model provider from the relevant `ballerinax/ai.<provider>` package, instead of `ai:getDefaultModelProvider()`.
 
 5. Run the sample using the Ballerina run command passing the `--experimental` option.
 

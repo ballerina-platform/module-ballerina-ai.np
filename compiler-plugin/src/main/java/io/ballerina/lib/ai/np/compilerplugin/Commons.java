@@ -23,6 +23,9 @@ package io.ballerina.lib.ai.np.compilerplugin;
  * @since 0.3.0
  */
 class Commons {
-    static final String ORG_NAME = "ballerina";
+    private Commons() {
+    }
+
+    static final String BALLERINA_ORG_NAME = "ballerina";
     static final String AI_MODULE_NAME = "ai";
 }

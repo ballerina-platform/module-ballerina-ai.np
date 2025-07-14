@@ -16,8 +16,10 @@
 
 import ballerina/ai;
 
+final ai:ModelProvider model = check ai:getDefaultModelProvider();
+
 public isolated function reviewBlog(Blog blog) returns Review|error => 
-    natural (check ai:getDefaultModelProvider()) {
+    natural (model) {
         You are an expert content reviewer for a blog site that 
             categorizes posts under the following categories: ${categories}
 

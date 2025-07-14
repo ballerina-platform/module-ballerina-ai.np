@@ -1,6 +1,8 @@
 import ballerina/ai;
 import ballerina/io;
 
+final ai:ModelProvider model = check ai:getDefaultModelProvider();
+
 # Represents a person who plays a sport.
 type SportsPerson record {|
     # First name of the person
@@ -14,7 +16,7 @@ type SportsPerson record {|
 |};
 
 function getPopularSportsPerson(string nameSegment, int decadeStart) 
-      returns SportsPerson|error => natural (check ai:getDefaultModelProvider()) {
+      returns SportsPerson|error => natural (model) {
     Who is a popular sportsperson that was born in the decade starting 
     from ${decadeStart} with ${nameSegment} in their name?
 };

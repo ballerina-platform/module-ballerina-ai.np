@@ -37,7 +37,7 @@ import io.ballerina.tools.diagnostics.Location;
 
 import java.util.Optional;
 
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.ORG_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.BALLERINA_ORG_NAME;
 import static io.ballerina.lib.ai.np.compilerplugin.DiagnosticLog.DiagnosticCode
         .CODE_GEN_WITH_CODE_ANNOT_NOT_YET_SUPPORTED;
 import static io.ballerina.lib.ai.np.compilerplugin.DiagnosticLog.DiagnosticCode.CONST_NATURAL_EXPR_NOT_YET_SUPPORTED;
@@ -126,6 +126,6 @@ public class Validator implements AnalysisTask<SyntaxNodeAnalysisContext> {
 
     private static boolean isLangNaturalModule(ModuleSymbol moduleSymbol) {
         ModuleID moduleId = moduleSymbol.id();
-        return ORG_NAME.equals(moduleId.orgName()) && "lang.natural".equals(moduleId.moduleName());
+        return BALLERINA_ORG_NAME.equals(moduleId.orgName()) && "lang.natural".equals(moduleId.moduleName());
     }
 }
