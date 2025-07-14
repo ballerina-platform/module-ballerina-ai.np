@@ -80,9 +80,8 @@ import static io.ballerina.lib.ai.np.compilerplugin.Commons.BAL_EXT;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.CODE_ANNOTATION;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.CONTENT;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.FILE_PATH;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.LANG_ANNOTATIONS_MODULE;
 import static io.ballerina.lib.ai.np.compilerplugin.Commons.isCodeAnnotation;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.isRuntimeNaturalExpression;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.isLangNaturalModule;
 
 /**
  * Code modification task to replace generate code based on a prompt and replace.
@@ -205,7 +204,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
 
         @Override
         public ExpressionNode transform(NaturalExpressionNode naturalExpressionNode) {
-            if (isRuntimeNaturalExpression(naturalExpressionNode)) {
+            if (naturalExpressionNode.constKeyword().isEmpty()) {
                 return naturalExpressionNode;
             }
             String generatedCode = generateCodeForNaturalExpression(copilotUrl, copilotAccessToken,
@@ -296,7 +295,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                         .annotAttachmentsOnExternal()) {
             AnnotationSymbol annotationSymbol = annotationAttachmentSymbol.typeDescriptor();
             Optional<ModuleSymbol> module = annotationSymbol.getModule();
-            if (module.isEmpty() || !LANG_ANNOTATIONS_MODULE.equals(module.get().getName().get())) {
+            if (module.isEmpty() || !isLangNaturalModule(module.get())) {
                 continue;
             }
 

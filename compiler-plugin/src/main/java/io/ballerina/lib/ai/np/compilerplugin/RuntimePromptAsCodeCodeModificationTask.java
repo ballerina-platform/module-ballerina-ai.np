@@ -25,41 +25,21 @@ import io.ballerina.compiler.api.symbols.TupleTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
 import io.ballerina.compiler.api.symbols.UnionTypeSymbol;
-import io.ballerina.compiler.syntax.tree.AbstractNodeFactory;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.BaseNodeModifier;
-import io.ballerina.compiler.syntax.tree.ChildNodeList;
-import io.ballerina.compiler.syntax.tree.ExpressionFunctionBodyNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionArgumentNode;
-import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
-import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
 import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ImportOrgNameNode;
 import io.ballerina.compiler.syntax.tree.ImportPrefixNode;
-import io.ballerina.compiler.syntax.tree.LiteralValueToken;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MetadataNode;
-import io.ballerina.compiler.syntax.tree.MinutiaeList;
-import io.ballerina.compiler.syntax.tree.ModuleMemberDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
-import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeFactory;
 import io.ballerina.compiler.syntax.tree.NodeList;
 import io.ballerina.compiler.syntax.tree.NodeParser;
-import io.ballerina.compiler.syntax.tree.NonTerminalNode;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.ParenthesizedArgList;
-import io.ballerina.compiler.syntax.tree.PositionalArgumentNode;
-import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.ReturnTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
 import io.ballerina.compiler.syntax.tree.SyntaxKind;
-import io.ballerina.compiler.syntax.tree.SyntaxTree;
-import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.compiler.syntax.tree.TreeModifier;
 import io.ballerina.compiler.syntax.tree.TypeDefinitionNode;
@@ -76,7 +56,6 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.OpenAPISchema2JsonSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,43 +63,23 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createIdentifierToken;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.CLOSE_PAREN_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_BRACE_TOKEN;
-import static io.ballerina.compiler.syntax.tree.SyntaxKind.OPEN_PAREN_TOKEN;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.CALL_LLM;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.MODULE_NAME;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.ORG_NAME;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.getParameterName;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.getParameterType;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.isNotNPCallCall;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.isRuntimeNaturalExpression;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.AI_MODULE_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.BALLERINA_ORG_NAME;
 import static io.ballerina.projects.util.ProjectConstants.EMPTY_STRING;
 
 /**
- * Code modification task to replace runtime natural expressions with np:call.
+ * Code modification task to replace runtime prompt as code external functions with np:call.
  *
  * @since 0.3.0
  */
 public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<SourceModifierContext> {
 
-    private static final Token OPEN_PAREN = createToken(OPEN_PAREN_TOKEN);
-    private static final Token CLOSE_PAREN = createToken(CLOSE_PAREN_TOKEN);
-    private static final Token OPEN_BRACE = createToken(OPEN_BRACE_TOKEN);
-    private static final Token CLOSE_BRACE = createToken(CLOSE_BRACE_TOKEN);
     private static final Token COLON = createToken(SyntaxKind.COLON_TOKEN);
-    private static final Token COMMA = createToken(SyntaxKind.COMMA_TOKEN);
-    private static final Token BACKTICK = createToken(SyntaxKind.BACKTICK_TOKEN);
-    private static final Token INTERPOLATION_START = createToken(SyntaxKind.INTERPOLATION_START_TOKEN);
-    private static final Token MODEL = createIdentifierToken("model");
     private static final String SCHEMA_ANNOTATION_IDENTIFIER = "JsonSchema";
     private static final String STRING = "string";
     private static final String BYTE = "byte";
     private static final String NUMBER = "number";
-    private static final String ESCAPED_BACKTICK = "\"`\"";
-    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     private final ModifierData modifierData;
     private final CodeModifier.AnalysisData analysisData;
@@ -145,111 +104,83 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
 
             for (DocumentId documentId: module.documentIds()) {
                 Document document = module.document(documentId);
-                processImportDeclarations(document, modifierData);
-                processExternalFunctions(document, module, modifierData, modifierContext);
+                generateSchemasForExpectedTypes(document, modifierData, modifierContext, moduleId,
+                        this.analysisData.typeMapper);
+            }
+
+            for (DocumentId documentId: module.testDocumentIds()) {
+                Document document = module.document(documentId);
+                generateSchemasForExpectedTypes(document, modifierData, modifierContext, moduleId,
+                        this.analysisData.typeMapper);
             }
 
             for (DocumentId documentId: module.documentIds()) {
                 Document document = module.document(documentId);
-                modifierContext.modifySourceFile(modifyDocument(document, modifierData, modifierContext, moduleId,
-                                                                this.analysisData.typeMapper), documentId);
+                Optional<String> aiImportPrefix = getAiImportPrefix(document);
+                modifierContext.modifySourceFile(modifyDocument(document, modifierData, aiImportPrefix), documentId);
             }
 
             for (DocumentId documentId: module.testDocumentIds()) {
                 Document document = module.document(documentId);
-                processImportDeclarations(document, modifierData);
-                processExternalFunctions(document, module, modifierData, modifierContext);
-            }
-
-            for (DocumentId documentId: module.testDocumentIds()) {
-                Document document = module.document(documentId);
-                modifierContext.modifyTestSourceFile(modifyDocument(document, modifierData, modifierContext, moduleId,
-                                                                    this.analysisData.typeMapper), documentId);
+                Optional<String> aiImportPrefix = getAiImportPrefix(document);
+                modifierContext.modifyTestSourceFile(
+                        modifyDocument(document, modifierData, aiImportPrefix), documentId);
             }
         }
     }
 
-    private void processExternalFunctions(Document document, Module module, ModifierData modifierData,
-                                          SourceModifierContext modifierContext) {
-        SyntaxTree syntaxTree = document.syntaxTree();
-        ModulePartNode rootNode = syntaxTree.rootNode();
-        SemanticModel semanticModel = modifierContext.compilation().getSemanticModel(module.moduleId());
-        for (ModuleMemberDeclarationNode memberNode : rootNode.members()) {
-            if (!isNaturalFunction(memberNode)) {
+    private Optional<String> getAiImportPrefix(Document document) {
+        ModulePartNode modulePartNode = document.syntaxTree().rootNode();
+        for (ImportDeclarationNode importDeclarationNode : modulePartNode.imports()) {
+            Optional<ImportOrgNameNode> importOrgNameNode = importDeclarationNode.orgName();
+            if (importOrgNameNode.isEmpty() || !BALLERINA_ORG_NAME.equals(importOrgNameNode.get().orgName().text())) {
                 continue;
             }
 
-            modifierData.documentsRequiringNPImport.add(document);
-            FunctionDefinitionNode functionDefinition = (FunctionDefinitionNode) memberNode;
-            extractAndStoreSchemas(semanticModel, functionDefinition, modifierData.typeSchemas,
-                                   this.analysisData.typeMapper);
+            SeparatedNodeList<IdentifierToken> moduleName = importDeclarationNode.moduleName();
+            if (moduleName.size() > 1 || !AI_MODULE_NAME.equals(moduleName.iterator().next().text())) {
+                continue;
+            }
+
+            Optional<ImportPrefixNode> prefix = importDeclarationNode.prefix();
+            return Optional.of(prefix.isEmpty() ? AI_MODULE_NAME : prefix.get().prefix().text());
         }
+        return Optional.empty();
     }
 
-    private static void processImportDeclarations(Document document, ModifierData modifierData) {
+    private static void generateSchemasForExpectedTypes(Document document, ModifierData modifierData,
+                                                        SourceModifierContext modifierContext,
+                                                        ModuleId moduleId,
+                                                        TypeMapper typeMapper) {
         ModulePartNode modulePartNode = document.syntaxTree().rootNode();
-        ImportDeclarationModifier importDeclarationModifier = new ImportDeclarationModifier(modifierData);
-        modulePartNode.apply(importDeclarationModifier);
+        NaturalExpressionSchemaGenerator naturalExpressionSchemaGenerator =
+                new NaturalExpressionSchemaGenerator(
+                        modifierData, modifierContext, moduleId, document, typeMapper);
+        modulePartNode.apply(naturalExpressionSchemaGenerator);
     }
 
     private static TextDocument modifyDocument(Document document, ModifierData modifierData,
-                                               SourceModifierContext modifierContext, ModuleId moduleId,
-                                               TypeMapper typeMapper) {
-        ModulePartNode modulePartNode = document.syntaxTree().rootNode();
-
-        NaturalProgrammingCodeModifier naturalProgrammingCodeModifier =
-                new NaturalProgrammingCodeModifier(
-                        modifierData, modifierContext, moduleId, document, typeMapper);
+                                               Optional<String> aiImportPrefix) {
         TypeDefinitionModifier typeDefinitionModifier =
-                new TypeDefinitionModifier(modifierData.typeSchemas, modifierData, document);
+                new TypeDefinitionModifier(modifierData.typeSchemas, modifierData, aiImportPrefix, document);
 
-        ModulePartNode modifiedRoot = (ModulePartNode) modulePartNode.apply(naturalProgrammingCodeModifier);
-        modifiedRoot = modifiedRoot.modify(modifiedRoot.imports(), modifiedRoot.members(), modifiedRoot.eofToken());
-
-        ModulePartNode finalRoot = (ModulePartNode) modifiedRoot.apply(typeDefinitionModifier);
+        ModulePartNode modulePartNode = document.syntaxTree().rootNode();
+        ModulePartNode finalRoot = (ModulePartNode) modulePartNode.apply(typeDefinitionModifier);
         finalRoot = finalRoot.modify(
                 updateImports(document, finalRoot, modifierData), finalRoot.members(), finalRoot.eofToken());
 
         return document.syntaxTree().modifyWith(finalRoot).textDocument();
     }
 
-    private static class ImportDeclarationModifier extends TreeModifier {
-
-        private final ModifierData modifierData;
-
-        ImportDeclarationModifier(ModifierData modifierData) {
-            this.modifierData = modifierData;
-        }
-
-        @Override
-        public ImportDeclarationNode transform(ImportDeclarationNode importDeclarationNode) {
-            Optional<ImportOrgNameNode> importOrgNameNode = importDeclarationNode.orgName();
-            // Allow the not present case for module tests.
-            if (importOrgNameNode.isPresent() && !ORG_NAME.equals(importOrgNameNode.get().orgName().text())) {
-                return importDeclarationNode;
-            }
-
-            SeparatedNodeList<IdentifierToken> moduleName = importDeclarationNode.moduleName();
-            if (moduleName.size() > 1 || !MODULE_NAME.equals(moduleName.iterator().next().text())) {
-                return importDeclarationNode;
-            }
-
-            Optional<ImportPrefixNode> prefix = importDeclarationNode.prefix();
-            modifierData.npPrefixIfImported = Optional.of(
-                    prefix.isEmpty() ? MODULE_NAME : prefix.get().prefix().text());
-            return importDeclarationNode;
-        }
-    }
-
-    private static class NaturalProgrammingCodeModifier extends BaseNodeModifier {
+    private static class NaturalExpressionSchemaGenerator extends BaseNodeModifier {
 
         private final ModifierData modifierData;
         private final SemanticModel semanticModel;
         private final Document document;
         private final TypeMapper typeMapper;
 
-        NaturalProgrammingCodeModifier(ModifierData modifierData, SourceModifierContext modifierContext,
-                                       ModuleId moduleId, Document document, TypeMapper typeMapper) {
+        NaturalExpressionSchemaGenerator(ModifierData modifierData, SourceModifierContext modifierContext,
+                                         ModuleId moduleId, Document document, TypeMapper typeMapper) {
             this.modifierData = modifierData;
             this.semanticModel = modifierContext.compilation().getSemanticModel(moduleId);
             this.document = document;
@@ -257,267 +188,51 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
         }
 
         @Override
-        public ExpressionNode transform(NaturalExpressionNode naturalExpressionNode) {
-            if (!isRuntimeNaturalExpression(naturalExpressionNode)) {
-                return naturalExpressionNode;
-            }
-
-            Optional<String> npPrefixIfImported = modifierData.npPrefixIfImported;
-            String npPrefix;
-
-            if (npPrefixIfImported.isPresent()) {
-                npPrefix = npPrefixIfImported.get();
-            } else {
-                modifierData.documentsRequiringNPImport.add(document);
-                npPrefix = MODULE_NAME;
-            }
-            return createNPCallFunctionCallExpression(npPrefix, naturalExpressionNode, this.semanticModel);
-        }
-
-        @Override
-        public FunctionCallExpressionNode transform(FunctionCallExpressionNode functionCallExpressionNode) {
-            if (isNotNPCallCall(functionCallExpressionNode, this.semanticModel)) {
-                return functionCallExpressionNode;
-            }
-
+        public NaturalExpressionNode transform(NaturalExpressionNode naturalExpressionNode) {
             Optional<TypeSymbol> typeSymbol =
-                              semanticModel.expectedType(document, functionCallExpressionNode.lineRange().startLine());
-            if (typeSymbol.isEmpty()) {
-                return functionCallExpressionNode;
-            }
-            populateTypeSchema(typeSymbol.get(), this.typeMapper, this.modifierData.typeSchemas);
-            return functionCallExpressionNode;
+                    semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine());
+            typeSymbol.ifPresent(symbol -> populateTypeSchema(symbol, this.typeMapper, this.modifierData.typeSchemas));
+            return naturalExpressionNode;
         }
-    }
-
-    private static FunctionCallExpressionNode createNPCallFunctionCallExpression(
-            String npPrefix, NaturalExpressionNode naturalExpressionNode, SemanticModel semanticModel) {
-        NodeList<Node> prompt = getRawTemplateContent(naturalExpressionNode, semanticModel);
-        TemplateExpressionNode promptRawTemplate = NodeFactory.createTemplateExpressionNode(
-                SyntaxKind.RAW_TEMPLATE_EXPRESSION, null, BACKTICK, prompt, BACKTICK);
-
-        Optional<ExpressionNode> naturalModelArg = Optional.empty();
-
-        Optional<ParenthesizedArgList> parenthesizedArgListOptional = naturalExpressionNode.parenthesizedArgList();
-        if (parenthesizedArgListOptional.isPresent()) {
-            ParenthesizedArgList parenthesizedArgList = parenthesizedArgListOptional.get();
-            SeparatedNodeList<FunctionArgumentNode> arguments = parenthesizedArgList.arguments();
-            if (!arguments.isEmpty()) {
-                if (arguments.get(0) instanceof PositionalArgumentNode positionalArgumentNode) {
-                    naturalModelArg = Optional.of(positionalArgumentNode.expression());
-                }
-            }
-        }
-
-        SeparatedNodeList<FunctionArgumentNode> arguments =
-                naturalModelArg.isPresent() ?
-                        NodeFactory.createSeparatedNodeList(
-                                promptRawTemplate,
-                                COMMA,
-                                createContextMappingExpressionNode(naturalModelArg.get())
-                        ) :
-                        NodeFactory.createSeparatedNodeList(
-                                promptRawTemplate
-                        );
-        return NodeFactory.createFunctionCallExpressionNode(
-                createNPCallQualifiedNameReferenceNode(npPrefix),
-                OPEN_PAREN,
-                arguments,
-                CLOSE_PAREN
-        );
-    }
-
-    private static NodeList<Node> getRawTemplateContent(NaturalExpressionNode naturalExpressionNode,
-                                                        SemanticModel semanticModel) {
-        NodeList<Node> prompt = naturalExpressionNode.prompt();
-        List<Node> modifiedNodes = new ArrayList<>();
-        boolean modified = false;
-        MinutiaeList emptyMinutiaeList = AbstractNodeFactory.createEmptyMinutiaeList();
-
-        boolean hasInsertions = false;
-        for (Node node : prompt) {
-            if (!(node instanceof LiteralValueToken literalValueToken)) {
-                modifiedNodes.add(node);
-                hasInsertions = true;
-                continue;
-            }
-
-            SyntaxKind kind = literalValueToken.kind();
-            String text = literalValueToken.text();
-
-            if (text.isEmpty()) {
-                modifiedNodes.add(node);
-                continue;
-            }
-
-            String updatedText = text.replace("\\}", "}");
-            updatedText = updatedText.replace("`", ESCAPED_BACKTICK);
-            if (!text.equals(updatedText)) {
-                modified = true;
-            }
-
-            String[] split = updatedText.split(ESCAPED_BACKTICK);
-
-            int length = split.length;
-            for (int i = 0; i < length - 1; i++) {
-                String part = split[i];
-                modifiedNodes.add(
-                        NodeFactory.createLiteralValueToken(kind, part, emptyMinutiaeList, emptyMinutiaeList));
-                modifiedNodes.add(
-                        NodeFactory.createInterpolationNode(
-                                INTERPOLATION_START, NodeParser.parseExpression(ESCAPED_BACKTICK), CLOSE_BRACE)
-                );
-            }
-
-            modifiedNodes.add(
-                    NodeFactory.createLiteralValueToken(kind, split[length - 1], emptyMinutiaeList, emptyMinutiaeList));
-
-            if (updatedText.endsWith(ESCAPED_BACKTICK)) {
-                modifiedNodes.add(
-                        NodeFactory.createInterpolationNode(
-                                INTERPOLATION_START, NodeParser.parseExpression(ESCAPED_BACKTICK), CLOSE_BRACE)
-                );
-            }
-        }
-
-        if (!hasInsertions) {
-            Optional<FunctionSignatureNode> functionSignatureIfInNaturalFunction =
-                    getFunctionSignatureIfInNaturalFunction(naturalExpressionNode);
-            if (functionSignatureIfInNaturalFunction.isPresent()) {
-                Optional<List<Node>> parameterInjectionTemplateNodes =
-                        getParameterInjectionTemplateNodes(semanticModel, functionSignatureIfInNaturalFunction.get());
-                if (parameterInjectionTemplateNodes.isPresent()) {
-                    modified = true;
-                    modifiedNodes.addAll(0, parameterInjectionTemplateNodes.get());
-                }
-            }
-        }
-
-        if (modified) {
-            return NodeFactory.createNodeList(modifiedNodes);
-        }
-        return prompt;
-    }
-
-    private static Optional<List<Node>> getParameterInjectionTemplateNodes(
-            SemanticModel semanticModel, FunctionSignatureNode functionSignatureNode) {
-        SeparatedNodeList<ParameterNode> parameters = functionSignatureNode.parameters();
-
-        List<String> parametersToInclude = new ArrayList<>(parameters.size());
-        for (ParameterNode parameter : parameters) {
-            SyntaxKind kind = parameter.kind();
-            Node parameterType = getParameterType(parameter, kind);
-            Optional<TypeSymbol> symbol = semanticModel.type(parameterType.lineRange());
-            if (symbol.isEmpty()) {
-                continue;
-            }
-
-            if (symbol.get().subtypeOf(semanticModel.types().ANYDATA)) {
-                parametersToInclude.add(getParameterName(parameter, kind));
-            }
-        }
-
-        if (parametersToInclude.isEmpty()) {
-            return Optional.empty();
-        }
-
-        StringBuilder sb = new StringBuilder("`You have been given the following input:");
-        sb.append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-
-        for (String str : parametersToInclude) {
-            sb.append(str)
-                    .append(": ")
-                    .append(LINE_SEPARATOR)
-                    .append("${\"```\"}")
-                    .append(LINE_SEPARATOR)
-                    .append("${")
-                    .append(str)
-                    .append("}")
-                    .append(LINE_SEPARATOR)
-                    .append("${\"```\"}")
-                    .append(LINE_SEPARATOR)
-                    .append(LINE_SEPARATOR);
-        }
-        sb.append("`");
-
-        ChildNodeList children = NodeParser.parseExpression(sb.toString()).children();
-        int size = children.size();
-        List<Node> parameterInjectionTemplateNodes = new ArrayList<>(size - 2);
-        for (int i = 1; i < size - 1; i++) {
-            parameterInjectionTemplateNodes.add(children.get(i));
-        }
-        return Optional.of(parameterInjectionTemplateNodes);
-    }
-
-    private static Optional<FunctionSignatureNode> getFunctionSignatureIfInNaturalFunction(
-            NaturalExpressionNode naturalExpressionNode) {
-        NonTerminalNode parent = naturalExpressionNode.parent();
-        while (parent != null) {
-            if (parent instanceof ExpressionNode) {
-                parent = parent.parent();
-                continue;
-            }
-
-            if (parent instanceof ExpressionFunctionBodyNode) {
-                return Optional.of(((FunctionDefinitionNode) parent.parent()).functionSignature());
-            }
-
-            return Optional.empty();
-        }
-        return Optional.empty();
-    }
-
-    private static MappingConstructorExpressionNode createContextMappingExpressionNode(ExpressionNode model) {
-        return NodeFactory.createMappingConstructorExpressionNode(
-                OPEN_BRACE,
-                NodeFactory.createSeparatedNodeList(
-                        NodeFactory.createSpecificFieldNode(null, MODEL, COLON, model)
-                ),
-                CLOSE_BRACE);
-    }
-
-    private static QualifiedNameReferenceNode createNPCallQualifiedNameReferenceNode(String npPrefix) {
-        return NodeFactory.createQualifiedNameReferenceNode(
-                NodeFactory.createIdentifierToken(npPrefix),
-                COLON,
-                NodeFactory.createIdentifierToken(CALL_LLM)
-        );
     }
 
     private static class TypeDefinitionModifier extends TreeModifier {
 
         private final Map<String, String> typeSchemas;
         private final ModifierData modifierData;
+        private final Optional<String> aiImportPrefix;
         private final Document document;
 
-        TypeDefinitionModifier(Map<String, String> typeSchemas, ModifierData modifierData, Document document) {
+        TypeDefinitionModifier(Map<String, String> typeSchemas, ModifierData modifierData,
+                               Optional<String> aiImportPrefix, Document document) {
             this.typeSchemas = typeSchemas;
             this.modifierData = modifierData;
+            this.aiImportPrefix = aiImportPrefix;
             this.document = document;
         }
 
         @Override
         public TypeDefinitionNode transform(TypeDefinitionNode typeDefinitionNode) {
-            if (modifierData.npPrefixIfImported.isEmpty() &&
-                    !modifierData.documentsRequiringNPImport.contains(this.document)) {
-                return typeDefinitionNode;
-            }
             String typeName = typeDefinitionNode.typeName().text();
 
             if (!this.typeSchemas.containsKey(typeName)) {
                 return typeDefinitionNode;
             }
 
+            if (this.aiImportPrefix.isEmpty()) {
+                modifierData.documentsRequiringAiImport.add(this.document);
+            }
+
             MetadataNode updatedMetadataNode =
                                 updateMetadata(typeDefinitionNode, typeSchemas.get(typeName),
-                                               modifierData.npPrefixIfImported.orElse(MODULE_NAME));
+                                               this.aiImportPrefix.orElse(AI_MODULE_NAME));
             return typeDefinitionNode.modify().withMetadata(updatedMetadataNode).apply();
         }
 
-        private MetadataNode updateMetadata(TypeDefinitionNode typeDefinitionNode, String schema, String npPrefix) {
+        private MetadataNode updateMetadata(TypeDefinitionNode typeDefinitionNode, String schema, String aiPrefix) {
             MetadataNode metadataNode = getMetadataNode(typeDefinitionNode);
             NodeList<AnnotationNode> updatedAnnotations =
-                                            updateAnnotations(metadataNode.annotations(), schema, npPrefix);
+                                            updateAnnotations(metadataNode.annotations(), schema, aiPrefix);
             return metadataNode.modify().withAnnotations(updatedAnnotations).apply();
         }
     }
@@ -530,18 +245,18 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
     }
 
     private static NodeList<AnnotationNode> updateAnnotations(NodeList<AnnotationNode> currentAnnotations,
-                                                              String jsonSchema, String npPrefix) {
+                                                              String jsonSchema, String aiPrefix) {
         NodeList<AnnotationNode> updatedAnnotations = NodeFactory.createNodeList();
 
         if (currentAnnotations.isEmpty()) {
-            updatedAnnotations = updatedAnnotations.add(getSchemaAnnotation(jsonSchema, npPrefix));
+            updatedAnnotations = updatedAnnotations.add(getSchemaAnnotation(jsonSchema, aiPrefix));
         }
 
         return updatedAnnotations;
     }
 
-    public static AnnotationNode getSchemaAnnotation(String jsonSchema, String npPrefix) {
-        String configIdentifierString = npPrefix + COLON.text() + SCHEMA_ANNOTATION_IDENTIFIER;
+    public static AnnotationNode getSchemaAnnotation(String jsonSchema, String aiPrefix) {
+        String configIdentifierString = aiPrefix + COLON.text() + SCHEMA_ANNOTATION_IDENTIFIER;
         IdentifierToken identifierToken = NodeFactory.createIdentifierToken(configIdentifierString);
 
         return NodeFactory.createAnnotationNode(
@@ -555,11 +270,11 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
         return (MappingConstructorExpressionNode) NodeParser.parseExpression(jsonSchema);
     }
 
-    private static boolean containsBallerinaNPImport(NodeList<ImportDeclarationNode> imports) {
+    private static boolean containsBallerinaAIImport(NodeList<ImportDeclarationNode> imports) {
         for (ImportDeclarationNode importDeclarationNode : imports) {
             Optional<ImportOrgNameNode> importOrgNameNode = importDeclarationNode.orgName();
-            if (importOrgNameNode.isPresent() && importOrgNameNode.get().orgName().text().equals(ORG_NAME)
-                    && importDeclarationNode.moduleName().get(0).text().equals(MODULE_NAME)) {
+            if (importOrgNameNode.isPresent() && importOrgNameNode.get().orgName().text().equals(BALLERINA_ORG_NAME)
+                    && importDeclarationNode.moduleName().get(0).text().equals(AI_MODULE_NAME)) {
                 return true;
             }
         }
@@ -570,47 +285,19 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
                                                                  ModifierData modifierData) {
         NodeList<ImportDeclarationNode> imports = modulePartNode.imports();
 
-        if (containsBallerinaNPImport(imports)) {
+        if (containsBallerinaAIImport(imports)) {
             return imports;
         }
 
-        if (modifierData.documentsRequiringNPImport.contains(document)) {
-            return imports.add(createImportDeclarationForNPModule());
+        if (modifierData.documentsRequiringAiImport.contains(document)) {
+            return imports.add(createImportDeclarationForAiModule());
         }
         return imports;
     }
 
-    private static ImportDeclarationNode createImportDeclarationForNPModule() {
-        return NodeParser.parseImportDeclaration(String.format("import %s/%s as np;", ORG_NAME, MODULE_NAME));
-    }
-
-    private boolean isNaturalFunction(ModuleMemberDeclarationNode memberNode) {
-        if (!(memberNode instanceof FunctionDefinitionNode functionDefinition)) {
-            return false;
-        }
-        return functionDefinition.functionBody() instanceof ExpressionFunctionBodyNode expressionFunctionBodyNode
-                && isRuntimeNaturalExpression(expressionFunctionBodyNode.expression());
-    }
-
-    private void extractAndStoreSchemas(SemanticModel semanticModel, FunctionDefinitionNode functionDefinition,
-                                        Map<String, String> typeSchemas, TypeMapper typeMapper) {
-        Optional<ReturnTypeDescriptorNode> returnTypeNodeOpt = functionDefinition.functionSignature().returnTypeDesc();
-        if (returnTypeNodeOpt.isEmpty()) {
-            return;
-        }
-
-        ReturnTypeDescriptorNode returnTypeNode = returnTypeNodeOpt.get();
-        Optional<TypeSymbol> typeSymbolOpt = semanticModel.type(returnTypeNode.type().lineRange());
-        if (typeSymbolOpt.isEmpty()) {
-            return;
-        }
-
-        TypeSymbol typeSymbol = typeSymbolOpt.get();
-        if (typeSymbol instanceof UnionTypeSymbol unionTypeSymbol) {
-            for (TypeSymbol memberType : unionTypeSymbol.memberTypeDescriptors()) {
-                populateTypeSchema(memberType, typeMapper, typeSchemas);
-            }
-        }
+    private static ImportDeclarationNode createImportDeclarationForAiModule() {
+        // TODO: handle the `ai` prefix already being used
+        return NodeParser.parseImportDeclaration(String.format("import %s/%s;", BALLERINA_ORG_NAME, AI_MODULE_NAME));
     }
 
     private static void populateTypeSchema(TypeSymbol memberType, TypeMapper typeMapper,
@@ -738,8 +425,7 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
     }
 
     static final class ModifierData {
-        Optional<String> npPrefixIfImported = Optional.empty();
-        Set<Document> documentsRequiringNPImport = new HashSet<>(0);
+        Set<Document> documentsRequiringAiImport = new HashSet<>(0);
         Map<String, String> typeSchemas = new HashMap<>();
     }
 }

@@ -51,35 +51,15 @@ public class DiagnosticsTest {
         Package naturalExprNegativePackage = loadPackage("natural-expressions-negative");
         DiagnosticResult diagnosticResult = naturalExprNegativePackage.runCodeGenAndModifyPlugins();
         List<Diagnostic> errorDiagnosticsList = diagnosticResult.diagnostics().stream().toList();
-        assertDiagnostic(errorDiagnosticsList, index++, "unexpected arguments: expected '1' argument, found '3'",
-                17, 48);
-        assertDiagnostic(errorDiagnosticsList, index++,
-                "incompatible expression: expected 'ballerina/np:ModelProvider', found 'int'",
-                17, 49);
         assertDiagnostic(errorDiagnosticsList, index++,
                 "subtypes of 'anydata' that are not subtypes of 'json' are not yet supported as the" +
                         " expected type for natural expressions",
-                17, 40);
+                19, 59);
         Assert.assertEquals(index, errorDiagnosticsList.size());
     }
 
     @Test
-    public void testCallLlmDisallowedTypes() {
-        int index = 0;
-        Package callLlmNegativePackage = loadPackage("call-llm-negative");
-        DiagnosticResult diagnosticResult = callLlmNegativePackage.runCodeGenAndModifyPlugins();
-        List<Diagnostic> errorDiagnosticsList = diagnosticResult.diagnostics().stream().toList();
-        String expectedErrorMessage = "subtypes of 'typedesc<anydata>' that are not subtypes of 'typedesc<json>' " +
-                "are not yet supported as the argument to 'ballerina/np:callLlm'";
-        assertDiagnostic(errorDiagnosticsList, index++, expectedErrorMessage, 19, 25);
-        assertDiagnostic(errorDiagnosticsList, index++, expectedErrorMessage, 22, 14);
-        assertDiagnostic(errorDiagnosticsList, index++, expectedErrorMessage, 28, 19);
-        assertDiagnostic(errorDiagnosticsList, index++, expectedErrorMessage, 29, 19);
-        Assert.assertEquals(index, errorDiagnosticsList.size());
-    }
-
-    @Test
-    public void testCodeGenInSingleBalFileMode() {
+    public void testCodeGenWithCodeAnnotationDisallowingFile() {
         Package codeAnnotationNegativeFile =
                 loadSingleFileProject();
         List<Diagnostic> fileDiagnosticsList =

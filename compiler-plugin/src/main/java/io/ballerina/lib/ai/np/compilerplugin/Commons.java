@@ -19,23 +19,10 @@ package io.ballerina.lib.ai.np.compilerplugin;
 
 import io.ballerina.compiler.api.ModuleID;
 import io.ballerina.compiler.api.SemanticModel;
-import io.ballerina.compiler.api.symbols.FunctionSymbol;
 import io.ballerina.compiler.api.symbols.ModuleSymbol;
-import io.ballerina.compiler.api.symbols.Symbol;
 import io.ballerina.compiler.syntax.tree.AnnotationNode;
-import io.ballerina.compiler.syntax.tree.DefaultableParameterNode;
-import io.ballerina.compiler.syntax.tree.ExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
-import io.ballerina.compiler.syntax.tree.IncludedRecordParameterNode;
-import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.ParameterNode;
-import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
-import io.ballerina.compiler.syntax.tree.RestParameterNode;
-import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SyntaxKind;
-
-import java.util.Optional;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 
 /**
  * Class containing common constants and functionality.
@@ -43,78 +30,30 @@ import java.util.Optional;
  * @since 0.3.0
  */
 class Commons {
-    static final String ORG_NAME = "ballerina";
-    static final String MODULE_NAME = "np";
-    static final String VERSION = "0.3.0";
-    static final String CALL_LLM = "callLlm";
+    private Commons() {
+    }
 
-    static final String LANG_ANNOTATIONS_MODULE = "lang.annotations";
+    static final String BALLERINA_ORG_NAME = "ballerina";
+    static final String AI_MODULE_NAME = "ai";
+
     static final String CODE_ANNOTATION = "code";
 
     static final String BAL_EXT = ".bal";
     static final String FILE_PATH = "filePath";
     static final String CONTENT = "content";
 
-    static boolean isRuntimeNaturalExpression(ExpressionNode expressionNode) {
-        return expressionNode instanceof NaturalExpressionNode naturalExpressionNode &&
-                naturalExpressionNode.constKeyword().isEmpty();
-    }
-
-    static boolean isNPModule(ModuleSymbol moduleSymbol) {
-        ModuleID moduleId = moduleSymbol.id();
-        return ORG_NAME.equals(moduleId.orgName()) && MODULE_NAME.equals(moduleId.moduleName());
-    }
-
-    static Node getParameterType(ParameterNode parameter, SyntaxKind kind) {
-        return switch (kind) {
-            case REQUIRED_PARAM -> ((RequiredParameterNode) parameter).typeName();
-            case DEFAULTABLE_PARAM -> ((DefaultableParameterNode) parameter).typeName();
-            case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).typeName();
-            default -> ((RestParameterNode) parameter).typeName();
-        };
-    }
-
-    static String getParameterName(ParameterNode parameter, SyntaxKind kind) {
-        return switch (kind) {
-            case REQUIRED_PARAM -> ((RequiredParameterNode) parameter).paramName().get().text();
-            case DEFAULTABLE_PARAM -> ((DefaultableParameterNode) parameter).paramName().get().text();
-            case INCLUDED_RECORD_PARAM -> ((IncludedRecordParameterNode) parameter).paramName().get().text();
-            default -> ((RestParameterNode) parameter).paramName().get().text();
-        };
-    }
-
-    static boolean isNotNPCallCall(FunctionCallExpressionNode functionCallExpressionNode, SemanticModel semanticModel) {
-        Optional<Symbol> symbolOptional = semanticModel.symbol(functionCallExpressionNode);
-        if (symbolOptional.isEmpty()) {
-            return true;
-        }
-
-        Symbol symbol = symbolOptional.get();
-        if (!(symbol instanceof FunctionSymbol functionSymbol)) {
-            return true;
-        }
-
-        Optional<ModuleSymbol> moduleOptional = functionSymbol.getModule();
-        Optional<String> nameOptional = functionSymbol.getName();
-        if (moduleOptional.isEmpty() || nameOptional.isEmpty()) {
-            return true;
-        }
-
-        return !(isNPModule(moduleOptional.get()) && CALL_LLM.equals(nameOptional.get()));
-    }
-
     static boolean isCodeAnnotation(AnnotationNode annotationNode, SemanticModel semanticModel) {
         Node node = annotationNode.annotReference();
-        if (!(node instanceof SimpleNameReferenceNode simpleNameReferenceNode) ||
-                !CODE_ANNOTATION.equals(simpleNameReferenceNode.name().text())) {
+        if (!(node instanceof QualifiedNameReferenceNode qualifiedNameReferenceNode) ||
+                !CODE_ANNOTATION.equals(qualifiedNameReferenceNode.identifier().text())) {
             return false;
         }
 
-        return isAnnotationsModule(semanticModel.symbol(node).get().getModule().get());
+        return isLangNaturalModule(semanticModel.symbol(node).get().getModule().get());
     }
 
-    private static boolean isAnnotationsModule(ModuleSymbol moduleSymbol) {
+    static boolean isLangNaturalModule(ModuleSymbol moduleSymbol) {
         ModuleID moduleId = moduleSymbol.id();
-        return ORG_NAME.equals(moduleId.orgName()) && LANG_ANNOTATIONS_MODULE.equals(moduleId.moduleName());
+        return BALLERINA_ORG_NAME.equals(moduleId.orgName()) && "lang.natural".equals(moduleId.moduleName());
     }
 }
