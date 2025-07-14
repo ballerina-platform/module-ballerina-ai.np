@@ -24,7 +24,7 @@ plugins {
 description = 'Ballerina - Natural Programming Module'
 
 def packageOrg = "ballerina"
-def packageName = "np"
+def packageName = "ai.np"
 
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
@@ -43,7 +43,7 @@ def stripBallerinaExtensionVersion(String extVersion) {
 ballerina {
     module = packageName
     langVersion = ballerinaLangVersion
-    testCoverageParam = "--code-coverage --coverage-format=xml --includes=io.ballerina.lib.np.*:ballerina.np*"
+    testCoverageParam = "--code-coverage --coverage-format=xml --includes=io.ballerina.lib.ai.np.*:ballerina.*"
     packageOrganization = packageOrg
 }
 
@@ -108,11 +108,9 @@ clean {
 updateTomlFiles.dependsOn copyStdlibs
 
 build.dependsOn "generatePomFileForMavenPublication"
-build.dependsOn ":${packageName}-native:build"
 build.dependsOn ":${packageName}-compiler-plugin:build"
 build.dependsOn deleteDependencyTomlFiles
 
-test.dependsOn ":${packageName}-native:build"
 test.dependsOn ":${packageName}-compiler-plugin:build"
 
 publish.dependsOn build

@@ -14,10 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function fn() returns anydata|error => natural (1, 2, "foo") {
-    What day was the 18th of April 2025?
-};
+import ballerina/ai;
 
-function fn2() returns string|error => natural () { // OK
+function fn(ai:ModelProvider mp) returns anydata|error => natural (mp) {
     What day was the 18th of April 2025?
 };

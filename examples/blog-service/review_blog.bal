@@ -14,23 +14,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public isolated function reviewBlog(Blog blog) returns Review|error => natural {
-    You are an expert content reviewer for a blog site that 
-        categorizes posts under the following categories: ${categories}
+import ballerina/ai;
 
-        Your tasks are:
-        1. Suggest a suitable category for the blog from exactly the specified categories. 
-           If there is no match, use null.
+final ai:ModelProvider model = check ai:getDefaultModelProvider();
 
-        2. Rate the blog post on a scale of 1 to 10 based on the following criteria:
-        - **Relevance**: How well the content aligns with the chosen category.
-        - **Depth**: The level of detail and insight in the content.
-        - **Clarity**: How easy it is to read and understand.
-        - **Originality**: Whether the content introduces fresh perspectives or ideas.
-        - **Language Quality**: Grammar, spelling, and overall writing quality.
+public isolated function reviewBlog(Blog blog) returns Review|error => 
+    natural (model) {
+        You are an expert content reviewer for a blog site that 
+            categorizes posts under the following categories: ${categories}
 
-        Here is the blog post content:
+            Your tasks are:
+            1. Suggest a suitable category for the blog from exactly the specified categories. 
+            If there is no match, use null.
 
-        Title: ${blog.title}
-        Content: ${blog.content}
-};
+            2. Rate the blog post on a scale of 1 to 10 based on the following criteria:
+            - **Relevance**: How well the content aligns with the chosen category.
+            - **Depth**: The level of detail and insight in the content.
+            - **Clarity**: How easy it is to read and understand.
+            - **Originality**: Whether the content introduces fresh perspectives or ideas.
+            - **Language Quality**: Grammar, spelling, and overall writing quality.
+
+            Here is the blog post content:
+
+            Title: ${blog.title}
+            Content: ${blog.content}
+    };

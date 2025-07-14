@@ -1,9 +1,9 @@
 [plugin]
-id = "np-compiler-plugin"
-class = "io.ballerina.lib.np.compilerplugin.CompilerPlugin"
+id = "ai.np-compiler-plugin"
+class = "io.ballerina.lib.ai.np.compilerplugin.CompilerPlugin"
 
 [[dependency]]
-path = "../compiler-plugin/build/libs/np-compiler-plugin-0.3.1-SNAPSHOT.jar"
+path = "../compiler-plugin/build/libs/ai.np-compiler-plugin-0.4.0-SNAPSHOT.jar"
 
 [[dependency]]
 path = "../compiler-plugin/build/libs/ballerina-to-openapi-2.3.0.jar"

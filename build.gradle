@@ -73,7 +73,10 @@ subprojects {
 
         /* Standard libraries */
         ballerinaStdLibs "io.ballerina.stdlib:io-ballerina:${stdlibIoVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:math.vector-ballerina:${stdlibMathVectorVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:cache-ballerina:${stdlibCacheVersion}"
+        ballerinaStdLibs "io.ballerina.lib:data.xmldata-ballerina:${stdlibDataXmldataVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:yaml-ballerina:${stdlibYamlVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:auth-ballerina:${stdlibAuthVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:constraint-ballerina:${stdlibConstraintVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:task-ballerina:${stdlibTaskVersion}"
@@ -90,6 +93,8 @@ subprojects {
         ballerinaStdLibs "io.ballerina.stdlib:http-ballerina:${stdlibHttpVersion}"
         ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
         ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:mcp-ballerina:${stdlibMcpVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:ai-ballerina:${stdlibAiVersion}"
     }
 
 }
@@ -111,9 +116,8 @@ release {
 }
 
 task build {
-    dependsOn('np-compiler-plugin:build')
-    dependsOn('np-native:build')
-    dependsOn('np-ballerina:build')
-    dependsOn('np-compiler-plugin-tests:test')
-    dependsOn('np-ballerina-tests:test')
+    dependsOn('ai.np-compiler-plugin:build')
+    dependsOn('ai.np-ballerina:build')
+    dependsOn('ai.np-compiler-plugin-tests:test')
+    dependsOn('ai.np-ballerina-tests:test')
 }

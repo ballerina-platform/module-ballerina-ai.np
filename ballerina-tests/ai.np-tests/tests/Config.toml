@@ -1,0 +1,2 @@
+serviceUrl = "http://localhost:8080/llm/azureopenai/deployments/gpt4onew"
+accessToken = "not-a-real-token"

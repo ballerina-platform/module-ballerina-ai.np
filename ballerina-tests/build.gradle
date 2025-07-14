@@ -24,15 +24,15 @@ plugins {
 description = 'Ballerina - Natural Programming Tests'
 
 def packageOrg = "ballerina"
-def packageName = "np"
+def packageName = "ai.np"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/BallerinaTest.toml")
 def testCommonTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/BallerinaTestCommon.toml")
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
 def distributionBinPath =  "${ballerinaDist}/bin"
-def testCoverageParam = "--code-coverage --coverage-format=xml --includes=io.ballerina.lib.np.*:ballerina.np*"
-def testSuites = ["np-tests", "np-default-model-tests"]
-def testCommonPackage = "np-test-commons"
+def testCoverageParam = "--code-coverage --coverage-format=xml --includes=io.ballerina.lib.ai.np.*:ballerina.*"
+def testSuites = ["ai.np-tests"]
+def testCommonPackage = "ai.np-test-commons"
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -43,7 +43,7 @@ def stripBallerinaExtensionVersion(String extVersion) {
 }
 
 dependencies {
-    testImplementation project(":np-compiler-plugin")
+    testImplementation project(":ai.np-compiler-plugin")
     testImplementation group: 'io.ballerina.openapi', name: 'ballerina-to-openapi', version: "${ballerinaToOpenApiVersion}"
 }
 
