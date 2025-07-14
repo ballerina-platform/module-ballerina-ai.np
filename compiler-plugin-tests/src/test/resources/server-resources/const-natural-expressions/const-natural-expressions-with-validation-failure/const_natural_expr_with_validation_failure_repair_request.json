@@ -34,106 +34,106 @@
         "message": "ERROR [null:(40:0,40:0)] missing identifier"
       },
       {
-        "message": "ERROR [null:(2:34,2:45)] Generated code should only contains constant expressions. (found: 'getString()')"
+        "message": "ERROR [main.bal:(2:34,2:45)] Generated code should only contains constant expressions. (found: 'getString()')"
       },
       {
-        "message": "ERROR [null:(3:22,3:34)] Generated code should only contains constant expressions. (found: 'getInteger()')"
+        "message": "ERROR [main.bal:(3:22,3:34)] Generated code should only contains constant expressions. (found: 'getInteger()')"
       },
       {
-        "message": "ERROR [null:(6:6,6:28)] Generated code should only contains constant expressions. (found: 'check testIntOrError()')"
+        "message": "ERROR [main.bal:(6:6,6:28)] Generated code should only contains constant expressions. (found: 'check testIntOrError()')"
       },
       {
-        "message": "ERROR [null:(7:0,7:10)] Generated code should only contains constant expressions. (found: 'error(\"a\")')"
+        "message": "ERROR [main.bal:(7:0,7:10)] Generated code should only contains constant expressions. (found: 'error(\"a\")')"
       },
       {
-        "message": "ERROR [null:(8:0,8:16)] Generated code should only contains constant expressions. (found: 'new TestClass(1)')"
+        "message": "ERROR [main.bal:(8:0,8:16)] Generated code should only contains constant expressions. (found: 'new TestClass(1)')"
       },
       {
-        "message": "ERROR [null:(10:0,10:18)] Generated code should only contains constant expressions. (found: 'let int p = 1 in p')"
+        "message": "ERROR [main.bal:(10:0,10:18)] Generated code should only contains constant expressions. (found: 'let int p = 1 in p')"
       },
       {
-        "message": "ERROR [null:(11:0,11:16)] Generated code should only contains constant expressions. (found: 'new TestClass(1)')"
+        "message": "ERROR [main.bal:(11:0,11:16)] Generated code should only contains constant expressions. (found: 'new TestClass(1)')"
       },
       {
-        "message": "ERROR [null:(14:1,14:24)] Generated code should only contains constant expressions. (found: 'recordType.@RecordAnnot')"
+        "message": "ERROR [main.bal:(14:1,14:24)] Generated code should only contains constant expressions. (found: 'recordType.@RecordAnnot')"
       },
       {
-        "message": "ERROR [null:(15:0,15:6)] Generated code should only contains constant expressions. (found: 'number ')"
+        "message": "ERROR [main.bal:(15:0,15:6)] Generated code should only contains constant expressions. (found: 'number ')"
       },
       {
-        "message": "ERROR [null:(16:1,16:7)] Generated code should only contains constant expressions. (found: 'number')"
+        "message": "ERROR [main.bal:(16:1,16:7)] Generated code should only contains constant expressions. (found: 'number')"
       },
       {
-        "message": "ERROR [null:(17:17,17:33)] Generated code should only contains constant expressions. (found: 'new TestClass(1)')"
+        "message": "ERROR [main.bal:(17:17,17:33)] Generated code should only contains constant expressions. (found: 'new TestClass(1)')"
       },
       {
-        "message": "ERROR [null:(18:3,18:11)] Generated code should only contains constant expressions. (found: 'object{}')"
+        "message": "ERROR [main.bal:(18:3,18:11)] Generated code should only contains constant expressions. (found: 'object{}')"
       },
       {
-        "message": "ERROR [null:(19:30,19:31)] Generated code should only contains constant expressions. (found: 'a')"
+        "message": "ERROR [main.bal:(19:30,19:31)] Generated code should only contains constant expressions. (found: 'a')"
       },
       {
-        "message": "ERROR [null:(22:0,22:3)] Generated code should only contains constant expressions. (found: 'END')"
+        "message": "ERROR [main.bal:(22:0,22:3)] Generated code should only contains constant expressions. (found: 'END')"
       },
       {
-        "message": "ERROR [null:(23:9,23:63)] Generated code should only contains constant expressions. (found: 'from int i in (<stream<int>>([1].toStream())) select i')"
+        "message": "ERROR [main.bal:(23:9,23:63)] Generated code should only contains constant expressions. (found: 'from int i in (<stream<int>>([1].toStream())) select i')"
       },
       {
-        "message": "ERROR [null:(24:10,24:26)] Generated code should only contains constant expressions. (found: 'trap getString()')"
+        "message": "ERROR [main.bal:(24:10,24:26)] Generated code should only contains constant expressions. (found: 'trap getString()')"
       },
       {
-        "message": "ERROR [null:(24:80,24:86)] Generated code should only contains constant expressions. (found: 'number')"
+        "message": "ERROR [main.bal:(24:80,24:86)] Generated code should only contains constant expressions. (found: 'number')"
       },
       {
-        "message": "ERROR [null:(24:99,24:105)] Generated code should only contains constant expressions. (found: 'number ')"
+        "message": "ERROR [main.bal:(24:99,24:105)] Generated code should only contains constant expressions. (found: 'number ')"
       },
       {
-        "message": "ERROR [null:(25:0,25:3)] Generated code should only contains constant expressions. (found: 'END ')"
+        "message": "ERROR [main.bal:(25:0,25:3)] Generated code should only contains constant expressions. (found: 'END ')"
       },
       {
-        "message": "ERROR [null:(25:10,25:13)] Generated code should only contains constant expressions. (found: 'END ')"
+        "message": "ERROR [main.bal:(25:10,25:13)] Generated code should only contains constant expressions. (found: 'END ')"
       },
       {
-        "message": "ERROR [null:(25:19,25:22)] Generated code should only contains constant expressions. (found: 'END ')"
+        "message": "ERROR [main.bal:(25:19,25:22)] Generated code should only contains constant expressions. (found: 'END ')"
       },
       {
-        "message": "ERROR [null:(27:13,27:24)] Generated code should only contains constant expressions. (found: 'getString()')"
+        "message": "ERROR [main.bal:(27:13,27:24)] Generated code should only contains constant expressions. (found: 'getString()')"
       },
       {
-        "message": "ERROR [null:(28:21,28:32)] Generated code should only contains constant expressions. (found: 'getString()')"
+        "message": "ERROR [main.bal:(28:21,28:32)] Generated code should only contains constant expressions. (found: 'getString()')"
       },
       {
-        "message": "ERROR [null:(32:4,32:16)] Generated code should only contains constant expressions. (found: 'getInteger()')"
+        "message": "ERROR [main.bal:(32:4,32:16)] Generated code should only contains constant expressions. (found: 'getInteger()')"
       },
       {
-        "message": "ERROR [null:(33:0,33:3)] Generated code should only contains constant expressions. (found: 'END ')"
+        "message": "ERROR [main.bal:(33:0,33:3)] Generated code should only contains constant expressions. (found: 'END ')"
       },
       {
-        "message": "ERROR [null:(34:0,34:6)] Generated code should only contains constant expressions. (found: 'number ')"
+        "message": "ERROR [main.bal:(34:0,34:6)] Generated code should only contains constant expressions. (found: 'number ')"
       },
       {
-        "message": "ERROR [null:(34:20,34:26)] Generated code should only contains constant expressions. (found: 'number ')"
+        "message": "ERROR [main.bal:(34:20,34:26)] Generated code should only contains constant expressions. (found: 'number ')"
       },
       {
-        "message": "ERROR [null:(35:0,35:18)] Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`.<a>')"
+        "message": "ERROR [main.bal:(35:0,35:18)] Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`.<a>')"
       },
       {
-        "message": "ERROR [null:(36:1,36:17)] Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`/*')"
+        "message": "ERROR [main.bal:(36:1,36:17)] Generated code should only contains constant expressions. (found: 'xml `<a>1</a>`/*')"
       },
       {
-        "message": "ERROR [null:(38:0,38:0)] Generated code should only contains constant expressions. (found: 'x->w1')"
+        "message": "ERROR [main.bal:(38:0,38:0)] Generated code should only contains constant expressions. (found: 'x->w1')"
       },
       {
-        "message": "ERROR [null:(39:0,39:7)] Generated code should only contains constant expressions. (found: ''client')"
+        "message": "ERROR [main.bal:(39:0,39:7)] Generated code should only contains constant expressions. (found: ''client')"
       },
       {
-        "message": "ERROR [null:(39:7,39:7)] Generated code should only contains constant expressions. (found: ''->/.post({})')"
+        "message": "ERROR [main.bal:(39:7,39:7)] Generated code should only contains constant expressions. (found: ''->/.post({})')"
       },
       {
-        "message": "ERROR [null:(39:22,39:22)] Generated code should only contains constant expressions. (found: '')"
+        "message": "ERROR [main.bal:(39:22,39:22)] Generated code should only contains constant expressions. (found: '')"
       },
       {
-        "message": "ERROR [null:(40:0,40:0)] Generated code should only contains constant expressions. (found: '')"
+        "message": "ERROR [main.bal:(40:0,40:0)] Generated code should only contains constant expressions. (found: '')"
       }
     ],
     "response": "\n[<int>(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"], \n<int>(<map<int>>{\"a\": 1, \"b\": 2})[getString()], \n<int>(<map<int>>{\"a\": getInteger(), \"b\": 2})[\"a\"], \n1 + 1, \n(<int[2]>[1,2])[0], \n1 + 1,check testIntOrError(), \nerror(\"a\").message(), \nnew TestClass(1).a, \n<int & readonly> 1, \nlet int p = 1 in p, \nnew TestClass(1).getNum(), \n(base64 `0xAA`).toString(), \n(<record {|string value;|}> \n(recordType.@RecordAnnot)).value, \nnumber + 1, \n-number,-2, \n<int>[<object {}>new TestClass(1),  \n1, object{},  \n((<record{|int a?;|}>{a: 1})?.a),  \n(<table<A>> table[{a: 1}])][1], \n<string>([(), \"a\"][1]), \nEND-2,<1>1, \n(<int[]>(from int i in (<stream<int>>([1].toStream())) select i))[0], \n<string>[(trap getString()) is error ? \"error\" : \"success\", <[int]>[1],  typeof number, typeof 1,  number is int,  1 is int,  <int|string>2][0], \nEND > 3 ? END - 4: END - 2, \nstring `a`, \nstring `abc${getString()}def`, \n<string>string `abc${getString()}def`, \n<string>string `a`, \n<int>2, \n[1, 2, 3][0], \n[1, getInteger(), 3][0], \nEND is int ? 6 : 7, \nnumber is int ? 6 : number + 1, \nxml `<a>1</a>`.<a>.toString(), \n(xml `<a>1</a>`/*).toString(), \n[...[3, 4, 5]][0], \nx->w1, \n'client'->/.post({}), , \n]\n"

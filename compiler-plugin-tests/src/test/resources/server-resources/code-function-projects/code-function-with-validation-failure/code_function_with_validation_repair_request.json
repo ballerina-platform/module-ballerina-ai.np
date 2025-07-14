@@ -20,10 +20,10 @@
   "diagnosticRequest": {
     "diagnostics": [
       {
-        "message": "cannot resolve module 'xlibb/test as _'"
+        "message": "ERROR [generated/functions_calculateTotalPriceNPGenerated.bal:(2:1,2:24)] cannot resolve module 'xlibb/test as _'"
       },
       {
-        "message": "cannot resolve module 'xlibb/test2 as _'"
+        "message": "ERROR [generated/functions_calculateTotalPriceNPGenerated.bal:(5:1,5:25)] cannot resolve module 'xlibb/test2 as _'"
       },
       {
         "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(1:0,1:23)] Disallowed import '\nimport xlibb/test as _;\n' detected in location, only 'ballerina/' or 'ballerinax/' packages are permitted"

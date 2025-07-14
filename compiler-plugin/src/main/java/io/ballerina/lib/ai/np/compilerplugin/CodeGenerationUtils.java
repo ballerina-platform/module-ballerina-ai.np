@@ -282,7 +282,7 @@ public class CodeGenerationUtils {
             }
 
             diagnosticObj = new JsonObject();
-            diagnosticObj.addProperty("message", diagnostic.message());
+            diagnosticObj.addProperty("message", diagnostic.toString());
             diagnostics.add(diagnosticObj);
         }
 
