@@ -6,7 +6,7 @@ configurable decimal discountThreshold = 100.00;
 public final decimal DISCOUNT_RATE = 0.1;
 public final decimal MINIMUM_ITEM_PRICE = 1.00;
 
-public function calculateTotalPrice(decimal[] itemPrices) returns decimal = @code {
+public function calculateTotalPrice(decimal[] itemPrices) returns decimal = @natural:code {
                 prompt: string `Calculate the total price of items by summing up valid prices
                         (above the minimum price), applying a discount if the subtotal exceeds a threshold,
                         and adding tax calculated based on the total after discount`
