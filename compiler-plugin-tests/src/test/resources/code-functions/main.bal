@@ -5,7 +5,7 @@ type Employee record {|
     decimal salary;
 |};
 
-function sortEmployees(Employee[] employees) returns Employee[] = @code {
+function sortEmployees(Employee[] employees) returns Employee[] = @natural:code {
     prompt: string `Give me a new array with the employees sorted by
                         1. salary in descending order and then
                         2. name in ascending order`

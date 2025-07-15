@@ -19,6 +19,6 @@ type Employee record {
     string name;
 };
 
-function getEmployees() returns Employee[]|error = @code {
+function getEmployees() returns Employee[]|error = @natural:code {
     prompt: string `Give me 50 employees with distinct data`
 } external;

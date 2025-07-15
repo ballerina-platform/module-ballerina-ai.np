@@ -22,6 +22,10 @@ When a blog post is submitted, the system attempts to determine the most appropr
 - The implementation uses an LLM to identify the most suitable category and a rating based on the specified review criteria. This is implemented using natural expressions in Ballerina, specifically a [natural function](./review_blog.bal) with the requirement specified in natural language. Ballerina's natural expressions handle incorporating the response schema in the request to the LLM and binding the response to the expected type automatically. 
 
     ```ballerina
+    import ballerina/ai;
+  
+    final ai:ModelProvider model = check ai:getDefaultModelProvider();
+
     # Represents a blog entry with title and content.
     public type Blog record {|
         # The title of the blog
@@ -38,26 +42,27 @@ When a blog post is submitted, the system attempts to determine the most appropr
         int rating;
     |};
 
-    public isolated function reviewBlog(Blog blog) returns Review|error => natural {
-        You are an expert content reviewer for a blog site that 
-            categorizes posts under the following categories: ${categories}
+    public isolated function reviewBlog(Blog blog) returns Review|error => 
+        natural (model) {
+            You are an expert content reviewer for a blog site that 
+                categorizes posts under the following categories: ${categories}
 
-            Your tasks are:
-            1. Suggest a suitable category for the blog from exactly the specified categories. 
-            If there is no match, use null.
+                Your tasks are:
+                1. Suggest a suitable category for the blog from exactly the specified categories. 
+                If there is no match, use null.
 
-            2. Rate the blog post on a scale of 1 to 10 based on the following criteria:
-            - **Relevance**: How well the content aligns with the chosen category.
-            - **Depth**: The level of detail and insight in the content.
-            - **Clarity**: How easy it is to read and understand.
-            - **Originality**: Whether the content introduces fresh perspectives or ideas.
-            - **Language Quality**: Grammar, spelling, and overall writing quality.
+                2. Rate the blog post on a scale of 1 to 10 based on the following criteria:
+                - **Relevance**: How well the content aligns with the chosen category.
+                - **Depth**: The level of detail and insight in the content.
+                - **Clarity**: How easy it is to read and understand.
+                - **Originality**: Whether the content introduces fresh perspectives or ideas.
+                - **Language Quality**: Grammar, spelling, and overall writing quality.
 
-            Here is the blog post content:
+                Here is the blog post content:
 
-            Title: ${blog.title}
-            Content: ${blog.content}
-    };
+                Title: ${blog.title}
+                Content: ${blog.content}
+        };
     ```
 
 - The rest of the logic, including accepting or rejecting the blog depending on the category and/or rating, persisting the data, etc. are all handled entirely in Ballerina.
@@ -76,7 +81,7 @@ Ballerina Swan Lake Update 13 (2201.13.0) will include experimental support for 
 
 3. Set up the database, you could use [script.sql](./script.sql)
 
-4. Add the database configuration to the Config.toml file. The Config.toml file should contain both the database configuration and the LLM configuration. For example, with the default Ballerina model, the content of your Config.toml could look like the following:
+4. Add the database configuration to the Config.toml file. The Config.toml file should contain both the database configuration and the LLM configuration. For example, the content of your Config.toml file could look like the following:
 
     ```toml
     [dbConfig]
@@ -86,8 +91,8 @@ Ballerina Swan Lake Update 13 (2201.13.0) will include experimental support for 
     port=<DB_PORT>
     database="<DB_NAME>"
 
-    [ballerina.np.defaultModelConfig]
-    url = "<DEFAULT_MODEL_URL>"
+    [ballerina.ai.wso2ProviderConfig]
+    serviceUrl = "<DEFAULT_MODEL_URL>"
     accessToken = "<DEFAULT_MODEL_ACCESS_TOKEN>"
     ```
 

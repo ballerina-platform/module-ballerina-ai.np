@@ -18,7 +18,7 @@ import ballerina/jballerina.java;
 
 const annotation annot on source external;
 
-function getArray() returns int[]|error = @code { // error, not yet supported
+function getArray() returns int[]|error = @natural:code { // error, not yet supported
     prompt: string `Give me an array of integers.`
 }
 @java:Method { // OK

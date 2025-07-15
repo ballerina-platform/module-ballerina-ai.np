@@ -1,3 +1,0 @@
-[ballerina.np.defaultModelConfig]
-url = "http://localhost:8080/llm/default"
-accessToken = "not-a-real-access-token"

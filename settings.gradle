@@ -40,20 +40,18 @@ plugins {
     id "com.gradle.enterprise" version "3.2"
 }
 
-rootProject.name = 'np'
+rootProject.name = 'ai.np'
 include(':checkstyle')
-include(':np-native')
-include(':np-ballerina')
-include(':np-compiler-plugin')
-include(':np-ballerina-tests')
-include(':np-compiler-plugin-tests')
+include(':ai.np-ballerina')
+include(':ai.np-compiler-plugin')
+include(':ai.np-ballerina-tests')
+include(':ai.np-compiler-plugin-tests')
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
-project(':np-native').projectDir = file('native')
-project(':np-ballerina').projectDir = file('ballerina')
-project(':np-compiler-plugin').projectDir = file('compiler-plugin')
-project(':np-ballerina-tests').projectDir = file('ballerina-tests')
-project(':np-compiler-plugin-tests').projectDir = file('compiler-plugin-tests')
+project(':ai.np-ballerina').projectDir = file('ballerina')
+project(':ai.np-compiler-plugin').projectDir = file('compiler-plugin')
+project(':ai.np-ballerina-tests').projectDir = file('ballerina-tests')
+project(':ai.np-compiler-plugin-tests').projectDir = file('compiler-plugin-tests')
 
 gradleEnterprise {
     buildScan {

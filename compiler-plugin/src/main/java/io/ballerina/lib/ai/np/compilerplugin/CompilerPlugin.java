@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
+ * Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com).
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,14 +16,19 @@
  * under the License.
  */
 
-module io.ballerina.lib.ai.np.compilerplugin {
-    requires java.net.http;
-    requires com.google.gson;
-    requires io.ballerina.formatter.core;
-    requires io.ballerina.lang;
-    requires io.ballerina.parser;
-    requires io.ballerina.tools.api;
-    requires io.ballerina.openapi.service;
-    requires io.swagger.v3.core;
-    requires io.swagger.v3.oas.models;
+package io.ballerina.lib.ai.np.compilerplugin;
+
+import io.ballerina.projects.plugins.CompilerPluginContext;
+
+/**
+ * Compiler plugin for natural programming.
+ *
+ * @since 0.3.0
+ */
+public class CompilerPlugin extends io.ballerina.projects.plugins.CompilerPlugin {
+
+    @Override
+    public void init(CompilerPluginContext compilerPluginContext) {
+        compilerPluginContext.addCodeModifier(new CodeModifier());
+    }
 }
