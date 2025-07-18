@@ -21,7 +21,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.ballerina.compiler.syntax.tree.AnnotAccessExpressionNode;
-import io.ballerina.compiler.syntax.tree.ArrayTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.BasicLiteralNode;
 import io.ballerina.compiler.syntax.tree.BinaryExpressionNode;
 import io.ballerina.compiler.syntax.tree.BracedExpressionNode;
@@ -29,49 +28,38 @@ import io.ballerina.compiler.syntax.tree.BuiltinSimpleNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.ByteArrayLiteralNode;
 import io.ballerina.compiler.syntax.tree.CheckExpressionNode;
 import io.ballerina.compiler.syntax.tree.ConditionalExpressionNode;
-import io.ballerina.compiler.syntax.tree.DistinctTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ErrorConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExplicitAnonymousFunctionExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.ExpressionNode;
 import io.ballerina.compiler.syntax.tree.FieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.FunctionCallExpressionNode;
-import io.ballerina.compiler.syntax.tree.FunctionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.ImplicitAnonymousFunctionExpressionNode;
 import io.ballerina.compiler.syntax.tree.ImplicitNewExpressionNode;
 import io.ballerina.compiler.syntax.tree.IndexedExpressionNode;
 import io.ballerina.compiler.syntax.tree.InterpolationNode;
-import io.ballerina.compiler.syntax.tree.IntersectionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.LetExpressionNode;
 import io.ballerina.compiler.syntax.tree.ListConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.MapTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.MappingConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.MethodCallExpressionNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.NilLiteralNode;
 import io.ballerina.compiler.syntax.tree.Node;
-import io.ballerina.compiler.syntax.tree.NodeLocation;
 import io.ballerina.compiler.syntax.tree.NodeVisitor;
 import io.ballerina.compiler.syntax.tree.ObjectConstructorExpressionNode;
-import io.ballerina.compiler.syntax.tree.ObjectTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.OptionalFieldAccessExpressionNode;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 import io.ballerina.compiler.syntax.tree.QueryActionNode;
 import io.ballerina.compiler.syntax.tree.QueryExpressionNode;
-import io.ballerina.compiler.syntax.tree.RecordTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.SimpleNameReferenceNode;
-import io.ballerina.compiler.syntax.tree.SingletonTypeDescriptorNode;
-import io.ballerina.compiler.syntax.tree.StreamTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TableConstructorExpressionNode;
 import io.ballerina.compiler.syntax.tree.TemplateExpressionNode;
 import io.ballerina.compiler.syntax.tree.TransactionalExpressionNode;
 import io.ballerina.compiler.syntax.tree.TrapExpressionNode;
-import io.ballerina.compiler.syntax.tree.TupleTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.TypeCastExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypeTestExpressionNode;
 import io.ballerina.compiler.syntax.tree.TypeofExpressionNode;
 import io.ballerina.compiler.syntax.tree.UnaryExpressionNode;
-import io.ballerina.compiler.syntax.tree.UnionTypeDescriptorNode;
 import io.ballerina.compiler.syntax.tree.XMLFilterExpressionNode;
 import io.ballerina.compiler.syntax.tree.XMLStepExpressionNode;
 import io.ballerina.projects.Document;
@@ -101,7 +89,6 @@ class ConstantExpressionValidator extends NodeVisitor {
 
     private void addConstantReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
-        NodeLocation location = node.location();
         diagnostic.addProperty("message", constructDiagnosticMessage(node));
         this.constantExpressionDiagnostics.add(diagnostic);
     }
@@ -109,11 +96,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     @Override
     public void visit(AnnotAccessExpressionNode annotAccessExpressionNode) {
         addConstantReferencesDiagnostics(annotAccessExpressionNode);
-    }
-
-    @Override
-    public void visit(ArrayTypeDescriptorNode arrayTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(arrayTypeDescriptorNode);
     }
 
     @Override
@@ -155,11 +137,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     }
 
     @Override
-    public void visit(DistinctTypeDescriptorNode distinctTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(distinctTypeDescriptorNode);
-    }
-
-    @Override
     public void visit(ErrorConstructorExpressionNode errorConstructorExpressionNode) {
         addConstantReferencesDiagnostics(errorConstructorExpressionNode);
     }
@@ -185,11 +162,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     }
 
     @Override
-    public void visit(FunctionTypeDescriptorNode functionTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(functionTypeDescriptorNode);
-    }
-
-    @Override
     public void visit(ImplicitAnonymousFunctionExpressionNode implicitAnonymousFunctionExpressionNode) {
         addConstantReferencesDiagnostics(implicitAnonymousFunctionExpressionNode);
     }
@@ -206,11 +178,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     }
 
     @Override
-    public void visit(IntersectionTypeDescriptorNode intersectionTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(intersectionTypeDescriptorNode);
-    }
-
-    @Override
     public void visit(LetExpressionNode letExpressionNode) {
         addConstantReferencesDiagnostics(letExpressionNode);
     }
@@ -223,11 +190,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     @Override
     public void visit(MappingConstructorExpressionNode mappingConstructorExpressionNode) {
         mappingConstructorExpressionNode.fields().forEach(field -> visitSyntaxNode(field));
-    }
-
-    @Override
-    public void visit(MapTypeDescriptorNode mapTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(mapTypeDescriptorNode);
     }
 
     @Override
@@ -262,11 +224,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     }
 
     @Override
-    public void visit(ObjectTypeDescriptorNode objectTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(objectTypeDescriptorNode);
-    }
-
-    @Override
     public void visit(OptionalFieldAccessExpressionNode optionalFieldAccessExpressionNode) {
         visitSyntaxNode(optionalFieldAccessExpressionNode.expression());
         visitSyntaxNode(optionalFieldAccessExpressionNode.fieldName());
@@ -280,21 +237,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     @Override
     public void visit(QueryActionNode queryActionNode) {
         addConstantReferencesDiagnostics(queryActionNode);
-    }
-
-    @Override
-    public void visit(RecordTypeDescriptorNode recordTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(recordTypeDescriptorNode);
-    }
-
-    @Override
-    public void visit(SingletonTypeDescriptorNode singletonTypeDescriptorNode) {
-        // Allowed
-    }
-
-    @Override
-    public void visit(StreamTypeDescriptorNode streamTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(streamTypeDescriptorNode);
     }
 
     @Override
@@ -323,11 +265,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     }
 
     @Override
-    public void visit(TupleTypeDescriptorNode tupleTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(tupleTypeDescriptorNode);
-    }
-
-    @Override
     public void visit(TypeCastExpressionNode typeCastExpressionNode) {
         visitSyntaxNode(typeCastExpressionNode.expression());
     }
@@ -345,11 +282,6 @@ class ConstantExpressionValidator extends NodeVisitor {
     @Override
     public void visit(UnaryExpressionNode unaryExpressionNode) {
         visitSyntaxNode(unaryExpressionNode.expression());
-    }
-
-    @Override
-    public void visit(UnionTypeDescriptorNode unionTypeDescriptorNode) {
-        addConstantReferencesDiagnostics(unionTypeDescriptorNode);
     }
 
     @Override
@@ -398,7 +330,7 @@ class ConstantExpressionValidator extends NodeVisitor {
         LinePosition startLine = lineRange.startLine();
         LinePosition endLine = lineRange.endLine();
         return String.format("ERROR [%s:(%s:%s,%s:%s)] Generated code should only " +
-                        "contains constant expressions. (found: '%s')",
+                        "contain constant expressions, found: '%s'",
             this.document.name(), startLine.line(), startLine.offset(), endLine.line(),
             endLine.offset(), node.toSourceCode());
     }

@@ -26,25 +26,25 @@
         "message": "ERROR [generated/functions_calculateTotalPriceNPGenerated.bal:(5:1,5:25)] cannot resolve module 'xlibb/test2 as _'"
       },
       {
-        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(1:0,1:23)] Disallowed import '\nimport xlibb/test as _;\n' detected in location, only 'ballerina/' or 'ballerinax/' packages are permitted"
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(1:0,1:23)] Disallowed import detected: '\nimport xlibb/test as _;\n', only imports from 'ballerina', 'ballerinax', and the user's organization are allowed."
       },
       {
-        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(4:0,4:24)] Disallowed import 'import xlibb/test2 as _;\n' detected in location, only 'ballerina/' or 'ballerinax/' packages are permitted"
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(4:0,4:24)] Disallowed import detected: 'import xlibb/test2 as _;\n', only imports from 'ballerina', 'ballerinax', and the user's organization are allowed."
       },
       {
         "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(8:20,8:38)] Module level variables cannot be used inside the generated code. (found: 'MINIMUM_ITEM_PRICE')"
       },
       {
-        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(14:19,14:36)] Config variables cannot be used inside the generated code. (found: 'discountThreshold')"
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(14:19,14:36)] Configurable variables cannot be accessed in generated code, found: 'discountThreshold'"
       },
       {
         "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(15:38,15:51)] Module level variables cannot be used inside the generated code. (found: 'DISCOUNT_RATE')"
       },
       {
-        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(18:36,18:43)] Config variables cannot be used inside the generated code. (found: 'taxRate')"
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(18:36,18:43)] Configurable variables cannot be accessed in generated code, found: 'taxRate'"
       },
       {
-        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(19:7,19:31)] Config variables cannot be used inside the generated code. (found: 'http:defaultListenerPort')"
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(19:7,19:31)] Configurable variables cannot be accessed in generated code, found: 'http:defaultListenerPort'"
       }
     ],
     "response": "\nimport xlibb/test as _;\nimport ballerina/io as _;\nimport ballerina/http;\nimport xlibb/test2 as _;\npublic function calculateTotalPriceNPGenerated(decimal[] itemPrices) returns decimal {\n    decimal subtotal = 0.0; \n    foreach decimal price in itemPrices {\n        if (price < MINIMUM_ITEM_PRICE) {\n            continue;\n        }\n        subtotal += price;\n    }\n    decimal discountedTotal = subtotal;\n    if (subtotal > discountThreshold) {\n        decimal discount = subtotal * DISCOUNT_RATE;\n        discountedTotal = subtotal - discount;\n    }\n    decimal tax = discountedTotal * taxRate;\n   _ = http:defaultListenerPort; // added for test qualified config references;\n   _ = http:AUTH_HEADER; // added for test qualified module level references;\n    decimal finalTotal = discountedTotal + tax;\n    return finalTotal;\n}\n\n"

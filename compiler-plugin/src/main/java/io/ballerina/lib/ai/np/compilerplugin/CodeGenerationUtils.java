@@ -172,7 +172,7 @@ public class CodeGenerationUtils {
         Optional<JsonArray> compilerDiagnostics = getDiagnostics(project);
         Module module = project.currentPackage().module(
                 project.currentPackage().modules().iterator().next().moduleId());
-        JsonArray codeGeneratorDiagnostics = new CodeGenerationValidator(
+        JsonArray codeGeneratorDiagnostics = new AllowedConstructValidator(
                     project.currentPackage().getCompilation().getSemanticModel(module.moduleId()),
                     findDocumentByName(module, generatedFuncName), packageOrgName
                 ).checkCodeGenerationDiagnostics(modulePartNode);
@@ -192,9 +192,9 @@ public class CodeGenerationUtils {
     private static JsonArray collectConstNaturalExpressionDiagnostics(ExpressionNode expNode,
                                                                       GeneratedCode generatedCode, Document document) {
         JsonArray diagnostics = new JsonArray();
-        Iterable<Diagnostic> projectDiagnostics = expNode.diagnostics();
+        Iterable<Diagnostic> compilerDiagnostics = expNode.diagnostics();
 
-        projectDiagnostics.forEach(diagnostic -> {
+        compilerDiagnostics.forEach(diagnostic -> {
             JsonObject diagnosticObj = new JsonObject();
             diagnosticObj.addProperty("message", constructProjectDiagnosticMessage(expNode, 
                     diagnostic.message(), document));
@@ -236,10 +236,10 @@ public class CodeGenerationUtils {
         return generatedCode.code;
     }
 
-    private static JsonArray mergeDiagnostics(Optional<JsonArray> projectDiagnostics,
+    private static JsonArray mergeDiagnostics(Optional<JsonArray> compilerDiagnostics,
                                               JsonArray validationDiagnostics) {
         JsonArray merged = new JsonArray();
-        projectDiagnostics.ifPresent(merged::addAll);
+        compilerDiagnostics.ifPresent(merged::addAll);
         merged.addAll(validationDiagnostics);
         return merged;
     }

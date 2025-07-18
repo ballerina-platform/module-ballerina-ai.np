@@ -39,7 +39,7 @@ import java.util.Optional;
  *
  * @since 0.3.0
  */
-class CodeGenerationValidator extends NodeVisitor {
+class AllowedConstructValidator extends NodeVisitor {
 
     private static final String BALLERINA = "ballerina";
     private static final String BALLERINAX = "ballerinax";
@@ -48,7 +48,7 @@ class CodeGenerationValidator extends NodeVisitor {
     private final JsonArray diagnostics = new JsonArray();
     private final String packageOrgName;
 
-    public CodeGenerationValidator(SemanticModel semanticModel, Optional<Document> document, String packageOrgName) {
+    public AllowedConstructValidator(SemanticModel semanticModel, Optional<Document> document, String packageOrgName) {
         this.semanticModel = semanticModel;
         this.document = document;
         this.packageOrgName = packageOrgName;
@@ -61,9 +61,6 @@ class CodeGenerationValidator extends NodeVisitor {
 
     @Override
     public void visit(ModulePartNode modulePartNode) {
-        if (this.document.isEmpty()) {
-            return;
-        }
         super.visitSyntaxNode(modulePartNode);
     }
 
@@ -108,31 +105,32 @@ class CodeGenerationValidator extends NodeVisitor {
     private void addModuleVariableReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
         NodeLocation location = node.location();
-        diagnostic.addProperty("message", String.format("ERROR [%s:(%s:%s,%s:%s)] Module level variables " +
-                "cannot be used inside the generated code. (found: '%s')",
-            document.get().name(), location.lineRange().startLine().line(),
-            location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
-            location.lineRange().endLine().offset(), node.toSourceCode()));
+        diagnostic.addProperty("message", constructDiagnosticMessage("ERROR [%s:(%s:%s,%s:%s)] " +
+                        "Module level variables cannot be used inside the generated code. (found: '%s')",
+                node.toSourceCode(), node.location()));
         this.diagnostics.add(diagnostic);
     }
 
     private void addConfigVariableReferencesDiagnostics(Node node) {
         JsonObject diagnostic = new JsonObject();
-        NodeLocation location = node.location();
-        diagnostic.addProperty("message", String.format("ERROR [%s:(%s:%s,%s:%s)] Config variables" +
-                " cannot be used inside the generated code. (found: '%s')",
-            document.get().name(), location.lineRange().startLine().line(),
-            location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
-            location.lineRange().endLine().offset(), node.toSourceCode()));
+        diagnostic.addProperty("message", constructDiagnosticMessage("ERROR [%s:(%s:%s,%s:%s)]" +
+                " Configurable variables cannot be accessed in generated code, found: '%s'",
+                node.toSourceCode(), node.location()));
         this.diagnostics.add(diagnostic);
+    }
+
+    private String constructDiagnosticMessage(String message, String sourceCode, NodeLocation location) {
+        return String.format(message, document.get().name(), location.lineRange().startLine().line(),
+                location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
+                location.lineRange().endLine().offset(), sourceCode);
     }
 
     private JsonObject addExternalImportDiagnostic(ImportDeclarationNode importNode) {
         JsonObject diagnostic = new JsonObject();
         NodeLocation location = importNode.location();
-        diagnostic.addProperty("message", String.format("ERROR [%s:(%s:%s,%s:%s)] Disallowed import '%s'" +
-                " detected in location, only 'ballerina/' or 'ballerinax/' " +
-                "packages are permitted", document.get().name(), location.lineRange().startLine().line(),
+        diagnostic.addProperty("message", String.format("ERROR [%s:(%s:%s,%s:%s)] Disallowed import" +
+                        " detected: '%s', only imports from 'ballerina', 'ballerinax', and the user's " +
+                        "organization are allowed.", document.get().name(), location.lineRange().startLine().line(),
             location.lineRange().startLine().offset(), location.lineRange().endLine().line(),
             location.lineRange().endLine().offset(), importNode.toSourceCode()));
         return diagnostic;
