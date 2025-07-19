@@ -21,7 +21,8 @@
 <suite name="BallerinaNPCompilerPluginTests">
     <test name="UnitTests">
         <classes>
-            <class name="io.ballerina.lib.ai.np.compilerplugintests.CompilerPluginTest"/>
+            <class name="io.ballerina.lib.ai.np.compilerplugintests.DiagnosticsTest"/>
+            <class name="io.ballerina.lib.ai.np.compilerplugintests.CodeGenerationTest"/>
         </classes>
     </test>
 </suite>

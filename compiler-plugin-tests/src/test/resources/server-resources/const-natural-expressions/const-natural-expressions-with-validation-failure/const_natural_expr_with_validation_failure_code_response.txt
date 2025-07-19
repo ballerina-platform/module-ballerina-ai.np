@@ -1,0 +1,149 @@
+event: resp_start
+
+event: libraries
+data: []
+
+event: functions
+data: []
+
+event: message_start
+
+event: content_block_delta
+data: {"text":"\n\nHere's the value"}
+
+event: content_block_delta
+data: {"text":" expression:\n\n<code filename"}
+
+event: content_block_delta
+data: {"text":"=\"main.bal\">"}
+
+event: content_block_delta
+data: {"text":"\n```ballerina\n["}
+
+event: content_block_delta
+data: {"text" :"<int>(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"], \n"}
+
+event: content_block_delta
+data: {"text" :"<int>(<map<int>>{\"a\": 1, \"b\": 2})[getString()], \n"}
+
+event: content_block_delta
+data: {"text" :"<int>(<map<int>>{\"a\": getInteger(), \"b\": 2})[\"a\"], \n"}
+
+event: content_block_delta
+data: {"text" :"1 + 1, \n"}
+
+event: content_block_delta
+data: {"text" :"(<int[2]>[1,2])[0], \n"}
+
+event: content_block_delta
+data: {"text" :"1 + 1,check testIntOrError(), \n"}
+
+event: content_block_delta
+data: {"text" :"error(\"a\").message(), \n"}
+
+event: content_block_delta
+data: {"text" :"new TestClass(1).a, \n"}
+
+event: content_block_delta
+data: {"text" :"<int & readonly> 1, \n"}
+
+event: content_block_delta
+data: {"text" :"let int p = 1 in p, \n"}
+
+event: content_block_delta
+data: {"text" :"new TestClass(1).getNum(), \n"}
+
+event: content_block_delta
+data: {"text" :"(base64 `0xAA`).toString(), \n"}
+
+event: content_block_delta
+data: {"text" :"(<record {|string value;|}> \n"}
+
+event: content_block_delta
+data: {"text" :"(recordType.@RecordAnnot)).value, \n"}
+
+event: content_block_delta
+data: {"text" :"number + 1, \n"}
+
+event: content_block_delta
+data: {"text" :"-number,-2, \n"}
+
+event: content_block_data
+data: {"text" :"io:COLON, \n"}
+
+event: content_block_delta
+data: {"text" :"<int>[<object {}>new TestClass(1),  \n"}
+
+event: content_block_delta
+data: {"text" :"1, object{},  \n"}
+
+event: content_block_delta
+data: {"text" :"((<record{|int a?;|}>{a: 1})?.a),  \n"}
+
+event: content_block_delta
+data: {"text" :"(<table<A>> table[{a: 1}])][1], \n"}
+
+event: content_block_delta
+data: {"text" :"<string>([(), \"a\"][1]), \n"}
+
+event: content_block_delta
+data: {"text" :"END-2,<1>1, \n"}
+
+event: content_block_delta
+data: {"text" :"(<int[]>(from int i in (<stream<int>>([1].toStream())) select i))[0], \n"}
+
+event: content_block_delta
+data: {"text" :"<string>[(trap getString()) is error ? \"error\" : \"success\", <[int]>[1],  typeof number, typeof 1,  number is int,  1 is int,  <int|string>2][0], \n"}
+
+event: content_block_delta
+data: {"text" :"END > 3 ? END - 4: END - 2, \n"}
+
+event: content_block_delta
+data: {"text" :"string `a`, \n"}
+
+event: content_block_delta
+data: {"text" :"string `abc${getString()}def`, \n"}
+
+event: content_block_delta
+data: {"text" :"<string>string `abc${getString()}def`, \n"}
+
+event: content_block_delta
+data: {"text" :"<string>string `a`, \n"}
+
+event: content_block_delta
+data: {"text" :"<int>2, \n"}
+
+event: content_block_delta
+data: {"text" :"[1, 2, 3][0], \n"}
+
+event: content_block_delta
+data: {"text" :"[1, getInteger(), 3][0], \n"}
+
+event: content_block_delta
+data: {"text" :"END is int ? 6 : 7, \n"}
+
+event: content_block_delta
+data: {"text" :"number is int ? 6 : number + 1, \n"}
+
+event: content_block_delta
+data: {"text" :"xml `<a>1</a>`.<a>.toString(), \n"}
+
+event: content_block_delta
+data: {"text" :"(xml `<a>1</a>`/*).toString(), \n"}
+
+event: content_block_delta
+data: {"text" :"[...[3, 4, 5]][0], \n"}
+
+event: content_block_delta
+data: {"text" :"x->w1, \n"}
+
+event: content_block_delta
+data: {"text" :"'client'->/.post({}), , \n"}
+
+event: content_block_delta
+data: {"text":"]\n```\n"}
+
+event: content_block_delta
+data: {"text":"</code>"}
+
+event: message_stop

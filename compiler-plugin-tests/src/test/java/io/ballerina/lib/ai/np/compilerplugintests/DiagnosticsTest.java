@@ -40,7 +40,7 @@ import java.util.List;
  *
  * @since 0.1.0
  */
-public class CompilerPluginTest {
+public class DiagnosticsTest {
 
     private static final Path RESOURCE_DIRECTORY = Paths.get("src", "test", "resources").toAbsolutePath();
     private static final Path DISTRIBUTION_PATH = Paths.get("../", "target", "ballerina-runtime").toAbsolutePath();
@@ -59,38 +59,15 @@ public class CompilerPluginTest {
     }
 
     @Test
-    public void testConstNaturalExpressionsDisallowing() {
-        int index = 0;
-        Package constNaturalExprNegativePackage = loadPackage("const-natural-expressions-negative");
-        DiagnosticResult diagnosticResult = constNaturalExprNegativePackage.runCodeGenAndModifyPlugins();
-        List<Diagnostic> errorDiagnosticsList = diagnosticResult.diagnostics().stream().toList();
-        assertDiagnostic(errorDiagnosticsList, index++, "'const' natural expressions are not yet supported", 17, 38);
-        Assert.assertEquals(index, errorDiagnosticsList.size());
-    }
-
-    @Test
-    public void testCodeGenWithCodeAnnotationDisallowingProject() {
-        Package codeAnnotationNegativePackage =
-                loadPackage(RESOURCE_DIRECTORY
-                        .resolve("code-annotation-negative")
-                        .resolve("code-annotation-negative-project"));
-        List<Diagnostic> projectDiagnosticsList =
-                codeAnnotationNegativePackage.runCodeGenAndModifyPlugins().diagnostics().stream().toList();
-        int index = 0;
-        assertDiagnostic(projectDiagnosticsList, index++,
-                "code generation with the 'code' annotation is not yet supported", 21, 43);
-        Assert.assertEquals(index, projectDiagnosticsList.size());
-    }
-
-    @Test
     public void testCodeGenWithCodeAnnotationDisallowingFile() {
         Package codeAnnotationNegativeFile =
-                loadSingleFileProject("code-annotation-negative", "code_annotation_negative_file.bal");
+                loadSingleFileProject();
         List<Diagnostic> fileDiagnosticsList =
                 codeAnnotationNegativeFile.runCodeGenAndModifyPlugins().diagnostics().stream().toList();
         int index = 0;
         assertDiagnostic(fileDiagnosticsList, index++,
-                "code generation with the 'code' annotation is not yet supported", 22, 52);
+                "code generation with the 'code' annotation is not supported in single bal file mode",
+                22, 52);
         Assert.assertEquals(index, fileDiagnosticsList.size());
     }
 
@@ -115,8 +92,9 @@ public class CompilerPluginTest {
         return project.currentPackage();
     }
 
-    private static Package loadSingleFileProject(String directory, String fileName) {
-        Path projectDirPath = RESOURCE_DIRECTORY.resolve(directory).resolve(fileName);
+    private static Package loadSingleFileProject() {
+        Path projectDirPath = RESOURCE_DIRECTORY.resolve("code-annotation-negative")
+                .resolve("code_annotation_negative_file.bal");
         Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(DISTRIBUTION_PATH).build();
         ProjectEnvironmentBuilder projectEnvironmentBuilder = ProjectEnvironmentBuilder.getBuilder(environment);
         BuildOptions buildOptions = BuildOptions.builder().setExperimental(true).build();

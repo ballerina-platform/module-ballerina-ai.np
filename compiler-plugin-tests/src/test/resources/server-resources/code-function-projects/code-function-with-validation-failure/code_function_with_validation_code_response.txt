@@ -1,0 +1,95 @@
+event: resp_start
+
+event: libraries
+data: ["ballerina/io"]
+
+event: functions
+data: []
+
+event: message_start
+
+event: content_block_delta
+data: {"text":"'ll help you to generate the `calculateTotalPriceNPGenerated"}
+
+event: content_block_delta
+data: {"text":" function.\n"}
+
+event: content_block_delta
+data: {"text":"\n\n<code filename=\"functions_addEmployeeNPGenerated.bal\">"}
+
+event: content_block_delta
+data: {"text":"\n```ballerina\n"}
+
+event: content_block_delta
+data: {"text":"import xlibb/test as _;\n"}
+
+event: content_block_delta
+data: {"text":"import ballerina/io as _;\n"}
+
+event: content_block_delta
+data: {"text":"import ballerina/http;\n"}
+
+event: content_block_delta
+data: {"text":"import xlibb/test2 as _;\n"}
+
+event: content_block_delta
+data: {"text":"public function calculateTotalPriceNPGenerated(decimal[] itemPrices) returns decimal {\n"}
+
+event: content_block_delta
+data: {"text":"    decimal subtotal = 0.0; \n"}
+
+event: content_block_delta
+data: {"text":"    foreach decimal price in itemPrices {\n"}
+
+event: content_block_delta
+data: {"text":"        if (price < MINIMUM_ITEM_PRICE) {\n"}
+
+event: content_block_delta
+data: {"text":"            continue;\n"}
+
+event: content_block_delta
+data: {"text":"        }\n"}
+
+event: content_block_delta
+data: {"text":"        subtotal += price;\n"}
+
+event: content_block_delta
+data: {"text":"    }\n"}
+
+event: content_block_delta
+data: {"text":"    decimal discountedTotal = subtotal;\n"}
+
+event: content_block_delta
+data: {"text":"    if (subtotal > discountThreshold) {\n"}
+
+event: content_block_delta
+data: {"text":"        decimal discount = subtotal * DISCOUNT_RATE;\n"}
+
+event: content_block_delta
+data: {"text":"        discountedTotal = subtotal - discount;\n"}
+
+event: content_block_delta
+data: {"text":"    }\n"}
+
+event: content_block_delta
+data: {"text":"    decimal tax = discountedTotal * taxRate;\n"}
+
+event: content_block_delta
+data: {"text":"   _ = http:defaultListenerPort; // added for test qualified config references;\n"}
+
+event: content_block_delta
+data: {"text":"   _ = http:AUTH_HEADER; // added for test qualified module level references;\n"}
+
+event: content_block_delta
+data: {"text":"    decimal finalTotal = discountedTotal + tax;\n"}
+
+event: content_block_delta
+data: {"text":"    return finalTotal;\n}\n"}
+
+event: content_block_delta
+data: {"text":"\n```"}
+
+event: content_block_delta
+data: {"text":"\n<\/code>\n"}
+
+event: message_stop

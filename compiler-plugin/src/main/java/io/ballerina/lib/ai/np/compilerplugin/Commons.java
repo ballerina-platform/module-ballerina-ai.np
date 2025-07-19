@@ -17,6 +17,13 @@
  */
 package io.ballerina.lib.ai.np.compilerplugin;
 
+import io.ballerina.compiler.api.ModuleID;
+import io.ballerina.compiler.api.SemanticModel;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
+
 /**
  * Class containing common constants and functionality.
  *
@@ -28,4 +35,25 @@ class Commons {
 
     static final String BALLERINA_ORG_NAME = "ballerina";
     static final String AI_MODULE_NAME = "ai";
+
+    static final String CODE_ANNOTATION = "code";
+
+    static final String BAL_EXT = ".bal";
+    static final String FILE_PATH = "filePath";
+    static final String CONTENT = "content";
+
+    static boolean isCodeAnnotation(AnnotationNode annotationNode, SemanticModel semanticModel) {
+        Node node = annotationNode.annotReference();
+        if (!(node instanceof QualifiedNameReferenceNode qualifiedNameReferenceNode) ||
+                !CODE_ANNOTATION.equals(qualifiedNameReferenceNode.identifier().text())) {
+            return false;
+        }
+
+        return isLangNaturalModule(semanticModel.symbol(node).get().getModule().get());
+    }
+
+    static boolean isLangNaturalModule(ModuleSymbol moduleSymbol) {
+        ModuleID moduleId = moduleSymbol.id();
+        return BALLERINA_ORG_NAME.equals(moduleId.orgName()) && "lang.natural".equals(moduleId.moduleName());
+    }
 }

@@ -48,9 +48,9 @@ class DiagnosticLog {
     }
 
     enum DiagnosticCode {
-        NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED("NP_ERROR_023", "non.json.expected.type.not.yet.supported"),
-        CONST_NATURAL_EXPR_NOT_YET_SUPPORTED("NP_ERROR_025", "const.natural.expr.not.yet.supported"),
-        CODE_GEN_WITH_CODE_ANNOT_NOT_YET_SUPPORTED("NP_ERROR_026", "code.gen.with.code.annot.not.yet.supported");
+        CODE_GEN_WITH_CODE_ANNOT_NOT_SUPPORTED_IN_SINGLE_BAL_FILE_MODE(
+                "NP_ERROR_003", "code.gen.with.code.annot.not.supported.in.single.bal.file.mode"),
+        NON_JSON_EXPECTED_TYPE_NOT_YET_SUPPORTED("NP_ERROR_023", "non.json.expected.type.not.yet.supported");
 
         private final String code;
         private final String message;

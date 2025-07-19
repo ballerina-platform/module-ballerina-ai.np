@@ -1,0 +1,116 @@
+event: resp_start
+
+event: libraries
+data: []
+
+event: functions
+data: []
+
+event: message_start
+
+event: content_block_delta
+data: {"text":"For"}
+
+event: content_block_delta
+data: {"text":" this query, I"}
+
+event: content_block_delta
+data: {"text":" need to provide a value expression that represents"}
+
+event: content_block_delta
+data: {"text":" an array of 10"}
+
+event: content_block_delta
+data: {"text":" integers between 1"}
+
+event: content_block_delta
+data: {"text":"000 and 2"}
+
+event: content_block_delta
+data: {"text":"000. Since this"}
+
+event: content_block_delta
+data: {"text":" is a simple value"}
+
+event: content_block_delta
+data: {"text":" expression requirement, we"}
+
+event: content_block_delta
+data: {"text":" don't need to use any"}
+
+event: content_block_delta
+data: {"text":" of the provided API"}
+
+event: content_block_delta
+data: {"text":" functions. We can use a"}
+
+event: content_block_delta
+data: {"text":" list constructor expression with"}
+
+event: content_block_delta
+data: {"text":" integer literals.\n\nThe"}
+
+event: content_block_delta
+data: {"text":" value expression should:\n1. Be an"}
+
+event: content_block_delta
+data: {"text":" array (using list constructor expression)"}
+
+event: content_block_delta
+data: {"text":"\n2. Contain exactly"}
+
+event: content_block_delta
+data: {"text":" 10 elements\n3. Each"}
+
+event: content_block_delta
+data: {"text":" element should be an integer"}
+
+event: content_block_delta
+data: {"text":" between 1000 "}
+
+event: content_block_delta
+data: {"text":"and 2000"}
+
+event: content_block_delta
+data: {"text":"\n4. Be a vali"}
+
+event: content_block_delta
+data: {"text":"d value for the type `"}
+
+event: content_block_delta
+data: {"text":"int[]|error`"}
+
+event: content_block_delta
+data: {"text":"\n\nHere's the value"}
+
+event: content_block_delta
+data: {"text":" expression:\n\n<code filename"}
+
+event: content_block_delta
+data: {"text":"=\"main.bal\">"}
+
+event: content_block_delta
+data: {"text":"\n```ballerina\n["}
+
+event: content_block_delta
+data: {"text":"1234, 1456"}
+
+event: content_block_delta
+data: {"text":", 1678, 1890"}
+
+event: content_block_delta
+data: {"text":", 1357, 1579,"}
+
+event: content_block_delta
+data: {"text":" 1246, 1468"}
+
+event: content_block_delta
+data: {"text":", 1975, 1753"}
+
+event: content_block_delta
+data: {"text":"]\n```\n"}
+
+event: content_block_delta
+data: {"text":"</code>"}
+
+event: message_stop
