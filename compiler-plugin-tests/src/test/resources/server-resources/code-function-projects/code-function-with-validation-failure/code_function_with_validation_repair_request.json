@@ -1,0 +1,52 @@
+{
+  "usecase": "Fix issues in the generated 'calculateTotalPriceNPGenerated' function. Do not change anything other than the function body",
+  "sourceFiles": [
+    {
+      "filePath": "main.bal",
+      "content": "import ballerina/io;\n\nconfigurable decimal taxRate = 0.08;\nconfigurable decimal discountThreshold = 100.00;\n\npublic final decimal DISCOUNT_RATE = 0.1;\npublic final decimal MINIMUM_ITEM_PRICE = 1.00;\n\npublic function calculateTotalPrice(decimal[] itemPrices) returns decimal = @natural:code {\n                prompt: string `Calculate the total price of items by summing up valid prices\n                        (above the minimum price), applying a discount if the subtotal exceeds a threshold,\n                        and adding tax calculated based on the total after discount`\n} external;\n\npublic function main() {\n    decimal[] itemPrices = [25.50, 15.75, 40.00, 19.99, 12.49];\n    decimal total = calculateTotalPrice(itemPrices);\n    io:println(\"Total price: \", total);\n}\n"
+    },
+    {
+      "filePath": "generated/functions_calculateTotalPriceNPGenerated.bal",
+      "content": "\nimport xlibb/test as _;\nimport ballerina/io as _;\nimport ballerina/http;\nimport xlibb/test2 as _;\npublic function calculateTotalPriceNPGenerated(decimal[] itemPrices) returns decimal {\n    decimal subtotal = 0.0; \n    foreach decimal price in itemPrices {\n        if (price < MINIMUM_ITEM_PRICE) {\n            continue;\n        }\n        subtotal += price;\n    }\n    decimal discountedTotal = subtotal;\n    if (subtotal > discountThreshold) {\n        decimal discount = subtotal * DISCOUNT_RATE;\n        discountedTotal = subtotal - discount;\n    }\n    decimal tax = discountedTotal * taxRate;\n   _ = http:defaultListenerPort; // added for test qualified config references;\n   _ = http:AUTH_HEADER; // added for test qualified module level references;\n    decimal finalTotal = discountedTotal + tax;\n    return finalTotal;\n}\n\n"
+    }
+  ],
+  "chatHistory": [
+    {
+      "actor": "user",
+      "message": "An `external` function with the `@natural:code` Ballerina annotation needs to be replaced at\ncompile-time with the code necessary to achieve the requirement specified as the `prompt`\nfield in the annotation.\n\nAs a skilled Ballerina programmer, you have to generate the code to do this for the calculateTotalPrice function.\nThe following prompt defines the requirement:\n\n```\nCalculate the total price of items by summing up valid prices\n                        (above the minimum price), applying a discount if the subtotal exceeds a threshold,\n                        and adding tax calculated based on the total after discount\n```\n\nYour task is to generate a function named 'calculateTotalPriceNPGenerated' with the code that is needed to satisfy this user\nprompt.\n\nThe 'calculateTotalPriceNPGenerated' function should have exactly the same signature as the 'calculateTotalPrice' function.\nUse only the parameters passed to the function and module-level clients that are clients from the ballerina and ballerinax module in the generated code.\nDo not use any configurable variables or module-level variables defined in the program.\n\nRespond with ONLY THE GENERATED FUNCTION AND ANY IMPORTS REQUIRED BY THE GENERATED FUNCTION.\n"
+    }
+  ],
+  "functions": [],
+  "diagnosticRequest": {
+    "diagnostics": [
+      {
+        "message": "ERROR [generated/functions_calculateTotalPriceNPGenerated.bal:(2:1,2:24)] cannot resolve module 'xlibb/test as _'"
+      },
+      {
+        "message": "ERROR [generated/functions_calculateTotalPriceNPGenerated.bal:(5:1,5:25)] cannot resolve module 'xlibb/test2 as _'"
+      },
+      {
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(1:0,1:23)] Disallowed import detected: '\nimport xlibb/test as _;\n', only imports from 'ballerina', 'ballerinax', and the user's organization are allowed."
+      },
+      {
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(4:0,4:24)] Disallowed import detected: 'import xlibb/test2 as _;\n', only imports from 'ballerina', 'ballerinax', and the user's organization are allowed."
+      },
+      {
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(8:20,8:38)] Module level variables cannot be used inside the generated code. (found: 'MINIMUM_ITEM_PRICE')"
+      },
+      {
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(14:19,14:36)] Configurable variables cannot be accessed in generated code, found: 'discountThreshold'"
+      },
+      {
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(15:38,15:51)] Module level variables cannot be used inside the generated code. (found: 'DISCOUNT_RATE')"
+      },
+      {
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(18:36,18:43)] Configurable variables cannot be accessed in generated code, found: 'taxRate'"
+      },
+      {
+        "message": "ERROR [functions_calculateTotalPriceNPGenerated.bal:(19:7,19:31)] Configurable variables cannot be accessed in generated code, found: 'http:defaultListenerPort'"
+      }
+    ],
+    "response": "\nimport xlibb/test as _;\nimport ballerina/io as _;\nimport ballerina/http;\nimport xlibb/test2 as _;\npublic function calculateTotalPriceNPGenerated(decimal[] itemPrices) returns decimal {\n    decimal subtotal = 0.0; \n    foreach decimal price in itemPrices {\n        if (price < MINIMUM_ITEM_PRICE) {\n            continue;\n        }\n        subtotal += price;\n    }\n    decimal discountedTotal = subtotal;\n    if (subtotal > discountThreshold) {\n        decimal discount = subtotal * DISCOUNT_RATE;\n        discountedTotal = subtotal - discount;\n    }\n    decimal tax = discountedTotal * taxRate;\n   _ = http:defaultListenerPort; // added for test qualified config references;\n   _ = http:AUTH_HEADER; // added for test qualified module level references;\n    decimal finalTotal = discountedTotal + tax;\n    return finalTotal;\n}\n\n"
+  }
+}

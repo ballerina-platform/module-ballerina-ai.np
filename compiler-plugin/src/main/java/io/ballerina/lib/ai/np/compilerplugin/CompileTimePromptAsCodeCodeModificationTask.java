@@ -192,7 +192,8 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             String prompt = getPrompt(functionDefinition, semanticModel);
             String generatedCode = generateCodeForFunction(copilotUrl, copilotAccessToken, funcName,
                     generatedFuncName, prompt, getHttpClient(),
-                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor());
+                    this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor(),
+                    document.module().project().currentPackage().packageOrg().value());
             handleGeneratedCode(funcName, generatedCode);
             ExpressionFunctionBodyNode expressionFunctionBody =
                     NodeFactory.createExpressionFunctionBodyNode(
@@ -207,10 +208,10 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             if (naturalExpressionNode.constKeyword().isEmpty()) {
                 return naturalExpressionNode;
             }
-            String generatedCode = generateCodeForNaturalExpression(copilotUrl, copilotAccessToken,
-                    semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine()).get(),
-                    naturalExpressionNode, getHttpClient(), this.getSourceFiles(), semanticModel);
-            return NodeParser.parseExpression(generatedCode);
+
+            return generateCodeForNaturalExpression(naturalExpressionNode, copilotUrl, copilotAccessToken,
+                    getHttpClient(), this.getSourceFiles(), semanticModel, semanticModel
+                        .expectedType(document, naturalExpressionNode.lineRange().startLine()).get(), document);
         }
 
         private void handleGeneratedCode(String originalFuncName, String generatedCode) {
@@ -280,7 +281,6 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                 writer.println(Formatter.format(generatedCode));
             } catch (IOException | FormatterException e) {
                 // Shouldn't be a showstopper?
-                return;
             }
         }
     }
