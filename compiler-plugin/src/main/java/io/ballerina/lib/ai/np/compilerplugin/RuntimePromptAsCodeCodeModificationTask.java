@@ -302,25 +302,25 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
     }
 
     private static void populateTypeSchema(TypeSymbol memberType, TypeMapper typeMapper,
-                                           Map<String, String> typeSchemas, TypeSymbol anydata) {
+                                           Map<String, String> typeSchemas, TypeSymbol anydataType) {
         switch (memberType) {
             case TypeReferenceTypeSymbol typeReference -> {
-                if (!typeReference.subtypeOf(anydata)) {
+                if (!typeReference.subtypeOf(anydataType)) {
                     return;
                 }
                 typeSchemas.put(typeReference.definition().getName().get(),
                         getJsonSchema(typeMapper.getSchema(typeReference)));
             }
             case ArrayTypeSymbol arrayType ->
-                            populateTypeSchema(arrayType.memberTypeDescriptor(), typeMapper, typeSchemas, anydata);
+                            populateTypeSchema(arrayType.memberTypeDescriptor(), typeMapper, typeSchemas, anydataType);
             case TupleTypeSymbol tupleType ->
                     tupleType.members().forEach(member ->
-                            populateTypeSchema(member.typeDescriptor(), typeMapper, typeSchemas, anydata));
+                            populateTypeSchema(member.typeDescriptor(), typeMapper, typeSchemas, anydataType));
             case RecordTypeSymbol recordType ->
                     recordType.fieldDescriptors().values().forEach(field ->
-                            populateTypeSchema(field.typeDescriptor(), typeMapper, typeSchemas, anydata));
+                            populateTypeSchema(field.typeDescriptor(), typeMapper, typeSchemas, anydataType));
             case UnionTypeSymbol unionTypeSymbol -> unionTypeSymbol.memberTypeDescriptors().forEach(member ->
-                            populateTypeSchema(member, typeMapper, typeSchemas, anydata));
+                            populateTypeSchema(member, typeMapper, typeSchemas, anydataType));
             default -> { }
         }
     }
