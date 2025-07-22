@@ -17,15 +17,21 @@
 import ballerina/http;
 import ballerina/test;
 
+type TextContentPart record {|
+    string 'type;
+    string text;
+|};
+
 service /llm on new http:Listener(8080) {
     resource function post azureopenai/deployments/gpt4onew/chat/completions(CreateChatCompletionRequest payload)
             returns CreateChatCompletionResponse|error {
         ChatCompletionRequestMessage message = payload.messages[0];
-
-        string? content = check message["content"].ensureType();
-        if content is () {
-            test:assertFail("Expected content in the payload");
+        TextContentPart[]|error textParts = check message["content"].cloneWithType();
+        if textParts is error {
+            test:assertFail("Expected text content in the payload");
         }
+
+        string content = textParts[0].text;
 
         test:assertEquals(content, getExpectedPrompt(content));
         test:assertEquals(message.role, "user");
@@ -45,7 +51,7 @@ service /llm on new http:Listener(8080) {
 }
 
 function getExpectedParameterSchema(string content) returns json {
-    if content.startsWith("What is 1 + 2 ?") {
+    if content.startsWith("        What is 1 + 2 ?") {
         return {"type":"object","properties":{"result":{"type":"string"}}};
     }
     return {
@@ -106,7 +112,8 @@ isolated function getExpectedPrompt(string prompt) returns string {
 
 
     if trimmedPrompt.startsWith("What is 1 + 2 ?") {
-        return string `What is 1 + 2 ?`;
+        return string `        What is 1 + 2 ?
+    `;
     }
 
     if trimmedPrompt.startsWith("Which country") {
@@ -134,8 +141,9 @@ isolated function getExpectedPrompt(string prompt) returns string {
     }
 
     if trimmedPrompt.startsWith("Who is a popular sportsperson") {
-        return string `Who is a popular sportsperson that was born in the decade starting
-    from 1990 with Simone in their name?`;
+        return string `    Who is a popular sportsperson that was born in the decade starting
+    from 1990 with Simone in their name?
+`;
     }
 
     if trimmedPrompt.includes("Tell me about places in the specified country") && trimmedPrompt.includes("Sri Lanka") {
@@ -345,7 +353,7 @@ isolated function getMockLLMResponse(string message) returns string {
         return "```\n\"Sri Lanka\"\n```";
     }
 
-    if message.includes("What is 1 + 2 ?") {
+    if message.includes("        What is 1 + 2 ?") {
         return "{\"result\": \"3\"}";
     }
 
@@ -353,7 +361,7 @@ isolated function getMockLLMResponse(string message) returns string {
         return "```\n[\"foo\", 1, \"bar\", \"2.3\", 4]\n```";
     }
 
-    if message.startsWith("Who is a popular sportsperson") {
+    if message.startsWith("    Who is a popular sportsperson") {
         return "{\"firstName\": \"Simone\", \"lastName\": \"Biles\", \"yearOfBirth\": 1997, \"sport\": \"Gymnastics\"}";
     }
 
