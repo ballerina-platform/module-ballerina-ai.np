@@ -51,7 +51,6 @@ scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "data.jsondata"},
 	{org = "ballerina", name = "http"},
-	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "test"}
 ]
 modules = [
