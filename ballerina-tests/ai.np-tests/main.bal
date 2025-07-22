@@ -21,13 +21,18 @@ configurable string accessToken = ?;
 
 final ai:Wso2ModelProvider mp = check new (serviceUrl, accessToken);
 
+type Error distinct error;
+
 function queryAboutCountry(string query) returns string|error => natural (mp) {
     Which country is ${query}?
 };
 
-function queryACalculation() returns string|error => natural (mp) {
-    What is 1 + 2 ?
-};
+function queryACalculation() returns string|error {
+    string|Error x = check natural (mp) {
+        What is 1 + 2 ?
+    };
+    return x;
+}
 
 function getParsedValues(string[] arr) returns (string|int)[]|error => natural (mp) {
     For each string value in the given array if the value can be parsed
