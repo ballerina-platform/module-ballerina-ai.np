@@ -1,69 +1,8 @@
 # module-ballerina-np
 
-This is the library module for natural programming - specifically the Code for AI component of natural programming, which simplifies working with large language models (LLMs) and allows LLM interactions to be strongly typed. This is enabled via natural expressions in Ballerina. 
+This is the library module for natural programming - specifically the compile-time code generation component of natural programming. 
 
-For more information about natural expressions and natural programming, see [Natural Language is Code: A hybrid approach with Natural Programming](https://blog.ballerina.io/posts/2025-04-26-introducing-natural-programming/).
-
-To get started, see [Work with Large Language Models (LLMs) using natural expressions](https://ballerina.io/learn/work-with-llms-using-natural-expressions/).
-
-For a set of examples, see [Examples](./examples/).
-
-## Overview
-
-A natural expression in Ballerina is transformed into a call to the `callLlm` function in this module, via a compiler plugin.
-
-For example, 
-
-```ballerina
-public isolated function reviewBlog(Blog blog) returns Review|error => natural {
-    You are an expert content reviewer for a blog site that 
-        categorizes posts under the following categories: ${categories}
-
-        Your tasks are:
-        1. Suggest a suitable category for the blog from exactly the specified categories. 
-           If there is no match, use null.
-
-        2. Rate the blog post on a scale of 1 to 10 based on the following criteria:
-        - **Relevance**: How well the content aligns with the chosen category.
-        - **Depth**: The level of detail and insight in the content.
-        - **Clarity**: How easy it is to read and understand.
-        - **Originality**: Whether the content introduces fresh perspectives or ideas.
-        - **Language Quality**: Grammar, spelling, and overall writing quality.
-
-        Here is the blog post content:
-
-        Title: ${blog.title}
-        Content: ${blog.content}
-};
-```
-
-becomes
-
-```ballerina
-import ballerina/np;
-
-public isolated function reviewBlog(Blog blog) returns Review|error => np:callLlm(
-    `You are an expert content reviewer for a blog site that 
-        categorizes posts under the following categories: ${categories}
-
-        Your tasks are:
-        1. Suggest a suitable category for the blog from exactly the specified categories. 
-           If there is no match, use null.
-
-        2. Rate the blog post on a scale of 1 to 10 based on the following criteria:
-        - **Relevance**: How well the content aligns with the chosen category.
-        - **Depth**: The level of detail and insight in the content.
-        - **Clarity**: How easy it is to read and understand.
-        - **Originality**: Whether the content introduces fresh perspectives or ideas.
-        - **Language Quality**: Grammar, spelling, and overall writing quality.
-
-        Here is the blog post content:
-
-        Title: ${blog.title}
-        Content: ${blog.content}`);
-```
-
-The `np:callLlm` function is dependently-typed, to allow natural expressions to be dependently-typed.
+For more information about natural programming, see [Natural Language is Code: A hybrid approach with Natural Programming](https://blog.ballerina.io/posts/2025-04-26-introducing-natural-programming/).
 
 ## Issues and projects 
 
