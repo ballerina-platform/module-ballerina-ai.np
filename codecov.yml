@@ -1,6 +1,6 @@
 fixes:
-  - "ballerina/np/**/::../ballerina/"
-  - "io/ballerina/lib/np/compilerplugin/::./compiler-plugin/src/main/java/io/ballerina/lib/np/compilerplugin/"
+  - "ballerina/ai/np/**/::../ballerina/"
+  - "io/ballerina/lib/ai/np/compilerplugin/::./compiler-plugin/src/main/java/io/ballerina/lib/ai/np/compilerplugin/"
 
 ignore:
   - "ballerina-tests"
