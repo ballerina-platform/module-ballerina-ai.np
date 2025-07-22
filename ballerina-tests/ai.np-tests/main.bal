@@ -25,6 +25,10 @@ function queryAboutCountry(string query) returns string|error => natural (mp) {
     Which country is ${query}?
 };
 
+function queryACalculation() returns string|error => natural (mp) {
+    What is 1 + 2 ?
+};
+
 function getParsedValues(string[] arr) returns (string|int)[]|error => natural (mp) {
     For each string value in the given array if the value can be parsed
     as an integer give an integer, if not give the same string value. Please preserve the order.
@@ -121,3 +125,4 @@ function getSumWithIncludedRecordParam(int d, *IntRecord e, int... f) returns in
     };
     return res;
 }
+

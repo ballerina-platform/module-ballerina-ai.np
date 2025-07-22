@@ -45,6 +45,9 @@ service /llm on new http:Listener(8080) {
 }
 
 function getExpectedParameterSchema(string content) returns json {
+    if content.startsWith("What is 1 + 2 ?") {
+        return {"type":"object","properties":{"result":{"type":"string"}}};
+    }
     return {
         "type": "object",
         "required": [
@@ -100,6 +103,11 @@ isolated function getTestServiceResponse(string content) returns CreateChatCompl
 
 isolated function getExpectedPrompt(string prompt) returns string {
     string trimmedPrompt = prompt.trim();
+
+
+    if trimmedPrompt.startsWith("What is 1 + 2 ?") {
+        return string `What is 1 + 2 ?`;
+    }
 
     if trimmedPrompt.startsWith("Which country") {
         return string `Which country is known as the pearl of the Indian Ocean?
@@ -335,6 +343,10 @@ ${"```"}
 isolated function getMockLLMResponse(string message) returns string {
     if message.startsWith("Which country") {
         return "```\n\"Sri Lanka\"\n```";
+    }
+
+    if message.includes("What is 1 + 2 ?") {
+        return "{\"result\": \"3\"}";
     }
 
     if message.startsWith("For each string value ") {
