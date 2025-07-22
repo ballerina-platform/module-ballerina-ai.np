@@ -1,4 +1,4 @@
-# module-ballerina-np
+# module-ballerina-ai.np
 
 This is the library module for natural programming - specifically the compile-time code generation component of natural programming. 
 
