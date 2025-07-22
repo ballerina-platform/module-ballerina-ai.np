@@ -4,7 +4,7 @@ name = "ai.np"
 version = "0.4.0"
 authors = ["Ballerina"]
 keywords = ["natural programming", "ai"]
-repository = "https://github.com/ballerina-platform/module-ballerina-np"
+repository = "https://github.com/ballerina-platform/module-ballerina-ai.np"
 license = ["Apache-2.0"]
 distribution = "2201.11.0"
 
