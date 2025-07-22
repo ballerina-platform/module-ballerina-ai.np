@@ -191,7 +191,8 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
         public NaturalExpressionNode transform(NaturalExpressionNode naturalExpressionNode) {
             Optional<TypeSymbol> typeSymbol =
                     semanticModel.expectedType(document, naturalExpressionNode.lineRange().startLine());
-            typeSymbol.ifPresent(symbol -> populateTypeSchema(symbol, this.typeMapper, this.modifierData.typeSchemas));
+            typeSymbol.ifPresent(symbol -> populateTypeSchema(symbol, this.typeMapper,
+                    this.modifierData.typeSchemas, this.semanticModel.types().ANYDATA));
             return naturalExpressionNode;
         }
     }
@@ -301,21 +302,25 @@ public class RuntimePromptAsCodeCodeModificationTask implements ModifierTask<Sou
     }
 
     private static void populateTypeSchema(TypeSymbol memberType, TypeMapper typeMapper,
-                                           Map<String, String> typeSchemas) {
+                                           Map<String, String> typeSchemas, TypeSymbol anydataType) {
         switch (memberType) {
-            case TypeReferenceTypeSymbol typeReference ->
-                    typeSchemas.put(typeReference.definition().getName().get(),
-                            getJsonSchema(typeMapper.getSchema(typeReference)));
+            case TypeReferenceTypeSymbol typeReference -> {
+                if (!typeReference.subtypeOf(anydataType)) {
+                    return;
+                }
+                typeSchemas.put(typeReference.definition().getName().get(),
+                        getJsonSchema(typeMapper.getSchema(typeReference)));
+            }
             case ArrayTypeSymbol arrayType ->
-                            populateTypeSchema(arrayType.memberTypeDescriptor(), typeMapper, typeSchemas);
+                            populateTypeSchema(arrayType.memberTypeDescriptor(), typeMapper, typeSchemas, anydataType);
             case TupleTypeSymbol tupleType ->
                     tupleType.members().forEach(member ->
-                            populateTypeSchema(member.typeDescriptor(), typeMapper, typeSchemas));
+                            populateTypeSchema(member.typeDescriptor(), typeMapper, typeSchemas, anydataType));
             case RecordTypeSymbol recordType ->
                     recordType.fieldDescriptors().values().forEach(field ->
-                            populateTypeSchema(field.typeDescriptor(), typeMapper, typeSchemas));
+                            populateTypeSchema(field.typeDescriptor(), typeMapper, typeSchemas, anydataType));
             case UnionTypeSymbol unionTypeSymbol -> unionTypeSymbol.memberTypeDescriptors().forEach(member ->
-                            populateTypeSchema(member, typeMapper, typeSchemas));
+                            populateTypeSchema(member, typeMapper, typeSchemas, anydataType));
             default -> { }
         }
     }

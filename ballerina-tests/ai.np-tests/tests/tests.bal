@@ -93,3 +93,9 @@ function testParameterInjectionWithIncludedRecordParamAndRestParam() returns err
     int v2 = check getSumWithIncludedRecordParam(300, {val: 400}, 500);
     test:assertEquals(v2, 1200);
 }
+
+@test:Config 
+function testUnionErrorTypeWithAnydataType() {
+    string|error x = queryACalculation();
+    test:assertTrue(x is string);
+}
