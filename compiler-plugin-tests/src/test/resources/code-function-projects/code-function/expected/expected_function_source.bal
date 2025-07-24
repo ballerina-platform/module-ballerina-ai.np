@@ -1,4 +1,3 @@
-
 function sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {
     Employee[] sortedEmployees = employees.clone();
     int n = sortedEmployees.length();
