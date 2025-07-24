@@ -451,7 +451,7 @@ public class CodeGenerationUtils {
                 The value should belong to the type '%s'. This value will be used in the code in place of the
                 `const natural {...}` expression with the requirement.
 
-                Respond with ONLY THE VALUE EXPRESSION.
+                Respond with ONLY THE VALUE EXPRESSION within ```ballerina and ```.
                 
                 Requirement:
                 """, expectedType.signature()));
