@@ -1,4 +1,3 @@
-
 public function calculateTotalPriceNPGenerated(decimal[] itemPrices) returns decimal {
     decimal taxRate = 0.08;
     decimal discountThreshold = 100.00;
