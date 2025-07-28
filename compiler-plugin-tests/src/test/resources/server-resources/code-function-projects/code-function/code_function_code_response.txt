@@ -69,7 +69,7 @@ event: content_block_delta
 data: {"text":"d code:\n\n<code filename=\"main.bal\">"}
 
 event: content_block_delta
-data: {"text":"\n```ballerina\nfunction"}
+data: {"text":"\n```\nfunction"}
 
 event: content_block_delta
 data: {"text":" sortEmployeesNPGenerated(Employee"}

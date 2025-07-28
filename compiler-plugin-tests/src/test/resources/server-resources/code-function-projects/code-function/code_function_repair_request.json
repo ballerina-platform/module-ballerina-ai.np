@@ -7,7 +7,7 @@
     },
     {
       "filePath": "generated/functions_sortEmployeesNPGenerated.bal",
-      "content": "\nfunction sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}\n"
+      "content": "function sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}"
     }
   ],
   "chatHistory": [
@@ -20,18 +20,18 @@
   "diagnosticRequest": {
     "diagnostics": [
       {
-        "message": "ERROR [generated/functions_sortEmployeesNPGenerated.bal:(5:5,7:35)] variable assignment is required"
+        "message": "ERROR [generated/functions_sortEmployeesNPGenerated.bal:(4:5,6:35)] variable assignment is required"
       },
       {
-        "message": "ERROR [generated/functions_sortEmployeesNPGenerated.bal:(7:8,7:17)] invalid token 'ascending'"
+        "message": "ERROR [generated/functions_sortEmployeesNPGenerated.bal:(6:8,6:17)] invalid token 'ascending'"
       },
       {
-        "message": "ERROR [generated/functions_sortEmployeesNPGenerated.bal:(7:18,7:18)] missing identifier"
+        "message": "ERROR [generated/functions_sortEmployeesNPGenerated.bal:(6:18,6:18)] missing identifier"
       },
       {
-        "message": "ERROR [generated/functions_sortEmployeesNPGenerated.bal:(7:18,7:33)] undefined parameter '$missingNode$_0'"
+        "message": "ERROR [generated/functions_sortEmployeesNPGenerated.bal:(6:18,6:33)] undefined parameter '$missingNode$_0'"
       }
     ],
-    "response": "\nfunction sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}\n"
+    "response": "function sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}"
   }
 }

@@ -386,12 +386,22 @@ public class CodeGenerationUtils {
     }
 
     private static boolean hasBallerinaCodeSnippet(String responseBodyString) {
-        return responseBodyString.contains(TRIPLE_BACKTICK_BALLERINA) && responseBodyString.contains(TRIPLE_BACKTICK);
+        return responseBodyString.contains(TRIPLE_BACKTICK) && responseBodyString.contains(TRIPLE_BACKTICK);
     }
 
     private static String extractBallerinaCodeSnippet(String responseBodyString) {
-        return responseBodyString.substring(responseBodyString.indexOf(TRIPLE_BACKTICK_BALLERINA) + 12,
-                responseBodyString.lastIndexOf(TRIPLE_BACKTICK));
+        int startDelimLength = 12;
+        int startIndex = responseBodyString.indexOf(TRIPLE_BACKTICK_BALLERINA);
+
+        if (startIndex == -1) {
+            startIndex = responseBodyString.indexOf(TRIPLE_BACKTICK);
+            startDelimLength = 3;
+        }
+
+        int endIndex = responseBodyString.lastIndexOf(TRIPLE_BACKTICK);
+        return (startIndex == -1 || endIndex == -1) ?
+                responseBodyString :
+                responseBodyString.substring(startIndex + startDelimLength, endIndex).trim();
     }
 
     private record GeneratedCode(String code, JsonArray functions) { }
