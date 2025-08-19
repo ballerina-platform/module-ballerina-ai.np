@@ -26,4 +26,9 @@ module io.ballerina.lib.ai.np.compilerplugin {
     requires io.ballerina.openapi.service;
     requires io.swagger.v3.core;
     requires io.swagger.v3.oas.models;
+    requires langchain4j.core;
+    requires langchain4j;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.annotations;
 }

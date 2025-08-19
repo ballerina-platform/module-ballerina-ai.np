@@ -1,0 +1,1280 @@
+
+> Task :ai.np-compiler-plugin:dependencies
+
+------------------------------------------------------------
+Project ':ai.np-compiler-plugin' - Ballerina - Natural Programming Compiler Plugin
+------------------------------------------------------------
+
+annotationProcessor - Annotation processors and their dependencies for source set 'main'.
+No dependencies
+
+ballerinaStdLibs
++--- io.ballerina.stdlib:io-ballerina:1.8.0
++--- io.ballerina.stdlib:math.vector-ballerina:1.2.0
++--- io.ballerina.stdlib:cache-ballerina:3.10.0
++--- io.ballerina.lib:data.xmldata-ballerina:1.4.2
++--- io.ballerina.stdlib:yaml-ballerina:0.8.0
++--- io.ballerina.stdlib:auth-ballerina:2.14.0
++--- io.ballerina.stdlib:constraint-ballerina:1.7.0
++--- io.ballerina.stdlib:task-ballerina:2.10.0
++--- io.ballerina.stdlib:time-ballerina:2.7.0
++--- io.ballerina.stdlib:log-ballerina:2.12.0
++--- io.ballerina.stdlib:jwt-ballerina:2.15.0
++--- io.ballerina.stdlib:oauth2-ballerina:2.14.0
++--- io.ballerina.stdlib:crypto-ballerina:2.9.0
++--- io.ballerina.stdlib:file-ballerina:1.12.0
++--- io.ballerina.stdlib:mime-ballerina:2.12.0
++--- io.ballerina.stdlib:uuid-ballerina:1.10.0
++--- io.ballerina.stdlib:os-ballerina:1.10.0
++--- io.ballerina.stdlib:url-ballerina:2.6.0
++--- io.ballerina.lib:data.jsondata-ballerina:1.1.0
++--- io.ballerina.stdlib:http-ballerina:2.14.1
++--- io.ballerina.stdlib:observe-ballerina:1.5.0
++--- io.ballerina:observe-ballerina:1.5.0
++--- io.ballerina.stdlib:mcp-ballerina:0.9.1
+\--- io.ballerina.stdlib:ai-ballerina:1.1.0
+
+checkstyle - The Checkstyle libraries to be used for this project.
++--- project :checkstyle
+\--- com.puppycrawl.tools:checkstyle:10.12.0
+     +--- info.picocli:picocli:4.7.3
+     +--- org.antlr:antlr4-runtime:4.11.1
+     +--- commons-beanutils:commons-beanutils:1.9.4
+     |    \--- commons-collections:commons-collections:3.2.2
+     +--- com.google.guava:guava:31.1-jre
+     |    +--- com.google.guava:failureaccess:1.0.1
+     |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     |    +--- com.google.code.findbugs:jsr305:3.0.2
+     |    +--- com.google.errorprone:error_prone_annotations:2.11.0
+     |    \--- com.google.j2objc:j2objc-annotations:1.3
+     +--- org.reflections:reflections:0.10.2
+     |    +--- org.javassist:javassist:3.28.0-GA
+     |    \--- com.google.code.findbugs:jsr305:3.0.2
+     +--- net.sf.saxon:Saxon-HE:12.2
+     |    \--- org.xmlresolver:xmlresolver:5.1.2
+     |         +--- org.apache.httpcomponents.client5:httpclient5:5.1.3
+     |         |    +--- org.apache.httpcomponents.core5:httpcore5:5.1.3
+     |         |    +--- org.apache.httpcomponents.core5:httpcore5-h2:5.1.3
+     |         |    |    \--- org.apache.httpcomponents.core5:httpcore5:5.1.3
+     |         |    \--- commons-codec:commons-codec:1.15
+     |         \--- org.apache.httpcomponents.core5:httpcore5:5.1.3
+     \--- org.checkerframework:checker-qual:3.27.0
+
+compileClasspath - Compile classpath for source set 'main'.
++--- org.ballerinalang:ballerina-lang:2201.13.0-m3
++--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3
++--- org.ballerinalang:ballerina-parser:2201.13.0-m3
++--- org.ballerinalang:formatter-core:2201.13.0-m3
++--- com.google.code.gson:gson:2.10.1
++--- io.ballerina.openapi:ballerina-to-openapi:2.3.0
++--- io.swagger.core.v3:swagger-core:2.2.9
+|    +--- jakarta.xml.bind:jakarta.xml.bind-api:2.3.2
+|    |    \--- jakarta.activation:jakarta.activation-api:1.2.1
+|    +--- org.apache.commons:commons-lang3:3.12.0
+|    +--- org.slf4j:slf4j-api:1.7.36 -> 2.0.7
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.14.2 -> 2.16.1
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1
+|    |         +--- com.fasterxml.jackson.core:jackson-annotations:2.16.1 (c)
+|    |         +--- com.fasterxml.jackson.core:jackson-core:2.16.1 (c)
+|    |         +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 (c)
+|    |         +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.1 (c)
+|    |         \--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1 (c)
+|    +--- com.fasterxml.jackson.core:jackson-databind:2.14.2 -> 2.16.1
+|    |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.1 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.1
+|    |    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1 (*)
+|    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2 -> 2.16.1
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 (*)
+|    |    +--- org.yaml:snakeyaml:2.2
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.1 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1 (*)
+|    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2 -> 2.16.1
+|    |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.1 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.1 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1 (*)
+|    +--- io.swagger.core.v3:swagger-annotations:2.2.9
+|    +--- org.yaml:snakeyaml:2.0 -> 2.2
+|    +--- io.swagger.core.v3:swagger-models:2.2.9
+|    |    \--- com.fasterxml.jackson.core:jackson-annotations:2.14.2 -> 2.16.1 (*)
+|    \--- jakarta.validation:jakarta.validation-api:2.0.2
++--- io.swagger.core.v3:swagger-models:2.2.9 (*)
++--- dev.langchain4j:langchain4j:0.31.0
+|    +--- dev.langchain4j:langchain4j-core:0.31.0
+|    |    +--- com.google.code.gson:gson:2.10.1
+|    |    \--- org.slf4j:slf4j-api:2.0.7
+|    +--- org.apache.opennlp:opennlp-tools:1.9.4
+|    +--- org.jsoup:jsoup:1.16.1
+|    \--- org.slf4j:slf4j-api:2.0.7
+\--- dev.langchain4j:langchain4j-anthropic:0.31.0
+     +--- dev.langchain4j:langchain4j-core:0.31.0 (*)
+     +--- com.squareup.retrofit2:retrofit:2.9.0
+     |    \--- com.squareup.okhttp3:okhttp:3.14.9 -> 4.12.0
+     |         +--- com.squareup.okio:okio:3.6.0
+     |         |    \--- com.squareup.okio:okio-jvm:3.6.0
+     |         |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10
+     |         |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10
+     |         |         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10
+     |         |         |    |    \--- org.jetbrains:annotations:13.0
+     |         |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10
+     |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10 (*)
+     |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+     +--- com.squareup.retrofit2:converter-jackson:2.9.0
+     |    +--- com.squareup.retrofit2:retrofit:2.9.0 (*)
+     |    \--- com.fasterxml.jackson.core:jackson-databind:2.10.1 -> 2.16.1 (*)
+     +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 (*)
+     +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
+     +--- com.squareup.okhttp3:okhttp-sse:4.12.0
+     |    +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+     \--- org.slf4j:slf4j-api:2.0.7
+
+compileOnly - Compile-only dependencies for the 'main' feature. (n)
+No dependencies
+
+coverageDataElementsForTest - Binary data file containing results of Jacoco test coverage reporting for the test Test Suite's test target. (n)
+No dependencies
+
+default - Configuration for default artifacts. (n)
+No dependencies
+
+externalJars
+\--- io.ballerina.openapi:ballerina-to-openapi:2.3.0
+
+implementation - Implementation dependencies for the 'main' feature. (n)
++--- org.ballerinalang:ballerina-lang:2201.13.0-m3 (n)
++--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (n)
++--- org.ballerinalang:ballerina-parser:2201.13.0-m3 (n)
++--- org.ballerinalang:formatter-core:2201.13.0-m3 (n)
++--- com.google.code.gson:gson:2.10.1 (n)
++--- io.ballerina.openapi:ballerina-to-openapi:2.3.0 (n)
++--- io.swagger.core.v3:swagger-core:2.2.9 (n)
++--- io.swagger.core.v3:swagger-models:2.2.9 (n)
++--- dev.langchain4j:langchain4j:0.31.0 (n)
+\--- dev.langchain4j:langchain4j-anthropic:0.31.0 (n)
+
+jacocoAgent - The Jacoco agent to use to get coverage data.
+\--- org.jacoco:org.jacoco.agent:0.8.12
+
+jacocoAnt - The Jacoco ant tasks to use to get execute Gradle tasks.
+\--- org.jacoco:org.jacoco.ant:0.8.12
+     +--- org.jacoco:org.jacoco.core:0.8.12
+     |    +--- org.ow2.asm:asm:9.7
+     |    +--- org.ow2.asm:asm-commons:9.7
+     |    |    +--- org.ow2.asm:asm:9.7
+     |    |    \--- org.ow2.asm:asm-tree:9.7
+     |    |         \--- org.ow2.asm:asm:9.7
+     |    \--- org.ow2.asm:asm-tree:9.7 (*)
+     +--- org.jacoco:org.jacoco.report:0.8.12
+     |    \--- org.jacoco:org.jacoco.core:0.8.12 (*)
+     \--- org.jacoco:org.jacoco.agent:0.8.12
+
+jbalTools
+\--- org.ballerinalang:jballerina-tools:2201.13.0-m3
+
+mainSourceElements - List of source directories contained in the Main SourceSet. (n)
+No dependencies
+
+runtimeClasspath - Runtime classpath of source set 'main'.
++--- org.ballerinalang:ballerina-lang:2201.13.0-m3
+|    +--- org.slf4j:slf4j-api:2.0.7
+|    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:ballerina-parser:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:ballerina-runtime:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0
+|    |    |    +--- com.fasterxml.woodstox:woodstox-core:6.2.8 -> 6.5.0
+|    |    |    |    \--- org.codehaus.woodstox:stax2-api:4.2.1
+|    |    |    \--- commons-logging:commons-logging:1.2
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0
+|    |    |    +--- commons-logging:commons-logging:1.2
+|    |    |    +--- org.apache.james:apache-mime4j-core:0.8.6
+|    |    |    \--- jakarta.activation:jakarta.activation-api:1.2.2
+|    |    +--- org.apache.commons:commons-text:1.10.0
+|    |    |    \--- org.apache.commons:commons-lang3:3.12.0 -> 3.14.0
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0
+|    |    |    \--- io.opentelemetry:opentelemetry-context:1.32.0
+|    |    +--- com.atomikos:transactions-jta:5.0.8
+|    |    |    +--- com.atomikos:transactions-api:5.0.8
+|    |    |    +--- com.atomikos:transactions:5.0.8
+|    |    |    |    +--- com.atomikos:transactions-api:5.0.8
+|    |    |    |    \--- com.atomikos:atomikos-util:5.0.8
+|    |    |    |         \--- com.atomikos:transactions-api:5.0.8
+|    |    |    \--- com.atomikos:atomikos-util:5.0.8 (*)
+|    |    +--- javax.transaction:javax.transaction-api:1.3
+|    |    +--- org.ballerinalang:toml-parser:2201.13.0-m3
+|    |    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    |    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
+|    |    |    +--- org.ballerinalang:identifier-util:2201.13.0-m3
+|    |    |    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    |    |    +--- org.apache.commons:commons-text:1.10.0 (*)
+|    |    |    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    |    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    |    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    |    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    |    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    |    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    |    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    |    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    |    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    |    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    |    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    |    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    |    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    |    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    |    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    |    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    |    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    |    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    |    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    |    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    |    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    |    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    |    |    +--- org.jline:jline:3.25.0 (c)
+|    |    |    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    |    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    |    |    \--- commons-codec:commons-codec:1.14 (c)
+|    |    |    +--- com.google.code.gson:gson:2.10.1
+|    |    |    +--- org.apache.commons:commons-text:1.10.0 (*)
+|    |    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    |    +--- org.jline:jline:3.25.0 (c)
+|    |    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    |    \--- commons-codec:commons-codec:1.14 (c)
+|    |    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
+|    |    +--- org.ballerinalang:identifier-util:2201.13.0-m3 (*)
+|    |    +--- com.github.ben-manes.caffeine:caffeine:3.2.0
+|    |    |    +--- org.jspecify:jspecify:1.0.0
+|    |    |    \--- com.google.errorprone:error_prone_annotations:2.36.0
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:toml-parser:2201.13.0-m3 (*)
+|    +--- org.ballerinalang:semtypes:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:central-client:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- org.ballerinalang:ballerina-runtime:2201.13.0-m3 (*)
+|    |    +--- me.tongfei:progressbar:0.7.4
+|    |    |    +--- org.jline:jline:3.11.0 -> 3.25.0
+|    |    |    \--- org.fusesource.jansi:jansi:1.18
+|    |    +--- com.google.code.gson:gson:2.10.1
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0
+|    |    |    +--- com.squareup.okio:okio:3.6.0
+|    |    |    |    \--- com.squareup.okio:okio-jvm:3.6.0
+|    |    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10
+|    |    |    |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10
+|    |    |    |         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10
+|    |    |    |         |    |    \--- org.jetbrains:annotations:13.0
+|    |    |    |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10
+|    |    |    |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10 (*)
+|    |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (*)
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:maven-resolver:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- org.apache.maven:maven-resolver-provider:3.6.3
+|    |    |    +--- org.apache.maven:maven-model:3.6.3
+|    |    |    |    \--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    +--- org.apache.maven:maven-model-builder:3.6.3
+|    |    |    |    +--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    |    +--- org.codehaus.plexus:plexus-interpolation:1.25
+|    |    |    |    +--- javax.inject:javax.inject:1
+|    |    |    |    +--- org.apache.maven:maven-model:3.6.3 (*)
+|    |    |    |    +--- org.apache.maven:maven-artifact:3.6.3
+|    |    |    |    |    +--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    |    |    \--- org.apache.commons:commons-lang3:3.8.1 -> 3.14.0
+|    |    |    |    +--- org.apache.maven:maven-builder-support:3.6.3
+|    |    |    |    \--- org.eclipse.sisu:org.eclipse.sisu.inject:0.3.4
+|    |    |    +--- org.apache.maven:maven-repository-metadata:3.6.3
+|    |    |    |    \--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.4.1 -> 1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.4.1 -> 1.7.0
+|    |    |    |    \--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-util:1.4.1 -> 1.7.0
+|    |    |    |    \--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-impl:1.4.1 -> 1.7.0
+|    |    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    |    |    +--- org.apache.maven.resolver:maven-resolver-named-locks:1.7.0
+|    |    |    |    +--- org.apache.maven.resolver:maven-resolver-util:1.7.0 (*)
+|    |    |    |    +--- org.apache.commons:commons-lang3:3.8.1 -> 3.14.0
+|    |    |    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    |    |    +--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    \--- javax.inject:javax.inject:1
+|    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-util:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-impl:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-connector-basic:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    |    \--- org.apache.maven.resolver:maven-resolver-util:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-transport-file:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    \--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-transport-http:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-util:1.7.0 (*)
+|    |    |    +--- org.apache.httpcomponents:httpclient:4.5.13
+|    |    |    |    +--- org.apache.httpcomponents:httpcore:4.4.13 -> 4.4.14
+|    |    |    |    \--- commons-codec:commons-codec:1.11 -> 1.14
+|    |    |    \--- org.apache.httpcomponents:httpcore:4.4.14
+|    |    +--- me.tongfei:progressbar:0.7.4 (*)
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:identifier-util:2201.13.0-m3 (*)
+|    +--- com.moandjiezana.toml:toml4j:0.7.2
+|    |    \--- com.google.code.gson:gson:2.8.1 -> 2.10.1
+|    +--- org.apache.commons:commons-compress:1.26.2
+|    |    \--- commons-io:commons-io:2.16.1
+|    +--- io.netty:netty-buffer:4.1.118.Final
+|    |    \--- io.netty:netty-common:4.1.118.Final
+|    +--- org.ow2.asm:asm:9.7
+|    +--- commons-io:commons-io:2.15.1 -> 2.16.1
+|    +--- com.github.zafarkhaja:java-semver:0.9.0
+|    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    +--- com.google.code.gson:gson:2.10.1 (c)
+|    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    +--- org.ow2.asm:asm:9.7 (c)
+|    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    +--- me.tongfei:progressbar:0.7.4 (c)
+|    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    +--- org.jline:jline:3.25.0 (c)
+|    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    \--- commons-codec:commons-codec:1.14 (c)
++--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
++--- org.ballerinalang:ballerina-parser:2201.13.0-m3 (*)
++--- org.ballerinalang:formatter-core:2201.13.0-m3
+|    +--- org.slf4j:slf4j-api:2.0.7
+|    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
+|    +--- org.ballerinalang:ballerina-parser:2201.13.0-m3 (*)
+|    +--- org.ballerinalang:ballerina-lang:2201.13.0-m3 (*)
+|    +--- org.apache.commons:commons-lang3:3.14.0
+|    +--- org.ballerinalang:toml-parser:2201.13.0-m3 (*)
+|    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    +--- com.google.code.gson:gson:2.10.1 (c)
+|    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    +--- org.ow2.asm:asm:9.7 (c)
+|    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    +--- me.tongfei:progressbar:0.7.4 (c)
+|    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    +--- org.jline:jline:3.25.0 (c)
+|    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    \--- commons-codec:commons-codec:1.14 (c)
++--- com.google.code.gson:gson:2.10.1
++--- io.ballerina.openapi:ballerina-to-openapi:2.3.0
++--- io.swagger.core.v3:swagger-core:2.2.9
+|    +--- jakarta.xml.bind:jakarta.xml.bind-api:2.3.2
+|    |    \--- jakarta.activation:jakarta.activation-api:1.2.1 -> 1.2.2
+|    +--- org.apache.commons:commons-lang3:3.12.0 -> 3.14.0
+|    +--- org.slf4j:slf4j-api:1.7.36 -> 2.0.7
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.14.2 -> 2.16.2
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2
+|    |         +--- com.fasterxml.jackson.core:jackson-annotations:2.16.2 (c)
+|    |         +--- com.fasterxml.jackson.core:jackson-databind:2.16.2 (c)
+|    |         +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.2 (c)
+|    |         +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.2 (c)
+|    |         \--- com.fasterxml.jackson.core:jackson-core:2.16.2 (c)
+|    +--- com.fasterxml.jackson.core:jackson-databind:2.14.2 -> 2.16.2
+|    |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.2 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.2
+|    |    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2 (*)
+|    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2 -> 2.16.2
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.16.2 (*)
+|    |    +--- org.yaml:snakeyaml:2.2
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.2 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2 (*)
+|    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2 -> 2.16.2
+|    |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.2 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.2 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.16.2 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2 (*)
+|    +--- io.swagger.core.v3:swagger-annotations:2.2.9
+|    +--- org.yaml:snakeyaml:2.0 -> 2.2
+|    +--- io.swagger.core.v3:swagger-models:2.2.9 -> 2.2.22
+|    |    \--- com.fasterxml.jackson.core:jackson-annotations:2.16.2 (*)
+|    \--- jakarta.validation:jakarta.validation-api:2.0.2
++--- io.swagger.core.v3:swagger-models:2.2.9 -> 2.2.22 (*)
++--- dev.langchain4j:langchain4j:0.31.0
+|    +--- dev.langchain4j:langchain4j-core:0.31.0
+|    |    +--- com.google.code.gson:gson:2.10.1
+|    |    \--- org.slf4j:slf4j-api:2.0.7
+|    +--- org.apache.opennlp:opennlp-tools:1.9.4
+|    +--- org.jsoup:jsoup:1.16.1
+|    \--- org.slf4j:slf4j-api:2.0.7
+\--- dev.langchain4j:langchain4j-anthropic:0.31.0
+     +--- dev.langchain4j:langchain4j-core:0.31.0 (*)
+     +--- com.squareup.retrofit2:retrofit:2.9.0
+     |    \--- com.squareup.okhttp3:okhttp:3.14.9 -> 4.12.0 (*)
+     +--- com.squareup.retrofit2:converter-jackson:2.9.0
+     |    +--- com.squareup.retrofit2:retrofit:2.9.0 (*)
+     |    \--- com.fasterxml.jackson.core:jackson-databind:2.10.1 -> 2.16.2 (*)
+     +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 -> 2.16.2 (*)
+     +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
+     +--- com.squareup.okhttp3:okhttp-sse:4.12.0
+     |    +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+     \--- org.slf4j:slf4j-api:2.0.7
+
+runtimeElements - Runtime elements for the 'main' feature. (n)
+No dependencies
+
+runtimeOnly - Runtime-only dependencies for the 'main' feature. (n)
+No dependencies
+
+spotbugs - configuration for the SpotBugs engine
+\--- com.github.spotbugs:spotbugs:4.8.6
+     +--- jaxen:jaxen:2.0.0
+     +--- net.sf.saxon:Saxon-HE:12.4
+     |    \--- org.xmlresolver:xmlresolver:5.2.2
+     |         +--- org.apache.httpcomponents.client5:httpclient5:5.1.3
+     |         |    +--- org.apache.httpcomponents.core5:httpcore5:5.1.3
+     |         |    +--- org.apache.httpcomponents.core5:httpcore5-h2:5.1.3
+     |         |    |    \--- org.apache.httpcomponents.core5:httpcore5:5.1.3
+     |         |    +--- org.slf4j:slf4j-api:1.7.25 -> 2.0.13
+     |         |    \--- commons-codec:commons-codec:1.15
+     |         \--- org.apache.httpcomponents.core5:httpcore5:5.1.3
+     +--- org.apache.logging.log4j:log4j-core:2.23.1
+     |    \--- org.apache.logging.log4j:log4j-api:2.23.1
+     +--- org.ow2.asm:asm:9.7
+     +--- org.ow2.asm:asm-analysis:9.7
+     |    \--- org.ow2.asm:asm-tree:9.7
+     |         \--- org.ow2.asm:asm:9.7
+     +--- org.ow2.asm:asm-commons:9.7
+     |    +--- org.ow2.asm:asm:9.7
+     |    \--- org.ow2.asm:asm-tree:9.7 (*)
+     +--- org.ow2.asm:asm-tree:9.7 (*)
+     +--- org.ow2.asm:asm-util:9.7
+     |    +--- org.ow2.asm:asm:9.7
+     |    +--- org.ow2.asm:asm-tree:9.7 (*)
+     |    \--- org.ow2.asm:asm-analysis:9.7 (*)
+     +--- org.apache.bcel:bcel:6.9.0
+     |    \--- org.apache.commons:commons-lang3:3.14.0
+     +--- com.github.stephenc.jcip:jcip-annotations:1.0-1
+     +--- org.dom4j:dom4j:2.1.4
+     +--- org.apache.commons:commons-lang3:3.14.0
+     +--- org.apache.commons:commons-text:1.10.0
+     |    \--- org.apache.commons:commons-lang3:3.12.0 -> 3.14.0
+     +--- org.slf4j:slf4j-api:2.0.13
+     +--- com.github.spotbugs:spotbugs-annotations:4.8.6
+     |    +--- com.google.code.findbugs:jsr305:3.0.2
+     |    \--- org.apache.logging.log4j:log4j-core:{strictly [2.17.1, 3[} -> 2.23.1 (c)
+     +--- com.google.code.gson:gson:2.11.0
+     |    \--- com.google.errorprone:error_prone_annotations:2.27.0
+     \--- org.apache.logging.log4j:log4j-core:{strictly [2.17.1, 3[} -> 2.23.1 (c)
+
+spotbugsPlugins - configuration for the external SpotBugs plugins
+No dependencies
+
+spotbugsSlf4j - configuration for the SLF4J provider to run SpotBugs
+\--- org.slf4j:slf4j-simple:2.0.0
+     \--- org.slf4j:slf4j-api:2.0.0
+
+testAnnotationProcessor - Annotation processors and their dependencies for source set 'test'.
+No dependencies
+
+testCompileClasspath - Compile classpath for source set 'test'.
++--- org.ballerinalang:ballerina-lang:2201.13.0-m3
++--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3
++--- org.ballerinalang:ballerina-parser:2201.13.0-m3
++--- org.ballerinalang:formatter-core:2201.13.0-m3
++--- com.google.code.gson:gson:2.10.1
++--- io.ballerina.openapi:ballerina-to-openapi:2.3.0
++--- io.swagger.core.v3:swagger-core:2.2.9
+|    +--- jakarta.xml.bind:jakarta.xml.bind-api:2.3.2
+|    |    \--- jakarta.activation:jakarta.activation-api:1.2.1
+|    +--- org.apache.commons:commons-lang3:3.12.0
+|    +--- org.slf4j:slf4j-api:1.7.36 -> 2.0.7
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.14.2 -> 2.16.1
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1
+|    |         +--- com.fasterxml.jackson.core:jackson-annotations:2.16.1 (c)
+|    |         +--- com.fasterxml.jackson.core:jackson-core:2.16.1 (c)
+|    |         +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 (c)
+|    |         +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.1 (c)
+|    |         \--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1 (c)
+|    +--- com.fasterxml.jackson.core:jackson-databind:2.14.2 -> 2.16.1
+|    |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.1 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.1
+|    |    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1 (*)
+|    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2 -> 2.16.1
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 (*)
+|    |    +--- org.yaml:snakeyaml:2.2
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.1 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1 (*)
+|    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2 -> 2.16.1
+|    |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.1 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.1 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1 (*)
+|    +--- io.swagger.core.v3:swagger-annotations:2.2.9
+|    +--- org.yaml:snakeyaml:2.0 -> 2.2
+|    +--- io.swagger.core.v3:swagger-models:2.2.9
+|    |    \--- com.fasterxml.jackson.core:jackson-annotations:2.14.2 -> 2.16.1 (*)
+|    \--- jakarta.validation:jakarta.validation-api:2.0.2
++--- io.swagger.core.v3:swagger-models:2.2.9 (*)
++--- dev.langchain4j:langchain4j:0.31.0
+|    +--- dev.langchain4j:langchain4j-core:0.31.0
+|    |    +--- com.google.code.gson:gson:2.10.1
+|    |    \--- org.slf4j:slf4j-api:2.0.7
+|    +--- org.apache.opennlp:opennlp-tools:1.9.4
+|    +--- org.jsoup:jsoup:1.16.1
+|    \--- org.slf4j:slf4j-api:2.0.7
+\--- dev.langchain4j:langchain4j-anthropic:0.31.0
+     +--- dev.langchain4j:langchain4j-core:0.31.0 (*)
+     +--- com.squareup.retrofit2:retrofit:2.9.0
+     |    \--- com.squareup.okhttp3:okhttp:3.14.9 -> 4.12.0
+     |         +--- com.squareup.okio:okio:3.6.0
+     |         |    \--- com.squareup.okio:okio-jvm:3.6.0
+     |         |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10
+     |         |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10
+     |         |         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10
+     |         |         |    |    \--- org.jetbrains:annotations:13.0
+     |         |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10
+     |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10 (*)
+     |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+     +--- com.squareup.retrofit2:converter-jackson:2.9.0
+     |    +--- com.squareup.retrofit2:retrofit:2.9.0 (*)
+     |    \--- com.fasterxml.jackson.core:jackson-databind:2.10.1 -> 2.16.1 (*)
+     +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 (*)
+     +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
+     +--- com.squareup.okhttp3:okhttp-sse:4.12.0
+     |    +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+     \--- org.slf4j:slf4j-api:2.0.7
+
+testCompileOnly - Compile only dependencies for source set 'test'. (n)
+No dependencies
+
+testImplementation - Implementation only dependencies for source set 'test'. (n)
+No dependencies
+
+testRuntimeClasspath - Runtime classpath of source set 'test'.
++--- org.ballerinalang:ballerina-lang:2201.13.0-m3
+|    +--- org.slf4j:slf4j-api:2.0.7
+|    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:ballerina-parser:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:ballerina-runtime:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0
+|    |    |    +--- com.fasterxml.woodstox:woodstox-core:6.2.8 -> 6.5.0
+|    |    |    |    \--- org.codehaus.woodstox:stax2-api:4.2.1
+|    |    |    \--- commons-logging:commons-logging:1.2
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0
+|    |    |    +--- commons-logging:commons-logging:1.2
+|    |    |    +--- org.apache.james:apache-mime4j-core:0.8.6
+|    |    |    \--- jakarta.activation:jakarta.activation-api:1.2.2
+|    |    +--- org.apache.commons:commons-text:1.10.0
+|    |    |    \--- org.apache.commons:commons-lang3:3.12.0 -> 3.14.0
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0
+|    |    |    \--- io.opentelemetry:opentelemetry-context:1.32.0
+|    |    +--- com.atomikos:transactions-jta:5.0.8
+|    |    |    +--- com.atomikos:transactions-api:5.0.8
+|    |    |    +--- com.atomikos:transactions:5.0.8
+|    |    |    |    +--- com.atomikos:transactions-api:5.0.8
+|    |    |    |    \--- com.atomikos:atomikos-util:5.0.8
+|    |    |    |         \--- com.atomikos:transactions-api:5.0.8
+|    |    |    \--- com.atomikos:atomikos-util:5.0.8 (*)
+|    |    +--- javax.transaction:javax.transaction-api:1.3
+|    |    +--- org.ballerinalang:toml-parser:2201.13.0-m3
+|    |    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    |    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
+|    |    |    +--- org.ballerinalang:identifier-util:2201.13.0-m3
+|    |    |    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    |    |    +--- org.apache.commons:commons-text:1.10.0 (*)
+|    |    |    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    |    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    |    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    |    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    |    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    |    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    |    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    |    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    |    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    |    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    |    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    |    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    |    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    |    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    |    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    |    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    |    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    |    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    |    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    |    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    |    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    |    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    |    |    +--- org.jline:jline:3.25.0 (c)
+|    |    |    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    |    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    |    |    \--- commons-codec:commons-codec:1.14 (c)
+|    |    |    +--- com.google.code.gson:gson:2.10.1
+|    |    |    +--- org.apache.commons:commons-text:1.10.0 (*)
+|    |    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    |    +--- org.jline:jline:3.25.0 (c)
+|    |    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    |    \--- commons-codec:commons-codec:1.14 (c)
+|    |    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
+|    |    +--- org.ballerinalang:identifier-util:2201.13.0-m3 (*)
+|    |    +--- com.github.ben-manes.caffeine:caffeine:3.2.0
+|    |    |    +--- org.jspecify:jspecify:1.0.0
+|    |    |    \--- com.google.errorprone:error_prone_annotations:2.36.0
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:toml-parser:2201.13.0-m3 (*)
+|    +--- org.ballerinalang:semtypes:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:central-client:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- org.ballerinalang:ballerina-runtime:2201.13.0-m3 (*)
+|    |    +--- me.tongfei:progressbar:0.7.4
+|    |    |    +--- org.jline:jline:3.11.0 -> 3.25.0
+|    |    |    \--- org.fusesource.jansi:jansi:1.18
+|    |    +--- com.google.code.gson:gson:2.10.1
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0
+|    |    |    +--- com.squareup.okio:okio:3.6.0
+|    |    |    |    \--- com.squareup.okio:okio-jvm:3.6.0
+|    |    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10
+|    |    |    |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10
+|    |    |    |         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10
+|    |    |    |         |    |    \--- org.jetbrains:annotations:13.0
+|    |    |    |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10
+|    |    |    |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.10 (*)
+|    |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10
+|    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (*)
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:maven-resolver:2201.13.0-m3
+|    |    +--- org.slf4j:slf4j-api:2.0.7
+|    |    +--- org.apache.maven:maven-resolver-provider:3.6.3
+|    |    |    +--- org.apache.maven:maven-model:3.6.3
+|    |    |    |    \--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    +--- org.apache.maven:maven-model-builder:3.6.3
+|    |    |    |    +--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    |    +--- org.codehaus.plexus:plexus-interpolation:1.25
+|    |    |    |    +--- javax.inject:javax.inject:1
+|    |    |    |    +--- org.apache.maven:maven-model:3.6.3 (*)
+|    |    |    |    +--- org.apache.maven:maven-artifact:3.6.3
+|    |    |    |    |    +--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    |    |    \--- org.apache.commons:commons-lang3:3.8.1 -> 3.14.0
+|    |    |    |    +--- org.apache.maven:maven-builder-support:3.6.3
+|    |    |    |    \--- org.eclipse.sisu:org.eclipse.sisu.inject:0.3.4
+|    |    |    +--- org.apache.maven:maven-repository-metadata:3.6.3
+|    |    |    |    \--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.4.1 -> 1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.4.1 -> 1.7.0
+|    |    |    |    \--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-util:1.4.1 -> 1.7.0
+|    |    |    |    \--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-impl:1.4.1 -> 1.7.0
+|    |    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    |    |    +--- org.apache.maven.resolver:maven-resolver-named-locks:1.7.0
+|    |    |    |    +--- org.apache.maven.resolver:maven-resolver-util:1.7.0 (*)
+|    |    |    |    +--- org.apache.commons:commons-lang3:3.8.1 -> 3.14.0
+|    |    |    |    \--- javax.annotation:javax.annotation-api:1.3.2
+|    |    |    +--- org.codehaus.plexus:plexus-utils:3.2.1
+|    |    |    \--- javax.inject:javax.inject:1
+|    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-util:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-impl:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-connector-basic:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    |    \--- org.apache.maven.resolver:maven-resolver-util:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-transport-file:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    \--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    +--- org.apache.maven.resolver:maven-resolver-transport-http:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-api:1.7.0
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-spi:1.7.0 (*)
+|    |    |    +--- org.apache.maven.resolver:maven-resolver-util:1.7.0 (*)
+|    |    |    +--- org.apache.httpcomponents:httpclient:4.5.13
+|    |    |    |    +--- org.apache.httpcomponents:httpcore:4.4.13 -> 4.4.14
+|    |    |    |    \--- commons-codec:commons-codec:1.11 -> 1.14
+|    |    |    \--- org.apache.httpcomponents:httpcore:4.4.14
+|    |    +--- me.tongfei:progressbar:0.7.4 (*)
+|    |    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    |    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    |    +--- com.google.code.gson:gson:2.10.1 (c)
+|    |    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    |    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    |    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    |    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    |    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    |    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    |    +--- org.ow2.asm:asm:9.7 (c)
+|    |    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    |    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    |    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    |    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    |    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    |    +--- me.tongfei:progressbar:0.7.4 (c)
+|    |    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    |    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    |    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    |    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    |    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    |    +--- org.jline:jline:3.25.0 (c)
+|    |    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    |    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    |    \--- commons-codec:commons-codec:1.14 (c)
+|    +--- org.ballerinalang:identifier-util:2201.13.0-m3 (*)
+|    +--- com.moandjiezana.toml:toml4j:0.7.2
+|    |    \--- com.google.code.gson:gson:2.8.1 -> 2.10.1
+|    +--- org.apache.commons:commons-compress:1.26.2
+|    |    \--- commons-io:commons-io:2.16.1
+|    +--- io.netty:netty-buffer:4.1.118.Final
+|    |    \--- io.netty:netty-common:4.1.118.Final
+|    +--- org.ow2.asm:asm:9.7
+|    +--- commons-io:commons-io:2.15.1 -> 2.16.1
+|    +--- com.github.zafarkhaja:java-semver:0.9.0
+|    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    +--- com.google.code.gson:gson:2.10.1 (c)
+|    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    +--- org.ow2.asm:asm:9.7 (c)
+|    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    +--- me.tongfei:progressbar:0.7.4 (c)
+|    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    +--- org.jline:jline:3.25.0 (c)
+|    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    \--- commons-codec:commons-codec:1.14 (c)
++--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
++--- org.ballerinalang:ballerina-parser:2201.13.0-m3 (*)
++--- org.ballerinalang:formatter-core:2201.13.0-m3
+|    +--- org.slf4j:slf4j-api:2.0.7
+|    +--- org.ballerinalang:ballerina-tools-api:2201.13.0-m3 (*)
+|    +--- org.ballerinalang:ballerina-parser:2201.13.0-m3 (*)
+|    +--- org.ballerinalang:ballerina-lang:2201.13.0-m3 (*)
+|    +--- org.apache.commons:commons-lang3:3.14.0
+|    +--- org.ballerinalang:toml-parser:2201.13.0-m3 (*)
+|    +--- commons-io:commons-io:2.15.1 -> 2.16.1 (c)
+|    +--- com.google.code.gson:gson:2.10.1 (c)
+|    +--- com.moandjiezana.toml:toml4j:0.7.2 (c)
+|    +--- org.apache.commons:commons-lang3:3.14.0 (c)
+|    +--- org.ow2.asm:asm:9.7 (c)
+|    +--- io.netty:netty-buffer:4.1.118.Final (c)
+|    +--- io.swagger.core.v3:swagger-models:2.2.22 (c)
+|    +--- com.github.zafarkhaja:java-semver:0.9.0 (c)
+|    +--- com.fasterxml.jackson.core:jackson-databind:2.15.3 -> 2.16.2 (c)
+|    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3 -> 2.16.2 (c)
+|    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 -> 2.16.2 (c)
+|    +--- org.yaml:snakeyaml:2.0 -> 2.2 (c)
+|    +--- com.squareup.okhttp3:okhttp:3.14.0 -> 4.12.0 (c)
+|    +--- org.apache.ws.commons.axiom:axiom-impl:1.4.0 (c)
+|    +--- org.apache.ws.commons.axiom:axiom-api:1.4.0 (c)
+|    +--- org.apache.commons:commons-text:1.10.0 (c)
+|    +--- io.opentelemetry:opentelemetry-api:1.32.0 (c)
+|    +--- javax.transaction:javax.transaction-api:1.3 (c)
+|    +--- me.tongfei:progressbar:0.7.4 (c)
+|    +--- com.google.code.findbugs:jsr305:3.0.2 (c)
+|    +--- com.squareup.okio:okio:3.4.0 -> 3.6.0 (c)
+|    +--- jakarta.activation:jakarta.activation-api:1.2.2 (c)
+|    +--- com.fasterxml.woodstox:woodstox-core:6.5.0 (c)
+|    +--- commons-logging:commons-logging:1.1.1 -> 1.2 (c)
+|    +--- org.jline:jline:3.25.0 (c)
+|    +--- org.codehaus.plexus:plexus-utils:3.0.8 -> 3.2.1 (c)
+|    +--- org.codehaus.woodstox:stax2-api:4.2.1 (c)
+|    \--- commons-codec:commons-codec:1.14 (c)
++--- com.google.code.gson:gson:2.10.1
++--- io.ballerina.openapi:ballerina-to-openapi:2.3.0
++--- io.swagger.core.v3:swagger-core:2.2.9
+|    +--- jakarta.xml.bind:jakarta.xml.bind-api:2.3.2
+|    |    \--- jakarta.activation:jakarta.activation-api:1.2.1 -> 1.2.2
+|    +--- org.apache.commons:commons-lang3:3.12.0 -> 3.14.0
+|    +--- org.slf4j:slf4j-api:1.7.36 -> 2.0.7
+|    +--- com.fasterxml.jackson.core:jackson-annotations:2.14.2 -> 2.16.2
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2
+|    |         +--- com.fasterxml.jackson.core:jackson-annotations:2.16.2 (c)
+|    |         +--- com.fasterxml.jackson.core:jackson-databind:2.16.2 (c)
+|    |         +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.2 (c)
+|    |         +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.2 (c)
+|    |         \--- com.fasterxml.jackson.core:jackson-core:2.16.2 (c)
+|    +--- com.fasterxml.jackson.core:jackson-databind:2.14.2 -> 2.16.2
+|    |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.2 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.2
+|    |    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2 (*)
+|    +--- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2 -> 2.16.2
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.16.2 (*)
+|    |    +--- org.yaml:snakeyaml:2.2
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.2 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2 (*)
+|    +--- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2 -> 2.16.2
+|    |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.2 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-core:2.16.2 (*)
+|    |    +--- com.fasterxml.jackson.core:jackson-databind:2.16.2 (*)
+|    |    \--- com.fasterxml.jackson:jackson-bom:2.16.2 (*)
+|    +--- io.swagger.core.v3:swagger-annotations:2.2.9
+|    +--- org.yaml:snakeyaml:2.0 -> 2.2
+|    +--- io.swagger.core.v3:swagger-models:2.2.9 -> 2.2.22
+|    |    \--- com.fasterxml.jackson.core:jackson-annotations:2.16.2 (*)
+|    \--- jakarta.validation:jakarta.validation-api:2.0.2
++--- io.swagger.core.v3:swagger-models:2.2.9 -> 2.2.22 (*)
++--- dev.langchain4j:langchain4j:0.31.0
+|    +--- dev.langchain4j:langchain4j-core:0.31.0
+|    |    +--- com.google.code.gson:gson:2.10.1
+|    |    \--- org.slf4j:slf4j-api:2.0.7
+|    +--- org.apache.opennlp:opennlp-tools:1.9.4
+|    +--- org.jsoup:jsoup:1.16.1
+|    \--- org.slf4j:slf4j-api:2.0.7
+\--- dev.langchain4j:langchain4j-anthropic:0.31.0
+     +--- dev.langchain4j:langchain4j-core:0.31.0 (*)
+     +--- com.squareup.retrofit2:retrofit:2.9.0
+     |    \--- com.squareup.okhttp3:okhttp:3.14.9 -> 4.12.0 (*)
+     +--- com.squareup.retrofit2:converter-jackson:2.9.0
+     |    +--- com.squareup.retrofit2:retrofit:2.9.0 (*)
+     |    \--- com.fasterxml.jackson.core:jackson-databind:2.10.1 -> 2.16.2 (*)
+     +--- com.fasterxml.jackson.core:jackson-databind:2.16.1 -> 2.16.2 (*)
+     +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
+     +--- com.squareup.okhttp3:okhttp-sse:4.12.0
+     |    +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
+     \--- org.slf4j:slf4j-api:2.0.7
+
+testRuntimeOnly - Runtime only dependencies for source set 'test'. (n)
+No dependencies
+
+(c) - A dependency constraint, not a dependency. The dependency affected by the constraint occurs elsewhere in the tree.
+(*) - Indicates repeated occurrences of a transitive dependency subtree. Gradle expands transitive dependency subtrees only once per project; repeat occurrences only display the root of the subtree, followed by this annotation.
+
+(n) - A dependency or dependency configuration that cannot be resolved.
+
+A web-based, searchable dependency report is available by adding the --scan option.
+[Incubating] Problems report is available at: file:///Users/admin/Desktop/Workspace/Literate_Programming/impl/fork-repos/module-ballerina-np/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1s
+1 actionable task: 1 executed
