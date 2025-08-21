@@ -109,6 +109,10 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
         boolean isSingleBalFileMode = currentPackage.project().kind() == ProjectKind.SINGLE_FILE_PROJECT;
         Path sourceRoot = currentPackage.project().sourceRoot();
 
+        if (modifierContext.compilation().diagnosticResult().errorCount() > 0) {
+            return;
+        }
+
         for (ModuleId moduleId : currentPackage.moduleIds()) {
             Module module = currentPackage.module(moduleId);
             SemanticModel semanticModel = currentPackage.getCompilation().getSemanticModel(moduleId);

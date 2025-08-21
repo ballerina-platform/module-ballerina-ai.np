@@ -71,6 +71,23 @@ public class DiagnosticsTest {
         Assert.assertEquals(index, fileDiagnosticsList.size());
     }
 
+    @Test
+    public void testNaturalProgrammingUsageWithoutExperimental() {
+        final Path projectPath = RESOURCE_DIRECTORY.resolve("natural-programming-generic-negative");
+        final Package naturalProgrammingProject = loadPackage(projectPath, false);
+        naturalProgrammingProject.runCodeGenAndModifyPlugins();
+        List<Diagnostic> diagnostics = naturalProgrammingProject.getCompilation()
+                .diagnosticResult().diagnostics().stream().toList();
+        int index = 0;
+        assertDiagnostic(diagnostics, index++, "using the experimental 'code generation' feature, " +
+                "use the '--experimental' option to enable experimental features", 24, 89);
+        assertDiagnostic(diagnostics, index++, "using the experimental 'natural expression' feature," +
+                " use the '--experimental' option to enable experimental features", 29, 30);
+        assertDiagnostic(diagnostics, index++, "using the experimental 'natural expression' feature," +
+                " use the '--experimental' option to enable experimental features", 21, 26);
+        Assert.assertEquals(index, diagnostics.size());
+    }
+
     private static void assertDiagnostic(List<Diagnostic> errorDiagnosticsList, int index, String expectedErrorMessage,
                                          int expectedStartLine, int expectedStartOffset) {
         Diagnostic diagnostic = errorDiagnosticsList.get(index);
@@ -81,13 +98,13 @@ public class DiagnosticsTest {
     }
 
     private static Package loadPackage(String path) {
-        return loadPackage(RESOURCE_DIRECTORY.resolve(path));
+        return loadPackage(RESOURCE_DIRECTORY.resolve(path), true);
     }
 
-    private static Package loadPackage(Path projectDirPath) {
+    private static Package loadPackage(Path projectDirPath, boolean enableExperimental) {
         Environment environment = EnvironmentBuilder.getBuilder().setBallerinaHome(DISTRIBUTION_PATH).build();
         ProjectEnvironmentBuilder projectEnvironmentBuilder = ProjectEnvironmentBuilder.getBuilder(environment);
-        BuildOptions buildOptions = BuildOptions.builder().setExperimental(true).build();
+        BuildOptions buildOptions = BuildOptions.builder().setExperimental(enableExperimental).build();
         BuildProject project = BuildProject.load(projectEnvironmentBuilder, projectDirPath, buildOptions);
         return project.currentPackage();
     }
