@@ -1,0 +1,5 @@
+[package]
+org = "np_test"
+name = "natural_programming_generic_negative"
+version = "0.1.0"
+distribution = "2201.13.0"
