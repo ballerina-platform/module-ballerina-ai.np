@@ -76,12 +76,11 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.lib.ai.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
 import static io.ballerina.lib.ai.np.compilerplugin.CodeGenerationUtils.generateCodeForNaturalExpression;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.BAL_EXT;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.CODE_ANNOTATION;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.CONTENT;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.FILE_PATH;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.isCodeAnnotation;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.isLangNaturalModule;
+import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.CODE_ANNOTATION;
+import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.CONTENT;
+import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.FILE_PATH;
+import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.isCodeAnnotation;
+import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.isLangNaturalModule;
 
 /**
  * Code modification task to replace generate code based on a prompt and replace.
@@ -89,19 +88,13 @@ import static io.ballerina.lib.ai.np.compilerplugin.Commons.isLangNaturalModule;
  * @since 0.4.0
  */
 public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask<SourceModifierContext> {
-
     private static final Token SEMICOLON = createToken(SyntaxKind.SEMICOLON_TOKEN);
     private static final Token RIGHT_DOUBLE_ARROW = createToken(SyntaxKind.RIGHT_DOUBLE_ARROW_TOKEN);
     private static final String PROMPT = "prompt";
     private static final String GENERATED_FUNCTION_SUFFIX = "NPGenerated";
     private static final String GENERATED_DIRECTORY = "generated";
+    private static final String BAL_EXT = ".bal";
     private static final String GENERATED_FUNC_FILE_NAME_SUFFIX = "_np_generated" + BAL_EXT;
-
-    private static final String BAL_CODEGEN_URL = "BAL_CODEGEN_URL";
-    private static final String BAL_CODEGEN_TOKEN = "BAL_CODEGEN_TOKEN";
-
-    private static final String copilotUrl = System.getenv(BAL_CODEGEN_URL);
-    private static final String copilotAccessToken = System.getenv(BAL_CODEGEN_TOKEN);
 
     @Override
     public void modify(SourceModifierContext modifierContext) {
@@ -190,7 +183,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
             String funcName = functionDefinition.functionName().text();
             String generatedFuncName = funcName.concat(GENERATED_FUNCTION_SUFFIX);
             String prompt = getPrompt(functionDefinition, semanticModel);
-            String generatedCode = generateCodeForFunction(copilotUrl, copilotAccessToken, funcName,
+            String generatedCode = generateCodeForFunction(funcName,
                     generatedFuncName, prompt, getHttpClient(),
                     this.getSourceFilesWithoutFileGeneratedForCurrentFunc(funcName), module.descriptor(),
                     document.module().project().currentPackage().packageOrg().value());
@@ -209,7 +202,7 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
                 return naturalExpressionNode;
             }
 
-            return generateCodeForNaturalExpression(naturalExpressionNode, copilotUrl, copilotAccessToken,
+            return generateCodeForNaturalExpression(naturalExpressionNode,
                     getHttpClient(), this.getSourceFiles(), semanticModel, semanticModel
                         .expectedType(document, naturalExpressionNode.lineRange().startLine()).get(), document);
         }

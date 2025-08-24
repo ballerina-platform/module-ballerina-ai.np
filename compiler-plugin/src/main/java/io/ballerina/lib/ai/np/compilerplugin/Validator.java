@@ -38,8 +38,8 @@ import io.ballerina.tools.diagnostics.Location;
 
 import java.util.Optional;
 
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.BALLERINA_ORG_NAME;
-import static io.ballerina.lib.ai.np.compilerplugin.Commons.isCodeAnnotation;
+import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.BALLERINA_ORG_NAME;
+import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.isCodeAnnotation;
 import static io.ballerina.lib.ai.np.compilerplugin.DiagnosticLog.DiagnosticCode
         .CODE_GEN_WITH_CODE_ANNOT_NOT_SUPPORTED_IN_SINGLE_BAL_FILE_MODE;
 import static io.ballerina.lib.ai.np.compilerplugin.DiagnosticLog.DiagnosticCode
