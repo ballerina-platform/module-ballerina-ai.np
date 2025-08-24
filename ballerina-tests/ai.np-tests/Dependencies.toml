@@ -38,7 +38,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "ai.np"
-version = "0.4.1"
+version = "0.4.2"
 modules = [
 	{org = "ballerina", packageName = "ai.np", moduleName = "ai.np"}
 ]
@@ -46,7 +46,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "ai.np_test_commons"
-version = "0.4.1"
+version = "0.4.2"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "data.jsondata"},
@@ -60,7 +60,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "ai.np_tests"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
 	{org = "ballerina", name = "ai"},
 	{org = "ballerina", name = "ai.np"},
@@ -114,7 +114,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "data.jsondata"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.object"}
@@ -143,7 +143,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.14.2"
+version = "2.14.4"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -321,7 +321,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "oauth2"
-version = "2.14.0"
+version = "2.14.1"
 dependencies = [
 	{org = "ballerina", name = "cache"},
 	{org = "ballerina", name = "crypto"},
