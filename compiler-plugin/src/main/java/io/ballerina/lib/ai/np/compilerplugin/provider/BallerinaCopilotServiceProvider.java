@@ -38,7 +38,7 @@ public class BallerinaCopilotServiceProvider implements Provider {
     public String repairCodeForFunctions(HttpClient client, String generatedFuncName, JsonArray updatedSourceFiles,
                                   String generatedPrompt, GeneratedCode generatedCode, JsonArray diagnostics)
             throws IOException, InterruptedException, URISyntaxException {
-        JsonObject payload = constructCodeReparationPayload(
+        JsonObject payload = constructCodeReparationPayloadForFunctions(
                 generatedPrompt, generatedFuncName, generatedCode, updatedSourceFiles, diagnostics);
         return updateResourcesWithCodeSnippet(repairCode(client, payload), generatedCode, updatedSourceFiles);
     }
@@ -63,11 +63,9 @@ public class BallerinaCopilotServiceProvider implements Provider {
                 .getAsJsonPrimitive("repairResponse").getAsString();
     }
 
-    private JsonObject constructCodeReparationPayload(String generatedPrompt, String generatedFuncName,
-                                                             GeneratedCode generatedCode, JsonArray sourceFiles,
-                                                             JsonArray diagnostics) {
+    private JsonObject constructCodeReparationPayloadForFunctions(String generatedPrompt, String generatedFuncName,
+                                          GeneratedCode generatedCode, JsonArray sourceFiles, JsonArray diagnostics) {
         JsonObject payload = new JsonObject();
-
         payload.addProperty(
                 "usecase", String.format("Fix issues in the generated '%s' function. " +
                         "Do not change anything other than the function body", generatedFuncName));

@@ -36,6 +36,11 @@ public class ProviderFactory {
     }
 
     private static Optional<Provider> createModelFromEnvironment() {
+        String anthropicToken = System.getenv(ANTHROPIC_TOKEN_ENV_VAR);
+        if (isNotNullOrEmpty(anthropicToken)) {
+            return Optional.of(new AnthropicModelProvider(anthropicToken));
+        }
+
         String azureToken = System.getenv(AZURE_TOKEN_ENV_VAR);
         String azureDeploymentId = System.getenv(AZURE_DEPLOYMENT_ID_ENV_VAR);
         String azureApiVersion = System.getenv(AZURE_API_VERSION_ENV_VAR);
@@ -64,11 +69,6 @@ public class ProviderFactory {
             throw new IllegalStateException("Azure OpenAI configuration is incomplete. " +
                     "The following required environment variables are missing: "
                     + String.join(", ", missingVars));
-        }
-
-        String anthropicToken = System.getenv(ANTHROPIC_TOKEN_ENV_VAR);
-        if (isNotNullOrEmpty(anthropicToken)) {
-            return Optional.of(new AnthropicModelProvider(anthropicToken));
         }
 
         String openAiToken = System.getenv(OPENAI_TOKEN_ENV_VAR);
