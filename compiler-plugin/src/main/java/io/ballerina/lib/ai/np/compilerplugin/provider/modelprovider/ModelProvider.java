@@ -17,7 +17,7 @@ public interface ModelProvider extends Provider {
         return PromptGenerator.getSystemPromptPrefix();
     }
 
-    default String getCodeGenerationSystemPromptSuffix() throws IOException {
+    default String getCodeGenerationSystemPromptSuffix() {
         return PromptGenerator.getSystemPromptSuffix();
     }
 
@@ -25,8 +25,12 @@ public interface ModelProvider extends Provider {
         return PromptGenerator.getUserPrompt(useCase, sourceFiles);
     }
 
-    default String getRepairPrompt(JsonArray diagnostics) {
-        return PromptGenerator.getRepairPrompt(diagnostics);
+    default String getRepairPromptForFunctions(String generatedFuncName, JsonArray diagnostics) {
+        return PromptGenerator.getRepairPromptForFunctions(generatedFuncName, diagnostics);
+    }
+
+    default String getRepairPromptForNaturalExpressions(JsonArray diagnostics) {
+        return PromptGenerator.getRepairPromptForNaturalExpressions(diagnostics);
     }
 
     default String calLlm(HttpClient httpClient, String url,

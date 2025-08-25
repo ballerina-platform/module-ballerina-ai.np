@@ -38,18 +38,16 @@ public class PromptGenerator {
            """;
     }
 
-    public static String getSystemPromptSuffix() throws IOException {
+    public static String getSystemPromptSuffix() {
         return """
                 Langlibs
                 <langlibs>
                    %s
                 </langlibs>
                                 
-                If the query doesn't require code examples, answer the code by utilzing the api documentation.
                 If the query requires code, Follow these steps to generate the Ballerina code:
                                 
                 1. Carefully analyze the provided sources:
-                   - Identify the available libraries, clients, their functions and their relavant types.
                                 
                 2. Thoroughly read and understand the given query:
                    - Identify the main requirements and objectives of the integration.
@@ -91,12 +89,6 @@ public class PromptGenerator {
                 generated ballerina code.
                                 
                 Important reminders:
-                - Only use the libraries, functions, types, services and clients specified in the provided
-                API documentation.
-                - Always strictly respect the types given in the API Docs.
-                - Do not introduce any additional libraries or functions not mentioned in the API docs.
-                - Only use specified fields in records according to the api docs. this applies to array
-                types of that record as well.
                 - Ensure your code is syntactically correct and follows Ballerina conventions.
                 - Do not use dynamic listener registrations.
                 - Do not write code in a way that requires updating/assigning values of function parameters.
@@ -163,18 +155,6 @@ public class PromptGenerator {
                 """.formatted(
                 useCase,
                 stringifyExistingCode(existingCode)
-        );
-    }
-
-    public static String getRepairPrompt(
-            JsonArray diagnostics
-    ) {
-        return """
-                "Generated code returns following errors.
-                Double-check all functions, types, record field access against the API documentation again.
-                Fix the compiler errors and return the new response.
-                Errors: %s
-                """.formatted(constructDiagnosticMessages(diagnostics)
         );
     }
 
@@ -271,5 +251,21 @@ public class PromptGenerator {
                 }
         );
         return sb.toString();
+    }
+
+    public static String getRepairPromptForFunctions(String generatedFuncName, JsonArray diagnostics) {
+        return """
+                Fix following issues in the generated '%s' function.
+                Do not change anything other than the function body.
+                Errors: %s
+                """.formatted(generatedFuncName, constructDiagnosticMessages(diagnostics));
+    }
+
+    public static String getRepairPromptForNaturalExpressions(JsonArray diagnostics) {
+        return """
+                "The generated expression results in the following errors. " +
+                "Fix the errors and return a new constant expression.
+                Errors: %s"
+                """.formatted(constructDiagnosticMessages(diagnostics));
     }
 }

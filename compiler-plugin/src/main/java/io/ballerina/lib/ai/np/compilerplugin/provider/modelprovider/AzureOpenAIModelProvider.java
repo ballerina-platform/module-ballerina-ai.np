@@ -1,6 +1,8 @@
 package io.ballerina.lib.ai.np.compilerplugin.provider.modelprovider;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.ballerina.lib.ai.np.compilerplugin.CommonUtils.GeneratedCode;
 
 import java.io.IOException;
@@ -14,36 +16,37 @@ public class AzureOpenAIModelProvider implements ModelProvider {
 
     public AzureOpenAIModelProvider(String apiKey, String deploymentId, String serviceUrl, String apiVersion) {
         this.apiKey = apiKey;
-        this.endPointUrl = String.format("%s/openai/deployments/%s/chat/completions?api-version=%s",
+        this.endPointUrl = String.format("%s/deployments/%s/chat/completions?api-version=%s",
                 serviceUrl, deploymentId, apiVersion);
     }
 
     public AzureOpenAIModelProvider(String serviceUrl, String apiKey, String deploymentId) {
         this.apiKey = apiKey;
-        this.endPointUrl = String.format("%s/openai/deployments/%s/chat/completions?api-version=%s",
+        this.endPointUrl = String.format("%s/deployments/%s/chat/completions?api-version=%s",
                 serviceUrl, deploymentId, "2023-05-15");
     }
 
     @Override
     public GeneratedCode generateCode(HttpClient client, String prompt, JsonArray sourceFiles)
             throws IOException, InterruptedException {
-        String jsonPayload = "{\"messages\": [{\"role\": \"user\", \"content\": \""
-                + prompt + "\"}]}";
-
         Map<String, String> headers = Map.of(
                 "Content-Type", "application/json",
                 "api-key", this.apiKey
         );
 
-        String code = calLlm(client, endPointUrl, jsonPayload, headers);
-        return new GeneratedCode(code, null);
+        String responseBody = calLlm(client, endPointUrl, constructCodeGenerationPayload(
+                prompt, sourceFiles).toString(), headers);
+        String generatedText = getResponseTextFromBody(responseBody);
+        return new GeneratedCode(generatedText, null);
     }
 
     @Override
     public String repairCodeForFunctions(HttpClient client, String generatedFuncName, JsonArray updatedSourceFiles,
                                          String generatedPrompt, GeneratedCode generatedCode, JsonArray diagnostics)
             throws IOException, InterruptedException, URISyntaxException {
-        return null;
+        JsonObject payload = constructCodeReparationPayloadForFunctions(
+                generatedPrompt, generatedFuncName, generatedCode, updatedSourceFiles, diagnostics);
+        return updateResourcesWithCodeSnippet(repairCode(client, payload), generatedCode, updatedSourceFiles);
     }
 
     @Override
@@ -51,6 +54,109 @@ public class AzureOpenAIModelProvider implements ModelProvider {
                                                   String generatedPrompt, GeneratedCode generatedCode,
                                                   JsonArray diagnostics)
             throws IOException, InterruptedException, URISyntaxException {
-        return null;
+        JsonObject payload = constructCodeReparationPayloadForNaturalExpressions(
+                generatedPrompt, generatedCode, updatedSourceFiles, diagnostics);
+        return updateResourcesWithCodeSnippet(repairCode(client, payload), generatedCode, updatedSourceFiles);
+    }
+
+    private String repairCode(HttpClient client, JsonObject payload)
+            throws IOException, InterruptedException {
+        Map<String, String> headers = Map.of(
+                "Content-Type", "application/json",
+                "api-key", this.apiKey
+        );
+
+        String responseBody = calLlm(client, endPointUrl, payload.toString(), headers);
+        return getResponseTextFromBody(responseBody);
+    }
+
+    private JsonObject constructCodeGenerationPayload(String useCase, JsonArray sourceFiles) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("max_tokens", 4096 * 4);
+        payload.addProperty("temperature", 0);
+
+        JsonArray messagesArray = new JsonArray();
+        messagesArray.add(getSystemMessage());
+
+        JsonObject userMessage = new JsonObject();
+        userMessage.addProperty("role", "user");
+        userMessage.addProperty("content", getUserPrompt(useCase, sourceFiles));
+        messagesArray.add(userMessage);
+
+        payload.add("messages", messagesArray);
+        return payload;
+    }
+
+    private JsonObject constructCodeReparationPayloadForFunctions(String generatedPrompt, String generatedFuncName,
+                                                                  GeneratedCode generatedCode, JsonArray sourceFiles,
+                                                                  JsonArray diagnostics) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("max_tokens", 4096 * 4);
+        payload.addProperty("temperature", 0);
+
+        JsonArray messagesArray = generateMessageHistoryForRepairCall(generatedCode, generatedPrompt, sourceFiles);
+        JsonObject userRepairMessage = new JsonObject();
+        userRepairMessage.addProperty("role", "user");
+        userRepairMessage.addProperty("content", getRepairPromptForFunctions(generatedFuncName, diagnostics));
+
+        messagesArray.add(userRepairMessage);
+        payload.add("messages", messagesArray);
+        return payload;
+    }
+
+    private JsonObject constructCodeReparationPayloadForNaturalExpressions(
+            String generatedPrompt, GeneratedCode generatedCode, JsonArray sourceFiles,
+            JsonArray diagnostics) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("max_tokens", 4096 * 4);
+        payload.addProperty("temperature", 0);
+
+        JsonArray messagesArray = generateMessageHistoryForRepairCall(generatedCode, generatedPrompt, sourceFiles);
+        JsonObject userRepairMessage = new JsonObject();
+        userRepairMessage.addProperty("role", "user");
+        userRepairMessage.addProperty("content", getRepairPromptForNaturalExpressions(diagnostics));
+
+        messagesArray.add(userRepairMessage);
+        payload.add("messages", messagesArray);
+        return payload;
+    }
+
+    private JsonArray generateMessageHistoryForRepairCall(GeneratedCode generatedCode, String generatedPrompt,
+                                                          JsonArray sourceFiles) {
+        JsonArray messagesArray = new JsonArray();
+        messagesArray.add(getSystemMessage());
+
+        JsonObject userMessage = new JsonObject();
+        userMessage.addProperty("role", "user");
+        userMessage.addProperty("content", getUserPrompt(generatedPrompt, sourceFiles));
+        messagesArray.add(userMessage);
+
+        JsonObject assistantMessage = new JsonObject();
+        assistantMessage.addProperty("role", "assistant");
+        assistantMessage.addProperty("content", generatedCode.code());
+        messagesArray.add(assistantMessage);
+
+        return messagesArray;
+    }
+
+    private JsonObject getSystemMessage() {
+        JsonObject systemMessage = new JsonObject();
+        systemMessage.addProperty("role", "system");
+        String systemContent = getCodeGenerationSystemPromptPrefix() + "\n" + getCodeGenerationSystemPromptSuffix();
+        systemMessage.addProperty("content", systemContent);
+        return systemMessage;
+    }
+
+    private String getResponseTextFromBody(String responseBody) {
+        JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
+        JsonArray choicesArray = responseJson.getAsJsonArray("choices");
+
+        if (choicesArray == null || choicesArray.isEmpty()) {
+            throw new RuntimeException("No choices found in LLM response");
+        }
+
+        JsonObject firstChoice = choicesArray.get(0).getAsJsonObject();
+        JsonObject message = firstChoice.getAsJsonObject("message");
+        return message.get("content").getAsString();
     }
 }
