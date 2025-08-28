@@ -76,11 +76,12 @@ import java.util.Optional;
 import static io.ballerina.compiler.syntax.tree.AbstractNodeFactory.createToken;
 import static io.ballerina.lib.ai.np.compilerplugin.CodeGenerationUtils.generateCodeForFunction;
 import static io.ballerina.lib.ai.np.compilerplugin.CodeGenerationUtils.generateCodeForNaturalExpression;
-import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.CODE_ANNOTATION;
-import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.CONTENT;
-import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.FILE_PATH;
-import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.isCodeAnnotation;
-import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.isLangNaturalModule;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.BAL_EXT;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.CODE_ANNOTATION;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.CONTENT;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.FILE_PATH;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.isCodeAnnotation;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.isLangNaturalModule;
 
 /**
  * Code modification task to replace generate code based on a prompt and replace.
@@ -93,7 +94,6 @@ public class CompileTimePromptAsCodeCodeModificationTask implements ModifierTask
     private static final String PROMPT = "prompt";
     private static final String GENERATED_FUNCTION_SUFFIX = "NPGenerated";
     private static final String GENERATED_DIRECTORY = "generated";
-    private static final String BAL_EXT = ".bal";
     private static final String GENERATED_FUNC_FILE_NAME_SUFFIX = "_np_generated" + BAL_EXT;
 
     @Override

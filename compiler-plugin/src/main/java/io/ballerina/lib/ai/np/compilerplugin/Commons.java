@@ -25,27 +25,22 @@ import io.ballerina.compiler.syntax.tree.AnnotationNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.QualifiedNameReferenceNode;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
-
 /**
  * Class containing common constants and functionality.
  *
  * @since 0.3.0
  */
-public class CommonUtils {
-    private CommonUtils() {
+public class Commons {
+    private Commons() {
     }
 
-    public static final String BALLERINA_ORG_NAME = "ballerina";
-    public static final String AI_MODULE_NAME = "ai";
-    public static final String CODE_ANNOTATION = "code";
-    public static final String FILE_PATH = "filePath";
-    public static final String CONTENT = "content";
+    static final String FILE_PATH = "filePath";
+    static final String CONTENT = "content";
+    static final String BALLERINA_ORG_NAME = "ballerina";
+    static final String AI_MODULE_NAME = "ai";
+    static final String CODE_ANNOTATION = "code";
+    static final String BAL_EXT = ".bal";
+
     public record GeneratedCode(String code, JsonArray functions) { }
 
     static boolean isCodeAnnotation(AnnotationNode annotationNode, SemanticModel semanticModel) {
@@ -61,20 +56,5 @@ public class CommonUtils {
     static boolean isLangNaturalModule(ModuleSymbol moduleSymbol) {
         ModuleID moduleId = moduleSymbol.id();
         return BALLERINA_ORG_NAME.equals(moduleId.orgName()) && "lang.natural".equals(moduleId.moduleName());
-    }
-
-    static String retrieveLangLibs(String langLibsPath) throws IOException {
-        try (InputStream inputStream = CommonUtils.class.getResourceAsStream(langLibsPath)) {
-            if (inputStream == null) {
-                throw new IllegalArgumentException("Failed to retrieve langlibs");
-            }
-
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                return reader.lines().collect(Collectors.joining(System.lineSeparator()));
-            }
-        } catch (Exception e) {
-            throw new IOException("Failed to retrieve langlibs");
-        }
     }
 }

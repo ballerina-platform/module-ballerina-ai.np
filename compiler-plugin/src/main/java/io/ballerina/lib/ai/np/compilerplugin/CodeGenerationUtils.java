@@ -27,6 +27,7 @@ import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.NaturalExpressionNode;
 import io.ballerina.compiler.syntax.tree.Node;
 import io.ballerina.compiler.syntax.tree.NodeParser;
+import io.ballerina.lib.ai.np.compilerplugin.provider.PromptGenerator;
 import io.ballerina.lib.ai.np.compilerplugin.provider.Provider;
 import io.ballerina.lib.ai.np.compilerplugin.provider.ProviderFactory;
 import io.ballerina.projects.BuildOptions;
@@ -55,9 +56,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.CONTENT;
-import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.FILE_PATH;
-import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.GeneratedCode;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.CONTENT;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.FILE_PATH;
+import static io.ballerina.lib.ai.np.compilerplugin.Commons.GeneratedCode;
 
 /**
  * Methods to generate code at compile-time.
@@ -65,9 +66,9 @@ import static io.ballerina.lib.ai.np.compilerplugin.CommonUtils.GeneratedCode;
  * @since 0.4.0
  */
 public class CodeGenerationUtils {
-
     public static final String TEMP_DIR_PREFIX = "ballerina-np-codegen-diagnostics-dir-";
     public static final String BALLERINA_TOML_FILE = "Ballerina.toml";
+    private static final Provider provider = ProviderFactory.getProviderInstance();
 
     static String generateCodeForFunction(String originalFuncName,
                                           String generatedFuncName, String prompt, HttpClient client,
@@ -75,8 +76,8 @@ public class CodeGenerationUtils {
                                           String packageOrgName) {
         try {
             String generatedPrompt = PromptGenerator
-                    .generateUseCasePromptForFunctions(originalFuncName, generatedFuncName, prompt);
-            GeneratedCode generatedCode = generateCode(client, sourceFiles,
+                    .generateUseCasePromptForFunctions(originalFuncName, generatedFuncName, prompt, sourceFiles);
+            GeneratedCode generatedCode = generateCodeForFunction(client, sourceFiles,
                     generatedPrompt);
 
             updateSourceFilesWithGeneratedContent(sourceFiles, generatedFuncName, generatedCode);
@@ -98,7 +99,7 @@ public class CodeGenerationUtils {
         try {
             String generatedPrompt = PromptGenerator.generateUseCasePromptForNaturalFunctions(
                     naturalExpressionNode, expectedType, semanticModel);
-            GeneratedCode generatedCode = generateCode(client, sourceFiles,
+            GeneratedCode generatedCode = generateCodeForExpression(client, sourceFiles,
                     generatedPrompt);
             ExpressionNode modifiedExpressionNode = NodeParser.parseExpression(generatedCode.code());
             JsonArray diagnostics =
@@ -118,11 +119,19 @@ public class CodeGenerationUtils {
         }
     }
 
-    private static GeneratedCode generateCode(HttpClient client, JsonArray sourceFiles, String generatedPrompt)
-            throws URISyntaxException, IOException, InterruptedException {
-        Provider provider = ProviderFactory.getProviderInstance();
+    private static GeneratedCode generateCodeForExpression(HttpClient client,
+                           JsonArray sourceFiles, String generatedPrompt) throws URISyntaxException {
         try {
-            return provider.generateCode(client, generatedPrompt, sourceFiles);
+            return provider.generateExpression(client, generatedPrompt, sourceFiles);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Failed to generate code using the model: " + e.getMessage());
+        }
+    }
+
+    private static GeneratedCode generateCodeForFunction(HttpClient client,
+                         JsonArray sourceFiles, String generatedPrompt) throws URISyntaxException {
+        try {
+            return provider.generateFunction(client, generatedPrompt, sourceFiles);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Failed to generate code using the model: " + e.getMessage());
         }
@@ -223,7 +232,7 @@ public class CodeGenerationUtils {
                                      HttpClient client, JsonArray updatedSourceFiles, String generatedPrompt,
                                      GeneratedCode generatedCode, JsonArray diagnostics)
             throws IOException, URISyntaxException, InterruptedException {
-        return ProviderFactory.getProviderInstance().repairCodeForFunctions(
+        return provider.repairFunctions(
                 client, generatedFuncName, updatedSourceFiles, generatedPrompt, generatedCode, diagnostics);
     }
 
@@ -231,7 +240,7 @@ public class CodeGenerationUtils {
                                                                String generatedPrompt, GeneratedCode generatedCode,
                                                                JsonArray diagnostics)
             throws URISyntaxException, IOException, InterruptedException {
-        return ProviderFactory.getProviderInstance().repairCodeForNaturalExpressions(client,
+        return provider.repairExpressions(client,
                 updatedSourceFiles, generatedPrompt, generatedCode, diagnostics);
     }
 

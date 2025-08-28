@@ -3,7 +3,7 @@ package io.ballerina.lib.ai.np.compilerplugin.provider;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.ballerina.lib.ai.np.compilerplugin.CommonUtils.GeneratedCode;
+import io.ballerina.lib.ai.np.compilerplugin.Commons.GeneratedCode;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +23,43 @@ public class BallerinaCopilotServiceProvider implements Provider {
     }
 
     @Override
-    public GeneratedCode generateCode(HttpClient client, String prompt, JsonArray sourceFiles)
+    public GeneratedCode generateFunction(HttpClient client, String useCase, JsonArray sourceFiles)
+            throws IOException, InterruptedException, URISyntaxException {
+        return generateCode(client, useCase, sourceFiles);
+    }
+
+    @Override
+    public GeneratedCode generateExpression(HttpClient client, String useCase, JsonArray sourceFiles)
+            throws IOException, InterruptedException, URISyntaxException {
+        return generateCode(client, useCase, sourceFiles);
+    }
+
+    @Override
+    public String repairFunctions(HttpClient client, String generatedFunctionName, JsonArray updatedSourceFiles,
+                                  String repairPrompt, GeneratedCode generatedFunction, JsonArray diagnostics)
+            throws IOException, InterruptedException, URISyntaxException {
+        JsonObject payload = constructCodeReparationPayloadForFunctions(
+                repairPrompt, generatedFunctionName, generatedFunction, updatedSourceFiles, diagnostics);
+        return ProviderUtils.updateSourceFilesWithGeneratedCode(
+                repairCode(client, payload), generatedFunction, updatedSourceFiles);
+    }
+
+    @Override
+    public String repairExpressions(HttpClient client, JsonArray updatedSourceFiles,
+                                    String repairPrompt, GeneratedCode generatedExpression, JsonArray diagnostics)
+            throws IOException, InterruptedException, URISyntaxException {
+        JsonObject payload = constructCodeReparationPayloadForConstNaturalExpressions(
+                repairPrompt, generatedExpression, updatedSourceFiles, diagnostics);
+        return ProviderUtils.updateSourceFilesWithGeneratedCode(
+                repairCode(client, payload), generatedExpression, updatedSourceFiles);
+    }
+
+    @Override
+    public String getName() {
+        return "BI Copilot";
+    }
+
+    private GeneratedCode generateCode(HttpClient client, String prompt, JsonArray sourceFiles)
             throws IOException, InterruptedException, URISyntaxException {
         HttpRequest codeGenerationRequest = HttpRequest.newBuilder()
                 .uri(new URI(copilotUrl + "/code"))
@@ -32,24 +68,6 @@ public class BallerinaCopilotServiceProvider implements Provider {
                         .ofString(constructCodeGenerationPayload(prompt, sourceFiles).toString())).build();
         Stream<String> lines = client.send(codeGenerationRequest, HttpResponse.BodyHandlers.ofLines()).body();
         return extractGeneratedFunctionCode(lines);
-    }
-
-    @Override
-    public String repairCodeForFunctions(HttpClient client, String generatedFuncName, JsonArray updatedSourceFiles,
-                                  String generatedPrompt, GeneratedCode generatedCode, JsonArray diagnostics)
-            throws IOException, InterruptedException, URISyntaxException {
-        JsonObject payload = constructCodeReparationPayloadForFunctions(
-                generatedPrompt, generatedFuncName, generatedCode, updatedSourceFiles, diagnostics);
-        return updateResourcesWithCodeSnippet(repairCode(client, payload), generatedCode, updatedSourceFiles);
-    }
-
-    @Override
-    public String repairCodeForNaturalExpressions(HttpClient client, JsonArray updatedSourceFiles,
-                                          String generatedPrompt, GeneratedCode generatedCode, JsonArray diagnostics)
-            throws IOException, InterruptedException, URISyntaxException {
-        JsonObject payload = constructCodeReparationPayloadForConstNaturalExpressions(
-                generatedPrompt, generatedCode, updatedSourceFiles, diagnostics);
-        return updateResourcesWithCodeSnippet(repairCode(client, payload), generatedCode, updatedSourceFiles);
     }
 
     private String repairCode(HttpClient client, JsonObject payload)
@@ -150,6 +168,6 @@ public class BallerinaCopilotServiceProvider implements Provider {
         }
 
         String responseBodyString = responseBody.toString();
-        return new GeneratedCode(extractBallerinaCodeSnippet(responseBodyString), functions);
+        return new GeneratedCode(ProviderUtils.extractBallerinaCodeSnippet(responseBodyString), functions);
     }
 }
