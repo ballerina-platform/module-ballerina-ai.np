@@ -45,13 +45,19 @@ include(':checkstyle')
 include(':ai.np-ballerina')
 include(':ai.np-compiler-plugin')
 include(':ai.np-ballerina-tests')
-include(':ai.np-compiler-plugin-tests')
+include(':ai.np-compiler-plugin-tests-ballerina-copilot')
+include(':ai.np-compiler-plugin-tests-openai')
+include(':ai.np-compiler-plugin-tests-azure-openai')
+include(':ai.np-compiler-plugin-tests-anthropic')
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(':ai.np-ballerina').projectDir = file('ballerina')
 project(':ai.np-compiler-plugin').projectDir = file('compiler-plugin')
 project(':ai.np-ballerina-tests').projectDir = file('ballerina-tests')
-project(':ai.np-compiler-plugin-tests').projectDir = file('compiler-plugin-tests')
+project(':ai.np-compiler-plugin-tests-ballerina-copilot').projectDir = file("compiler-plugin-tests${File.separator}ballerina-copilot")
+project(':ai.np-compiler-plugin-tests-openai').projectDir = file("compiler-plugin-tests${File.separator}openai")
+project(':ai.np-compiler-plugin-tests-azure-openai').projectDir = file("compiler-plugin-tests${File.separator}azure-openai")
+project(':ai.np-compiler-plugin-tests-anthropic').projectDir = file("compiler-plugin-tests${File.separator}anthropic")
 
 gradleEnterprise {
     buildScan {

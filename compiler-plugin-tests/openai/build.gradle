@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+}
+
+description = 'Ballerina - Natural Programming Compiler Plugin Tests (OpenAI)'
+
+dependencies {
+    implementation project(':ai.np-compiler-plugin')
+    // Copy other dependencies from your existing test build.gradle file
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
+    testImplementation group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
+    testImplementation group: 'com.squareup.okhttp3', name: 'mockwebserver', version: "${okhttpVersion}"
+}
+
+test {
+    systemProperty "ballerina.offline.flag", "true"
+    systemProperty "ballerina.ai.np.version", project.version
+
+    // Crucial: Set environment variables for the OpenAI Provider
+    environment "BAL_CODEGEN_OPENAI_TOKEN", "not-a-real-openai-token"
+
+    useTestNG()
+    testLogging {
+        exceptionFormat = "full"
+        // ... copy afterSuite logging block from your existing test build.gradle
+    }
+}
+
+// Ensure you have these tasks or similar configurations from your root project
+compileTestJava.dependsOn ":ai.np-compiler-plugin:copyOpenApiJar"
+test.dependsOn ":ai.np-ballerina:build"

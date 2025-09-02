@@ -60,7 +60,8 @@ import static io.ballerina.projects.util.ProjectConstants.BALLERINA_HOME;
  */
 public class CodeGenerationTest {
 
-    private static final Path DISTRIBUTION_PATH = Paths.get("../", "target", "ballerina-runtime").toAbsolutePath();
+    private static final Path DISTRIBUTION_PATH = Paths.get("")
+            .toAbsolutePath().resolve("../../target/ballerina-runtime").normalize();
     private static final Path RESOURCE_DIRECTORY = Paths.get("src", "test", "resources").toAbsolutePath();
     private static final Path SERVER_RESOURCES = RESOURCE_DIRECTORY.resolve("server-resources");
     private static final String TARGET = "target";

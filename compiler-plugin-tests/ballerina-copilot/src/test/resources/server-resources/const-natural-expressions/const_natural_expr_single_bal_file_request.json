@@ -1,0 +1,9 @@
+{
+  "usecase": "Generate a self-contained value expression that satisfies the following requirement.\n\nTarget type: int[]|error\n\nRespond with ONLY the value expression wrapped in ```ballerina code blocks.\n\nRequirement:\n    Give me an array of length 10, with integers between 1001 and 2000.\n",
+  "sourceFiles": [
+    {
+      "filePath": "const_natural_expressions.bal",
+      "content": "import ballerina/io;\n\nconst START = 1001;\n\nfunction getIntegers() returns int[]|error => const natural {\n    Give me an array of length 10, with integers between ${START} and 2000.\n};\n\npublic function main() {\n    io:println(getIntegers());\n}\n"
+    }
+  ]
+}

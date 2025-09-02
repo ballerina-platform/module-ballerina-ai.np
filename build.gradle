@@ -119,6 +119,9 @@ release {
 task build {
     dependsOn('ai.np-compiler-plugin:build')
     dependsOn('ai.np-ballerina:build')
-    dependsOn('ai.np-compiler-plugin-tests:test')
     dependsOn('ai.np-ballerina-tests:test')
+    dependsOn('ai.np-compiler-plugin-tests-ballerina-copilot:test')
+    dependsOn('ai.np-compiler-plugin-tests-openai:test')
+    dependsOn('ai.np-compiler-plugin-tests-azure-openai:test')
+    dependsOn('ai.np-compiler-plugin-tests-anthropic:test')
 }

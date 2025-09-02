@@ -43,7 +43,8 @@ import java.util.List;
 public class DiagnosticsTest {
 
     private static final Path RESOURCE_DIRECTORY = Paths.get("src", "test", "resources").toAbsolutePath();
-    private static final Path DISTRIBUTION_PATH = Paths.get("../", "target", "ballerina-runtime").toAbsolutePath();
+    private static final Path DISTRIBUTION_PATH = Paths.get("")
+            .toAbsolutePath().resolve("../../target/ballerina-runtime").normalize();
 
     @Test
     public void testNaturalExpressionsNegative() {

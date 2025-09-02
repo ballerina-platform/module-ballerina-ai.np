@@ -1,7 +1,5 @@
 package io.ballerina.lib.ai.np.compilerplugin.provider;
 
-import io.ballerina.lib.ai.np.compilerplugin.provider.Provider;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;

@@ -1,0 +1,9 @@
+{
+  "usecase": "Generate a self-contained value expression that satisfies the following requirement.\n\nTarget type: (int|string)[]|error\n\nRespond with ONLY the value expression wrapped in ```ballerina code blocks.\n\nRequirement:\n    Give me an array of with integers between 1000 and 100000 and strings.\n",
+  "sourceFiles": [
+    {
+      "filePath": "main.bal",
+      "content": "import ballerina/http;\nimport ballerina/io;\n\nconst END = 100000;\n\nint number = 3;\n\nfinal http:Client 'client = check new (\"http://localhost:9090\");\n\nconst annotation record {|string value;|} RecordAnnot on type;\n\n@RecordAnnot {\n    value: \"val\"\n}\ntype recordType record {\n    int a;\n};\n\nclass TestClass {\n    public int num;\n\n    function init(int num) {\n        self.num = num;\n    }\n\n    public function getNum() returns int {\n        return self.num;\n    }\n}\n\nfunction getIntegers() returns (int|string)[]|error => const natural {\n    Give me an array of with integers between 1000 and ${END} and strings.\n};\n\npublic function main() {\n    worker w1 {\n\n    }\n\n    io:println(getIntegers());\n}\n\nfunction getInteger() returns int {\n    return END;\n}\n\nfunction testIntOrError() returns int|error {\n    return END;\n}\n\nfunction getString() returns string {\n    return \"1\";\n}\n"
+    }
+  ]
+}
