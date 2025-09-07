@@ -21,16 +21,18 @@ import static io.ballerina.lib.ai.np.compilerplugin.provider.ProviderUtils.TEMPE
 import static io.ballerina.lib.ai.np.compilerplugin.provider.ProviderUtils.TEXT;
 import static io.ballerina.lib.ai.np.compilerplugin.provider.ProviderUtils.TYPE;
 import static io.ballerina.lib.ai.np.compilerplugin.provider.ProviderUtils.USER;
+import static io.ballerina.lib.ai.np.compilerplugin.provider.ProviderUtils.extractBallerinaCodeSnippet;
 import static io.ballerina.lib.ai.np.compilerplugin.provider.ProviderUtils.updateSourceFilesWithGeneratedCode;
 
 public class AnthropicModelProvider implements ModelProvider {
     private final String apiKey;
-    private final String apiURL = "https://api.anthropic.com/v1/messages";
+    private final String serviceUrl;
     private final String apiVersion = "2023-06-01";
     private final Map<String, String> headers;
 
     public AnthropicModelProvider(String apiKey) {
         this.apiKey = apiKey;
+        this.serviceUrl = "https://api.anthropic.com/v1/messages";
         this.headers = Map.of(
             "Content-Type", "application/json",
             "x-api-key", this.apiKey,
@@ -38,10 +40,20 @@ public class AnthropicModelProvider implements ModelProvider {
         );
     }
 
+    public AnthropicModelProvider(String apiKey, String serviceUrl) {
+        this.apiKey = apiKey;
+        this.serviceUrl = serviceUrl + "/messages";
+        this.headers = Map.of(
+                "Content-Type", "application/json",
+                "x-api-key", this.apiKey,
+                "anthropic-version", this.apiVersion
+        );
+    }
+
     @Override
     public GeneratedCode generateFunction(HttpClient client, String useCase, JsonArray sourceFiles)
             throws IOException, InterruptedException {
-        String responseBody = sendRequest(client, apiURL, constructCodeGenerationPayload(
+        String responseBody = sendRequest(client, serviceUrl, constructCodeGenerationPayload(
                 useCase, sourceFiles, generateSystemMessagesForFunctions()).toString(), headers);
         String generatedText = getResponseTextFromBody(responseBody);
         return new GeneratedCode(generatedText, null);
@@ -50,7 +62,7 @@ public class AnthropicModelProvider implements ModelProvider {
     @Override
     public GeneratedCode generateExpression(HttpClient client, String useCase, JsonArray sourceFiles)
             throws IOException, InterruptedException {
-        String responseBody = sendRequest(client, apiURL, constructCodeGenerationPayload(
+        String responseBody = sendRequest(client, serviceUrl, constructCodeGenerationPayload(
                 useCase, sourceFiles, generateSystemMessagesForExpressions()).toString(), headers);
         String generatedText = getResponseTextFromBody(responseBody);
         return new GeneratedCode(generatedText, null);
@@ -82,7 +94,7 @@ public class AnthropicModelProvider implements ModelProvider {
 
     private String repairCode(HttpClient client, JsonObject payload)
             throws IOException, InterruptedException {
-        String responseBody = sendRequest(client, apiURL, payload.toString(), headers);
+        String responseBody = sendRequest(client, serviceUrl, payload.toString(), headers);
         return getResponseTextFromBody(responseBody);
     }
 
@@ -177,6 +189,6 @@ public class AnthropicModelProvider implements ModelProvider {
         }
 
         JsonObject firstContent = contentArray.get(0).getAsJsonObject();
-        return firstContent.get(TEXT).getAsString();
+        return extractBallerinaCodeSnippet(firstContent.get(TEXT).getAsString());
     }
 }

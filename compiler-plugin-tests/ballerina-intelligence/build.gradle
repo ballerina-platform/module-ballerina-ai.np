@@ -44,6 +44,7 @@ dependencies {
     checkstyle "com.puppycrawl.tools:checkstyle:${puppycrawlCheckstyleVersion}"
 
     implementation project(':ai.np-compiler-plugin')
+    testImplementation project(path: ':ai.np-compiler-plugin-tests:commons')
 
     testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
@@ -102,8 +103,6 @@ compileJava {
 test {
     systemProperty "ballerina.offline.flag", "true"
     systemProperty "ballerina.ai.np.version", project.version
-    environment "BAL_CODEGEN_URL", "http://localhost:8080"
-    environment "BAL_CODEGEN_TOKEN", "not-a-realazure-openai-token"
     environment "BAL_CODEGEN_URL", "http://localhost:8080"
     environment "BAL_CODEGEN_TOKEN", "not-a-real-token"
     useTestNG()

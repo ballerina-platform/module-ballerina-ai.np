@@ -13,7 +13,9 @@ public class ProviderFactory {
     private static final String AZURE_API_VERSION_ENV_VAR = "BAL_CODEGEN_AZURE_OPENAI_API_VERSION";
     private static final String AZURE_SERVICE_URL_ENV_VAR = "BAL_CODEGEN_AZURE_OPENAI_SERVICE_URL";
     private static final String ANTHROPIC_TOKEN_ENV_VAR = "BAL_CODEGEN_ANTHROPIC_TOKEN";
+    private static final String ANTHROPIC_SERVICE_URL_ENV_VAR = "BAL_CODEGEN_ANTHROPIC_SERVICE_URL";
     private static final String OPENAI_TOKEN_ENV_VAR = "BAL_CODEGEN_OPENAI_TOKEN";
+    private static final String OPENAI_SERVICE_URL_ENV_VAR = "BAL_CODEGEN_OPENAI_SERVICE_URL";
     private static final String BAL_CODEGEN_URL = "BAL_CODEGEN_URL";
     private static final String BAL_CODEGEN_TOKEN = "BAL_CODEGEN_TOKEN";
 
@@ -56,7 +58,11 @@ public class ProviderFactory {
     private static Optional<Provider> createAnthropicProvider() {
         String anthropicToken = System.getenv(ANTHROPIC_TOKEN_ENV_VAR);
         if (isNotNullOrEmpty(anthropicToken)) {
-            return Optional.of(new AnthropicModelProvider(anthropicToken));
+            String anthropicServiceUrl = System.getenv(ANTHROPIC_SERVICE_URL_ENV_VAR);
+            if (!isNotNullOrEmpty(anthropicServiceUrl)) {
+                return Optional.of(new AnthropicModelProvider(anthropicToken));
+            }
+            return Optional.of(new AnthropicModelProvider(anthropicToken, anthropicServiceUrl));
         }
         return Optional.empty();
     }
@@ -97,7 +103,11 @@ public class ProviderFactory {
     private static Optional<Provider> createOpenAiProvider() {
         String openAiToken = System.getenv(OPENAI_TOKEN_ENV_VAR);
         if (isNotNullOrEmpty(openAiToken)) {
-            return Optional.of(new OpenAIModelProvider(openAiToken));
+            String openAiServiceUrl = System.getenv(OPENAI_SERVICE_URL_ENV_VAR);
+            if (!isNotNullOrEmpty(openAiServiceUrl)) {
+                return Optional.of(new OpenAIModelProvider(openAiToken));
+            }
+            return Optional.of(new OpenAIModelProvider(openAiToken, openAiServiceUrl));
         }
         return Optional.empty();
     }

@@ -26,7 +26,7 @@ class ProviderUtils {
     static final String MESSAGE = "message";
     static final String CHOICES = "choices";
     static final String CLAUDE_MODEL_NAME = "claude-sonnet-4-20250514";
-    static final String OPENAI_MODEL_NAME = "claude-sonnet-4-20250514";
+    static final String OPENAI_MODEL_NAME = "gpt-4o-mini";
     static final String MODEL = "model";
     static final String MAX_TOKENS = "max_tokens";
     static final String TEMPERATURE = "temperature";
@@ -35,22 +35,25 @@ class ProviderUtils {
     static final String CACHE_CONTROL = "cache_control";
 
     public static String extractBallerinaCodeSnippet(String responseBodyString) {
-        return responseBodyString.substring(responseBodyString.indexOf(TRIPLE_BACKTICK_BALLERINA) + 12,
-                responseBodyString.lastIndexOf(TRIPLE_BACKTICK));
-    }
+        int startDelimLength = 12;
+        int startIndex = responseBodyString.indexOf(TRIPLE_BACKTICK_BALLERINA);
 
-    public static boolean hasBallerinaCodeSnippet(String responseBodyString) {
-        return responseBodyString.contains(TRIPLE_BACKTICK_BALLERINA) && responseBodyString.contains(TRIPLE_BACKTICK);
+        if (startIndex == -1) {
+            startIndex = responseBodyString.indexOf(TRIPLE_BACKTICK);
+            startDelimLength = 3;
+        }
+
+        int endIndex = responseBodyString.lastIndexOf(TRIPLE_BACKTICK);
+        return (startIndex == -1 || endIndex == -1) ?
+                responseBodyString :
+                responseBodyString.substring(startIndex + startDelimLength, endIndex).trim();
     }
 
     public static String updateSourceFilesWithGeneratedCode(String repairResponse, GeneratedCode generatedCode,
                                                             JsonArray sourceFiles) {
-        if (hasBallerinaCodeSnippet(repairResponse)) {
-            String generatedFunctionSrc = extractBallerinaCodeSnippet(repairResponse);
-            sourceFiles.get(sourceFiles.size() - 1).getAsJsonObject().addProperty(CONTENT, generatedFunctionSrc);
-            return generatedFunctionSrc;
-        }
-        return generatedCode.code();
+        String generatedFunctionSrc = extractBallerinaCodeSnippet(repairResponse);
+        sourceFiles.get(sourceFiles.size() - 1).getAsJsonObject().addProperty(CONTENT, generatedFunctionSrc);
+        return generatedFunctionSrc;
     }
 
     static String retrieveLangLibs(String langLibsPath) throws IOException {
@@ -78,8 +81,8 @@ class ProviderUtils {
         }
 
         JsonObject firstChoice = choicesArray.get(0).getAsJsonObject();
-        JsonObject message = firstChoice.getAsJsonObject(MESSAGE);
-        return message.get(CONTENT).getAsString();
+        String content = firstChoice.getAsJsonObject(MESSAGE).get(CONTENT).getAsString();
+        return extractBallerinaCodeSnippet(content);
     }
 
     public static JsonObject getOpenAISystemMessageForFunction() {

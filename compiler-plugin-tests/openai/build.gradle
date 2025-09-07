@@ -6,29 +6,40 @@ description = 'Ballerina - Natural Programming Compiler Plugin Tests (OpenAI)'
 
 dependencies {
     implementation project(':ai.np-compiler-plugin')
-    // Copy other dependencies from your existing test build.gradle file
-    testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-    testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
-    testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
+    testImplementation project(path: ':ai.np-compiler-plugin-tests:commons')
+
     testImplementation group: 'org.testng', name: 'testng', version: "${testngVersion}"
     testImplementation group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
     testImplementation group: 'com.squareup.okhttp3', name: 'mockwebserver', version: "${okhttpVersion}"
+    testImplementation 'com.squareup.okhttp3:okhttp-tls:4.12.0'
+
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
+    testImplementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
 }
 
 test {
     systemProperty "ballerina.offline.flag", "true"
     systemProperty "ballerina.ai.np.version", project.version
 
-    // Crucial: Set environment variables for the OpenAI Provider
     environment "BAL_CODEGEN_OPENAI_TOKEN", "not-a-real-openai-token"
+    environment "BAL_CODEGEN_OPENAI_SERVICE_URL", "http://localhost:8080"
 
     useTestNG()
     testLogging {
         exceptionFormat = "full"
-        // ... copy afterSuite logging block from your existing test build.gradle
+        afterSuite { desc, result ->
+            if (!desc.parent) { // will match the outermost suite
+                def output = "Compiler Plugin Tests: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                def startItem = '|  ', endItem = '  |'
+                def repeatLength = startItem.length() + output.length() + endItem.length()
+                println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+            }
+        }
     }
 }
 
-// Ensure you have these tasks or similar configurations from your root project
 compileTestJava.dependsOn ":ai.np-compiler-plugin:copyOpenApiJar"
 test.dependsOn ":ai.np-ballerina:build"
+test.finalizedBy jacocoTestReport
+jacocoTestReport.dependsOn test

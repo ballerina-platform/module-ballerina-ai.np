@@ -19,7 +19,7 @@ import static io.ballerina.lib.ai.np.compilerplugin.provider.ProviderUtils.USER;
 import static io.ballerina.lib.ai.np.compilerplugin.provider.ProviderUtils.updateSourceFilesWithGeneratedCode;
 
 public class OpenAIModelProvider implements ModelProvider {
-    private final String serviceUrl = "https://api.openai.com/v1/chat/completions";
+    private final String serviceUrl;
     private final Map<String, String> headers;
 
     public OpenAIModelProvider(String apiKey) {
@@ -27,6 +27,15 @@ public class OpenAIModelProvider implements ModelProvider {
             "Content-Type", "application/json",
             "Authorization", "Bearer " + apiKey
         );
+         this.serviceUrl = "https://api.openai.com/v1/chat/completions";
+    }
+
+    public OpenAIModelProvider(String apiKey, String serviceUrl) {
+        this.headers = Map.of(
+                "Content-Type", "application/json",
+                "Authorization", "Bearer " + apiKey
+        );
+        this.serviceUrl = serviceUrl + "/chat/completions";
     }
 
     @Override
@@ -43,8 +52,8 @@ public class OpenAIModelProvider implements ModelProvider {
             throws IOException, InterruptedException {
         String responseBody = sendRequest(client, serviceUrl, constructCodeGenerationPayload(
                 useCase, sourceFiles, ProviderUtils.getOpenAISystemMessageForExpression()).toString(), headers);
-        String generatedText = ProviderUtils.getOpenAIResponseTextFromBody(responseBody);
-        return new GeneratedCode(generatedText, null);
+        String generatedCode = ProviderUtils.getOpenAIResponseTextFromBody(responseBody);
+        return new GeneratedCode(generatedCode, null);
     }
 
     @Override

@@ -77,8 +77,8 @@ public class BallerinaCopilotServiceProvider implements Provider {
                 .header("Authorization", "Bearer " + copilotAccessToken)
                 .POST(HttpRequest.BodyPublishers.ofString(payload.toString())).build();
         String body = client.send(codeReparationRequest, HttpResponse.BodyHandlers.ofString()).body();
-        return JsonParser.parseString(body).getAsJsonObject()
-                .getAsJsonPrimitive("repairResponse").getAsString();
+        return ProviderUtils.extractBallerinaCodeSnippet(JsonParser.parseString(body).getAsJsonObject()
+                .getAsJsonPrimitive("repairResponse").getAsString());
     }
 
     private JsonObject constructCodeReparationPayloadForFunctions(String generatedPrompt, String generatedFuncName,
