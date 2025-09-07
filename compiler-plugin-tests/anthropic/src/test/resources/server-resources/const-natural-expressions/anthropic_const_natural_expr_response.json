@@ -1,0 +1,17 @@
+{
+    "id": "msg_01A2B3C4D5E6F7G8H9I1J2K3",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-sonnet-4-20250514",
+    "content": [
+        {
+            "type": "text",
+            "text": "```ballerina\n[1234, 1456, 1678, 1890, 1357, 1579, 1246, 1468, 1975, 1753]\n```"
+        }
+    ],
+    "stop_reason": "end_turn",
+    "usage": {
+        "input_tokens": 9,
+        "output_tokens": 12
+    }
+}

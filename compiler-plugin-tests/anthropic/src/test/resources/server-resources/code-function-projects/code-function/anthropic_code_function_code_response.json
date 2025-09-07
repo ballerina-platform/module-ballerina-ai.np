@@ -1,0 +1,17 @@
+{
+    "id": "msg_01E2F3G4H5I6J7K8L9M1N2O3",
+    "type": "message",
+    "role": "assistant",
+    "model": "claude-sonnet-4-20250514",
+    "content": [
+        {
+            "type": "text",
+            "text": "I'll help you generate the `sortEmployeesNPGenerated` function that sorts employees by salary in descending order and then by name in ascending order when salaries are equal.\n\nFor this requirement, we don't need any additional libraries from the provided API documentation since we're just doing basic array sorting and the array operations are built into the language.\n\nThe control flow will be:\n1. Create a new array by cloning the input array to avoid modifying the original\n2. Sort the array based on two criteria:\n   - Primary: salary in descending order (higher salary first)\n   - Secondary: name in ascending order (alphabetical) when salaries are equal\n\nHere's the generated code:\n\n<code filename=\"main.bal\">\n```ballerina\nfunction sortEmployeesNPGenerated(Employee[] employees) returns Employee[] {\n    Employee[] sortedEmployees = employees.clone();\n    \n    sortedEmployees.sort(key = isolated function(Employee employee) returns [decimal, string] {\n        return [employee.salary, employee.name];\n    }, ascending = [false, true]);\n    \n    return sortedEmployees;\n}\n```\n</code>\n\nThe code uses:\n- Array's built-in `clone()` method to create a copy of the input array\n- Array's built-in `sort()` method with a key function that returns a tuple of [salary, name]\n- The `ascending` parameter to specify descending order for salary (false) and ascending order for name (true)\n\nNo additional imports are required as we're using only built-in array operations."
+        }
+    ],
+    "stop_reason": "end_turn",
+    "usage": {
+        "input_tokens": 150,
+        "output_tokens": 300
+    }
+}

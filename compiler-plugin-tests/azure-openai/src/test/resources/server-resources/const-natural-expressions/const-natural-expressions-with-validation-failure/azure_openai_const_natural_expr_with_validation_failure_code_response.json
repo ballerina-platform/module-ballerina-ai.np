@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-generated-123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```ballerina\n[<int>(<map<int>>{\"a\": 1, \"b\": 2})[\"a\"], \n<int>(<map<int>>{\"a\": 1, \"b\": 2})[getString()], \n<int>(<map<int>>{\"a\": getInteger(), \"b\": 2})[\"a\"], \n1 + 1, \n(<int[2]>[1,2])[0], \n1 + 1,check testIntOrError(), \nerror(\"a\").message(), \nnew TestClass(1).a, \n<int & readonly> 1, \nlet int p = 1 in p, \nnew TestClass(1).getNum(), \n(base64 `0xAA`).toString(), \n(<record {|string value;|}> \n(recordType.@RecordAnnot)).value, \nnumber + 1, \n-number,-2, \nio:COLON, \n<int>[<object {}>new TestClass(1),  \n1, object{},  \n((<record{|int a?;|}>{a: 1})?.a),  \n(<table<A>> table[{a: 1}])][1], \n<string>([(), \"a\"][1]), \nEND-2,<1>1, \n(<int[]>(from int i in (<stream<int>>([1].toStream())) select i))[0], \n<string>[(trap getString()) is error ? \"error\" : \"success\", <[int]>[1],  typeof number, typeof 1,  number is int,  1 is int,  <int|string>2][0], \nEND > 3 ? END - 4: END - 2, \nstring `a`, \nstring `abc${getString()}def`, \n<string>string `abc${getString()}def`, \n<string>string `a`, \n<int>2, \n[1, 2, 3][0], \n[1, getInteger(), 3][0], \nEND is int ? 6 : 7, \nnumber is int ? 6 : number + 1, \nxml `<a>1</a>`.<a>.toString(), \n(xml `<a>1</a>`/*).toString(), \n[...[3, 4, 5]][0], \nx->w1, \n'client'->/.post({}), , \n]\n```"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 85,
+    "completion_tokens": 450,
+    "total_tokens": 535
+  }
+}

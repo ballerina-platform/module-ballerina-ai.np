@@ -113,7 +113,7 @@ public abstract class AbstractCodeGenerationTest {
     }
 
     protected void assertRequest(String path, String directory, String file) throws InterruptedException, IOException {
-        assertRequest(path, getExpectedPayload(directory, file), "Bearer not-a-real-token");
+        assertRequest(path, getExpectedPayload(directory, file), "Bearer not-a-real-token", "Authorization");
     }
 
     protected void assertRequest(String path, String directory, String file, String expectedAuthHeader)
@@ -121,13 +121,23 @@ public abstract class AbstractCodeGenerationTest {
         assertRequest(path, getExpectedPayload(directory, file), expectedAuthHeader);
     }
 
+    protected void assertRequest(String path, String directory, String file, String expectedAuthHeader,
+                                 String expectedAuthHeaderKey) throws InterruptedException, IOException {
+        assertRequest(path, getExpectedPayload(directory, file), expectedAuthHeader, expectedAuthHeaderKey);
+    }
+
     protected void assertRequest(String path, JsonObject expectedPayload, String expectedAuthHeader)
             throws InterruptedException {
+        assertRequest(path, expectedPayload, expectedAuthHeader, "Authorization");
+    }
+
+    protected void assertRequest(String path, JsonObject expectedPayload,
+                                 String expectedAuthHeader, String expectedAuthHeaderKey) throws InterruptedException {
         RecordedRequest recordedRequest = server.takeRequest(5, TimeUnit.SECONDS); // Increased timeout
         Assert.assertNotNull(recordedRequest, "Request was not sent to the mock server.");
         Assert.assertEquals(recordedRequest.getPath(), path);
         if (expectedAuthHeader != null) {
-            Assert.assertEquals(recordedRequest.getHeader("Authorization"), expectedAuthHeader);
+            Assert.assertEquals(recordedRequest.getHeader(expectedAuthHeaderKey), expectedAuthHeader);
         }
         JsonObject actualPayload = JsonParser.parseString(
                 recordedRequest.getBody().readUtf8().replace("\\r\\n", "\\n")).getAsJsonObject();

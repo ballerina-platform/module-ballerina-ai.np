@@ -1,0 +1,17 @@
+{
+  "id": "msg_01H2I3J4K5L6M7N8O9P1Q2R3",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-20250514",
+  "content": [
+    {
+      "type": "text",
+      "text": "'ll help you to generate the `calculateTotalPriceNPGenerated function.\n\n\n<code filename=\"functions_addEmployeeNPGenerated.bal\">\n```ballerina\nimport xlibb/test as _;\nimport ballerina/io as _;\nimport ballerina/http;\nimport xlibb/test2 as _;\npublic function calculateTotalPriceNPGenerated(decimal[] itemPrices) returns decimal {\n    decimal subtotal = 0.0; \n    foreach decimal price in itemPrices {\n        if (price < MINIMUM_ITEM_PRICE) {\n            continue;\n        }\n        subtotal += price;\n    }\n    decimal discountedTotal = subtotal;\n    if (subtotal > discountThreshold) {\n        decimal discount = subtotal * DISCOUNT_RATE;\n        discountedTotal = subtotal - discount;\n    }\n    decimal tax = discountedTotal * taxRate;\n   _ = http:defaultListenerPort; // added for test qualified config references;\n   _ = http:AUTH_HEADER; // added for test qualified module level references;\n    decimal finalTotal = discountedTotal + tax;\n    return finalTotal;\n}\n\n```\n</code>\n"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 120,
+    "output_tokens": 280
+  }
+}

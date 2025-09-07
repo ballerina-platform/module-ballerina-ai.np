@@ -35,7 +35,7 @@ public class AnthropicModelProvider implements ModelProvider {
         this.serviceUrl = "https://api.anthropic.com/v1/messages";
         this.headers = Map.of(
             "Content-Type", "application/json",
-            "x-api-key", this.apiKey,
+            "x-api-key", "Bearer " + this.apiKey,
             "anthropic-version", this.apiVersion
         );
     }
@@ -45,7 +45,7 @@ public class AnthropicModelProvider implements ModelProvider {
         this.serviceUrl = serviceUrl + "/messages";
         this.headers = Map.of(
                 "Content-Type", "application/json",
-                "x-api-key", this.apiKey,
+                "x-api-key", "Bearer " + this.apiKey,
                 "anthropic-version", this.apiVersion
         );
     }

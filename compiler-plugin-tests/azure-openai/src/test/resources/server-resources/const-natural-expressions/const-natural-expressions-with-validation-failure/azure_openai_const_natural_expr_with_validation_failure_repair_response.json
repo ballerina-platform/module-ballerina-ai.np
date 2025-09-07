@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-generated-123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Let me analyze the issue and provide a corrected implementation.\n\n<code filename=\\\"generated/functions_calculateTotalPriceNPGenerated.bal\\\">\n```ballerina\n[2,-2,99998,99996,\"a\",\"a\",2,1,6,3]\n```\n</code>"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 85,
+    "completion_tokens": 450,
+    "total_tokens": 535
+  }
+}
