@@ -1,5 +1,7 @@
 package io.ballerina.lib.ai.np.compilerplugin.provider;
 
+import io.ballerina.projects.ProjectException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +49,7 @@ public class ProviderFactory {
             String configuredProviderNames = availableProviders.stream()
                     .map(Provider::getName)
                     .collect(Collectors.joining(", "));
-            throw new IllegalStateException("Multiple AI model providers are configured. " +
+            throw new ProjectException("Multiple AI model providers are configured. " +
                     "Please set environment variables for only one provider. Found configurations for: "
                     + configuredProviderNames);
         }

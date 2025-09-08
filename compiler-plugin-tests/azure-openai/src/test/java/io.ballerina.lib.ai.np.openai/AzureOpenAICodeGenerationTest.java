@@ -38,7 +38,7 @@ public class AzureOpenAICodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, "const-natural-expressions", "azure_openai_const_natural_expr_proj_request.json",
-                " Bearer not-a-real-azure-openai-token", "api-key");
+                "not-a-real-azure-openai-token", "api-key");
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
                 "[1234,1456,1678,1890,1357,1579,1246,1468,1975,1753]");
@@ -57,9 +57,9 @@ public class AzureOpenAICodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, resDir, "azure_openai_const_natural_expr_with_validation_failure_code_request.json",
-                " Bearer not-a-real-azure-openai-token", "api-key");
+                "not-a-real-azure-openai-token", "api-key");
         assertRequest(API_PATH, resDir, "azure_openai_const_natural_expr_with_validation_failure_repair_request.json",
-                " Bearer not-a-real-azure-openai-token", "api-key");
+                "not-a-real-azure-openai-token", "api-key");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
@@ -75,7 +75,7 @@ public class AzureOpenAICodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, "const-natural-expressions", "azure_openai_const_natural_expr_single_bal_file_request.json",
-                " Bearer not-a-real-azure-openai-token", "api-key");
+                "not-a-real-azure-openai-token", "api-key");
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPathForSingleBalFile(dirPath)),
@@ -93,9 +93,9 @@ public class AzureOpenAICodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, resDir, "azure_openai_code_function_code_request.json",
-                " Bearer not-a-real-azure-openai-token", "api-key");
+                "not-a-real-azure-openai-token", "api-key");
         assertRequest(API_PATH, resDir, "azure_openai_code_function_repair_request.json",
-                " Bearer not-a-real-azure-openai-token", "api-key");
+                "not-a-real-azure-openai-token", "api-key");
 
         Assert.assertNull(server.takeRequest(3L, TimeUnit.SECONDS)); // No third request
 
@@ -118,9 +118,9 @@ public class AzureOpenAICodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, resDir, "azure_openai_code_function_with_validation_code_request.json",
-                " Bearer not-a-real-azure-openai-token", "api-key");
+                "not-a-real-azure-openai-token", "api-key");
         assertRequest(API_PATH, resDir, "azure_openai_code_function_with_validation_repair_request.json",
-                " Bearer not-a-real-azure-openai-token", "api-key");
+                "not-a-real-azure-openai-token", "api-key");
 
         validateGeneratedCodeAndDeleteGeneratedDir(resDir, "calculateTotalPrice_np_generated.bal");
 

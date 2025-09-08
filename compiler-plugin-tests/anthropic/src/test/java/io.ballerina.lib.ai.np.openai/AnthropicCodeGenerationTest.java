@@ -41,7 +41,7 @@ public class AnthropicCodeGenerationTest extends AbstractCodeGenerationTest {
 
         assertRequest(API_PATH, "const-natural-expressions",
                 "anthropic_const_natural_expr_proj_request.json",
-                "Bearer not-a-real-anthropic-token", AUTH_HEADER_KEY);
+                "not-a-real-anthropic-token", AUTH_HEADER_KEY);
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
                 "[1234,1456,1678,1890,1357,1579,1246,1468,1975,1753]");
@@ -60,9 +60,9 @@ public class AnthropicCodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, resDir, "anthropic_const_natural_expr_with_validation_failure_code_request.json",
-                "Bearer not-a-real-anthropic-token", AUTH_HEADER_KEY);
+                "not-a-real-anthropic-token", AUTH_HEADER_KEY);
         assertRequest(API_PATH, resDir, "anthropic_const_natural_expr_with_validation_failure_repair_request.json",
-                "Bearer not-a-real-anthropic-token", AUTH_HEADER_KEY);
+                "not-a-real-anthropic-token", AUTH_HEADER_KEY);
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
@@ -78,7 +78,7 @@ public class AnthropicCodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, "const-natural-expressions", "anthropic_const_natural_expr_single_bal_file_request.json",
-                "Bearer not-a-real-anthropic-token", AUTH_HEADER_KEY);
+                "not-a-real-anthropic-token", AUTH_HEADER_KEY);
 
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPathForSingleBalFile(dirPath)),
@@ -96,9 +96,9 @@ public class AnthropicCodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, resDir, "anthropic_code_function_code_request.json",
-                "Bearer not-a-real-anthropic-token", AUTH_HEADER_KEY);
+                "not-a-real-anthropic-token", AUTH_HEADER_KEY);
         assertRequest(API_PATH, resDir, "anthropic_code_function_repair_request.json",
-                "Bearer not-a-real-anthropic-token", AUTH_HEADER_KEY);
+                "not-a-real-anthropic-token", AUTH_HEADER_KEY);
 
         Assert.assertNull(server.takeRequest(3L, TimeUnit.SECONDS)); // No third request
 
@@ -121,9 +121,9 @@ public class AnthropicCodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, resDir, "anthropic_code_function_with_validation_code_request.json",
-                "Bearer not-a-real-anthropic-token", AUTH_HEADER_KEY);
+                "not-a-real-anthropic-token", AUTH_HEADER_KEY);
         assertRequest(API_PATH, resDir, "anthropic_code_function_with_validation_repair_request.json",
-                "Bearer not-a-real-anthropic-token", AUTH_HEADER_KEY);
+                "not-a-real-anthropic-token", AUTH_HEADER_KEY);
 
         validateGeneratedCodeAndDeleteGeneratedDir(resDir, "calculateTotalPrice_np_generated.bal");
 

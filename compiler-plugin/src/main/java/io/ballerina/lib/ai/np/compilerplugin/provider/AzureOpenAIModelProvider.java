@@ -25,7 +25,7 @@ public class AzureOpenAIModelProvider implements ModelProvider {
                 serviceUrl, deploymentId, apiVersion);
         this.headers = Map.of(
                 "Content-Type", "application/json",
-                "api-key", "Bearer " + apiKey
+                "api-key", apiKey
         );
     }
 
