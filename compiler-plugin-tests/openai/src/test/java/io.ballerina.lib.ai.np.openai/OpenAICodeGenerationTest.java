@@ -29,7 +29,7 @@ public class OpenAICodeGenerationTest extends AbstractCodeGenerationTest {
 
     @Test
     public void testConstNaturalExpressionsInProject() throws IOException, InterruptedException {
-        enqueueResponse("const-natural-expressions", "openai_const_natural_expr_response.json");
+        enqueueResponse("const-natural-expressions", "const_natural_expr_response.json");
 
         final Path projectPath = RESOURCE_DIRECTORY
                 .resolve("const-natural-expressions")
@@ -38,7 +38,7 @@ public class OpenAICodeGenerationTest extends AbstractCodeGenerationTest {
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
         assertRequest(API_PATH, "const-natural-expressions",
-                "openai_const_natural_expr_proj_request.json", "Bearer not-a-real-openai-token");
+                "const_natural_expr_proj_request.json", "Bearer not-a-real-openai-token");
         Assert.assertEquals(
                 buildAndRunExecutable(naturalExprProject, getJarPath(projectPath.toString(), naturalExprProject)),
                 "[1234,1456,1678,1890,1357,1579,1246,1468,1975,1753]");
@@ -47,8 +47,8 @@ public class OpenAICodeGenerationTest extends AbstractCodeGenerationTest {
     @Test
     public void testConstNaturalExpressionsInProjectWithRepair() throws IOException, InterruptedException {
         String resDir = "const-natural-expressions/const-natural-expressions-with-validation-failure";
-        enqueueResponse(resDir, "openai_const_natural_expr_with_validation_failure_code_response.json");
-        enqueueResponse(resDir, "openai_const_natural_expr_with_validation_failure_repair_response.json");
+        enqueueResponse(resDir, "const_natural_expr_with_validation_failure_code_response.json");
+        enqueueResponse(resDir, "const_natural_expr_with_validation_failure_repair_response.json");
 
         final Path projectPath = RESOURCE_DIRECTORY
                 .resolve("const-natural-expressions")
@@ -56,9 +56,9 @@ public class OpenAICodeGenerationTest extends AbstractCodeGenerationTest {
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(API_PATH, resDir, "openai_const_natural_expr_with_validation_failure_code_request.json",
+        assertRequest(API_PATH, resDir, "const_natural_expr_with_validation_failure_code_request.json",
                 "Bearer not-a-real-openai-token");
-        assertRequest(API_PATH, resDir, "openai_const_natural_expr_with_validation_failure_repair_request.json",
+        assertRequest(API_PATH, resDir, "const_natural_expr_with_validation_failure_repair_request.json",
                 "Bearer not-a-real-openai-token");
 
         Assert.assertEquals(
@@ -68,13 +68,13 @@ public class OpenAICodeGenerationTest extends AbstractCodeGenerationTest {
 
     @Test
     public void testConstNaturalExpressionsInSingleBalFile() throws IOException, InterruptedException {
-        enqueueResponse("const-natural-expressions", "openai_const_natural_expr_response.json");
+        enqueueResponse("const-natural-expressions", "const_natural_expr_response.json");
 
         final Path dirPath = RESOURCE_DIRECTORY.resolve("const-natural-expressions");
         final Project naturalExprProject = loadSingleBalFileProject(dirPath.resolve("const_natural_expressions.bal"));
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(API_PATH, "const-natural-expressions", "openai_const_natural_expr_single_bal_file_request.json",
+        assertRequest(API_PATH, "const-natural-expressions", "const_natural_expr_single_bal_file_request.json",
                 "Bearer not-a-real-openai-token");
 
         Assert.assertEquals(
@@ -85,16 +85,16 @@ public class OpenAICodeGenerationTest extends AbstractCodeGenerationTest {
     @Test
     public void testCodeFunction() throws IOException, InterruptedException {
         String resDir = "code-function-projects/code-function";
-        enqueueResponse(resDir, "openai_code_function_code_response.json");
-        enqueueResponse(resDir, "openai_code_function_repair_response.json");
+        enqueueResponse(resDir, "code_function_code_response.json");
+        enqueueResponse(resDir, "code_function_repair_response.json");
 
         final Path projectPath = RESOURCE_DIRECTORY.resolve(resDir);
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(API_PATH, resDir, "openai_code_function_code_request.json",
+        assertRequest(API_PATH, resDir, "code_function_code_request.json",
                 "Bearer not-a-real-openai-token");
-        assertRequest(API_PATH, resDir, "openai_code_function_repair_request.json",
+        assertRequest(API_PATH, resDir, "code_function_repair_request.json",
                 "Bearer not-a-real-openai-token");
 
         Assert.assertNull(server.takeRequest(3L, TimeUnit.SECONDS)); // No third request
@@ -110,16 +110,16 @@ public class OpenAICodeGenerationTest extends AbstractCodeGenerationTest {
     @Test
     public void testCodeFunctionWithValidation() throws IOException, InterruptedException {
         String resDir = "code-function-projects/code-function-with-validation-failure";
-        enqueueResponse(resDir, "openai_code_function_with_validation_code_response.json");
-        enqueueResponse(resDir, "openai_code_function_with_validation_repair_response.json");
+        enqueueResponse(resDir, "code_function_with_validation_code_response.json");
+        enqueueResponse(resDir, "code_function_with_validation_repair_response.json");
 
         final Path projectPath = RESOURCE_DIRECTORY.resolve(resDir);
         final Project naturalExprProject = loadPackageProject(projectPath);
         naturalExprProject.currentPackage().runCodeGenAndModifyPlugins();
 
-        assertRequest(API_PATH, resDir, "openai_code_function_with_validation_code_request.json",
+        assertRequest(API_PATH, resDir, "code_function_with_validation_code_request.json",
                 "Bearer not-a-real-openai-token");
-        assertRequest(API_PATH, resDir, "openai_code_function_with_validation_repair_request.json",
+        assertRequest(API_PATH, resDir, "code_function_with_validation_repair_request.json",
                 "Bearer not-a-real-openai-token");
 
         validateGeneratedCodeAndDeleteGeneratedDir(resDir, "calculateTotalPrice_np_generated.bal");
