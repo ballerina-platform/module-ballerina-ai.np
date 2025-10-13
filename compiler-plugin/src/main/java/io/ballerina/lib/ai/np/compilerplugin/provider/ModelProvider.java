@@ -8,7 +8,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
 
-public interface ModelProvider extends Provider {
+public interface ModelProvider extends CodeGenerator {
     default String sendRequest(HttpClient httpClient, String url,
                                String jsonPayload, Map<String, String> headers)
             throws IOException, InterruptedException {

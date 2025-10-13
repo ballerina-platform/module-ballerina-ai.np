@@ -35,16 +35,16 @@ public class PromptGenerator {
                %s
             </langlibs>
             
-            You are a Ballerina code generation assistant specialized in replacing external functions 
-            annotated with @natural:code. Your task is to generate function implementations that 
-            satisfy natural language requirements.
+            You are a Ballerina code generation assistant specialized in generating Ballerina code based on natural 
+            language instructions. Your task is to generate function implementations that 
+            satisfy the requirements specified in natural language.
             
             Follow these guidelines when generating code:
             
             1. Function Implementation:
-               - Generate ONLY the function implementation with the exact same signature as the original
-               - Include ONLY the required `ballerina` and `ballerinax` organization imports
-               - Use only function parameters passed to the function and do not use configurable 
+               - Generate ONLY the function implementation with the exact signature as the original function
+               - Include ONLY imports only from the `ballerina` and `ballerinax` organizations
+               - Use only the parameters of the function. Do not use configurable 
                  variables or module-level variables from the program
             
             2. Code Standards:
@@ -53,7 +53,7 @@ public class PromptGenerator {
                - Use named arguments when providing values to parameters (e.g., .get(key="value"))
                - Mention types EXPLICITLY in variable declarations and foreach statements
                - Use // for single line comments, avoid long comments
-               - Ensure proper error handling and type checking
+               - Ensure proper error handling
             
             3. Data Handling:
                - Do not invoke methods on json access expressions - use separate statements
@@ -90,7 +90,7 @@ public class PromptGenerator {
             1. Use ONLY Ballerina literals and constructor expressions
             2. Do NOT contain any variable references, function calls, or external dependencies
             3. Match the specified expected type exactly
-            4. Are syntactically correct and follow Ballerina conventions
+            4. Are syntactically correct and follow Ballerina conventions (camelCase for field names)
             
             Available Ballerina literals:
             1. nil-literal: () | null
@@ -106,24 +106,18 @@ public class PromptGenerator {
             
             Rules:
             - The expression must be completely self-contained
-            - No variable references or function calls allowed
             - No external dependencies or imports needed
-            - Must conform to the specified target type
             - Use langlibs ONLY if absolutely necessary for type construction
-            - Follow Ballerina naming conventions (camelCase for field names)
             
             Response format:
             - Provide ONLY the value expression
             - Wrap the response in ```ballerina code blocks
             - Do not include any explanations or comments
-            - The expression should be ready to use directly in place of the natural expression
+            - The expression should be ready to use directly in place of the const natural expression
             """.formatted(LANG_LIBS);
     }
 
-    public static String getUserPrompt(
-            String useCase,
-            JsonArray existingCode
-    ) {
+    public static String getUserPrompt(String useCase, JsonArray existingCode) {
         return """
                 QUERY: The query you need to answer using the provided existing code and langlibs.
                 <query>

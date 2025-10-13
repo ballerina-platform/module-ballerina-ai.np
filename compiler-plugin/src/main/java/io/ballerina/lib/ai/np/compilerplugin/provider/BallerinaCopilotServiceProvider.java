@@ -13,7 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.stream.Stream;
 
-public class BallerinaCopilotServiceProvider implements Provider {
+public class BallerinaCopilotServiceProvider implements CodeGenerator {
     private final String copilotUrl;
     private final String copilotAccessToken;
 

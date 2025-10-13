@@ -21,8 +21,8 @@ public class ProviderFactory {
     private static final String BAL_CODEGEN_URL = "BAL_CODEGEN_URL";
     private static final String BAL_CODEGEN_TOKEN = "BAL_CODEGEN_TOKEN";
 
-    public static Provider getProviderInstance() {
-        Optional<Provider> providerOpt = ProviderFactory.createModelFromEnvironment();
+    public static CodeGenerator getProviderInstance() {
+        Optional<CodeGenerator> providerOpt = ProviderFactory.createModelFromEnvironment();
         if (providerOpt.isEmpty()) {
             throw new RuntimeException("Failed to create a provider for code generation. " +
                     "Ensure that environment variables for exactly one provider are set.");
@@ -30,8 +30,8 @@ public class ProviderFactory {
         return providerOpt.get();
     }
 
-    private static Optional<Provider> createModelFromEnvironment() {
-        List<Provider> availableProviders = Stream.of(
+    private static Optional<CodeGenerator> createModelFromEnvironment() {
+        List<CodeGenerator> availableProviders = Stream.of(
                         createAnthropicProvider(),
                         createAzureOpenAiProvider(),
                         createOpenAiProvider(),
@@ -47,7 +47,7 @@ public class ProviderFactory {
 
         if (availableProviders.size() > 1) {
             String configuredProviderNames = availableProviders.stream()
-                    .map(Provider::getName)
+                    .map(CodeGenerator::getName)
                     .collect(Collectors.joining(", "));
             throw new ProjectException("Multiple AI model providers are configured. " +
                     "Please set environment variables for only one provider. Found configurations for: "
@@ -57,7 +57,7 @@ public class ProviderFactory {
         return Optional.of(availableProviders.get(0));
     }
 
-    private static Optional<Provider> createAnthropicProvider() {
+    private static Optional<CodeGenerator> createAnthropicProvider() {
         String anthropicToken = System.getenv(ANTHROPIC_TOKEN_ENV_VAR);
         if (isNotNullOrEmpty(anthropicToken)) {
             String anthropicServiceUrl = System.getenv(ANTHROPIC_SERVICE_URL_ENV_VAR);
@@ -69,7 +69,7 @@ public class ProviderFactory {
         return Optional.empty();
     }
 
-    private static Optional<Provider> createAzureOpenAiProvider() {
+    private static Optional<CodeGenerator> createAzureOpenAiProvider() {
         String token = System.getenv(AZURE_TOKEN_ENV_VAR);
         String deploymentId = System.getenv(AZURE_DEPLOYMENT_ID_ENV_VAR);
         String apiVersion = System.getenv(AZURE_API_VERSION_ENV_VAR);
@@ -102,7 +102,7 @@ public class ProviderFactory {
         return Optional.of(new AzureOpenAIModelProvider(token, deploymentId, serviceUrl, apiVersion));
     }
 
-    private static Optional<Provider> createOpenAiProvider() {
+    private static Optional<CodeGenerator> createOpenAiProvider() {
         String openAiToken = System.getenv(OPENAI_TOKEN_ENV_VAR);
         if (isNotNullOrEmpty(openAiToken)) {
             String openAiServiceUrl = System.getenv(OPENAI_SERVICE_URL_ENV_VAR);
@@ -114,7 +114,7 @@ public class ProviderFactory {
         return Optional.empty();
     }
 
-    private static Optional<Provider> createBallerinaCopilotProvider() {
+    private static Optional<CodeGenerator> createBallerinaCopilotProvider() {
         String url = System.getenv(BAL_CODEGEN_URL);
         String token = System.getenv(BAL_CODEGEN_TOKEN);
 

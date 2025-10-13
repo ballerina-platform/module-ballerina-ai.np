@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 
-public interface Provider {
+public interface CodeGenerator {
     GeneratedCode generateFunction(HttpClient client, String useCase, JsonArray sourceFiles)
             throws IOException, InterruptedException, URISyntaxException;
 

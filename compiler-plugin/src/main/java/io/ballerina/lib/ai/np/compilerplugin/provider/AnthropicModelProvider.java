@@ -30,7 +30,7 @@ public class AnthropicModelProvider implements ModelProvider {
     private final String apiVersion = "2023-06-01";
     private final Map<String, String> headers;
 
-    public AnthropicModelProvider(String apiKey) {
+    AnthropicModelProvider(String apiKey) {
         this.apiKey = apiKey;
         this.serviceUrl = "https://api.anthropic.com/v1/messages";
         this.headers = Map.of(
@@ -40,13 +40,13 @@ public class AnthropicModelProvider implements ModelProvider {
         );
     }
 
-    public AnthropicModelProvider(String apiKey, String serviceUrl) {
+    AnthropicModelProvider(String apiKey, String serviceUrl) {
         this.apiKey = apiKey;
         this.serviceUrl = serviceUrl + "/messages";
         this.headers = Map.of(
-                "Content-Type", "application/json",
-                "x-api-key", this.apiKey,
-                "anthropic-version", this.apiVersion
+            "Content-Type", "application/json",
+            "x-api-key", this.apiKey,
+            "anthropic-version", this.apiVersion
         );
     }
 
