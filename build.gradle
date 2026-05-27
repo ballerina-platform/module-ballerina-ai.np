@@ -61,6 +61,14 @@ allprojects {
 
 subprojects {
 
+    plugins.withId('java') {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(25)
+            }
+        }
+    }
+
     configurations {
         ballerinaStdLibs
         jbalTools
@@ -116,7 +124,7 @@ release {
     }
 }
 
-task build {
+tasks.named('build') {
     dependsOn('ai.np-compiler-plugin:build')
     dependsOn('ai.np-ballerina:build')
     dependsOn('ai.np-compiler-plugin-tests:test')

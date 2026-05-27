@@ -239,7 +239,7 @@ public class CodeGenerationTest {
 
     private static String buildAndRunExecutable(Project project, Path jarPath) throws IOException {
         JBallerinaBackend jBallerinaBackend =
-                JBallerinaBackend.from(project.currentPackage().getCompilation(), JvmTarget.JAVA_21);
+                JBallerinaBackend.from(project.currentPackage().getCompilation(), JvmTarget.JAVA_25);
         DiagnosticResult diagnosticResult = jBallerinaBackend.diagnosticResult();
         Assert.assertFalse(diagnosticResult.hasErrors(),
                 String.format("Expected no compilation errors, found: [%s]", diagnosticResult.errors()));

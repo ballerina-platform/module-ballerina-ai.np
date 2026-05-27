@@ -6,8 +6,8 @@ authors = ["Ballerina"]
 keywords = ["natural programming", "ai"]
 repository = "https://github.com/ballerina-platform/module-ballerina-ai.np"
 license = ["Apache-2.0"]
-distribution = "2201.11.0"
+distribution = "2201.14.0-20260527-050400-74f7e6bf"
 
-[platform.java21]
+[platform.java25]
 graalvmCompatible = true
 
