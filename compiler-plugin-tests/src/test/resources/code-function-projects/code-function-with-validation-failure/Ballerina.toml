@@ -2,4 +2,7 @@
 org = "np_test"
 name = "code_functions_with_validation_failure"
 version = "0.1.0"
-distribution = "2201.14.0"
+distribution = "2201.13.0-m2"
+
+[build-options]
+observabilityIncluded = true
