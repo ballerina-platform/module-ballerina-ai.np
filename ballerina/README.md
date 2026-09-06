@@ -1,8 +1,14 @@
-# Overview
+## Overview
 
-This is the library module for natural programming - specifically the compile-time code generation component of natural programming. This module also generates JSON schema corresponding to types used with natural expressions.
+This module provides compile-time code generation for natural programming, including generating JSON schema for types used with natural expressions.
 
 For more information about natural programming, see [Natural Language is Code: A hybrid approach with Natural Programming](https://blog.ballerina.io/posts/2025-04-26-introducing-natural-programming/).
+
+## Key Features
+
+- Compile-time code generation for natural language expressions
+- JSON schema generation for types used with natural expressions
+- Configurable Copilot integration for code generation
 
 ### Sample of compile-time code generation
 
