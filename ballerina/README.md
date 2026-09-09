@@ -4,7 +4,7 @@ This module provides compile-time code generation for natural programming, inclu
 
 For more information about natural programming, see [Natural Language is Code: A hybrid approach with Natural Programming](https://blog.ballerina.io/posts/2025-04-26-introducing-natural-programming/).
 
-## Key Features
+### Key Features
 
 - Compile-time code generation for natural language expressions
 - JSON schema generation for types used with natural expressions
