@@ -116,7 +116,7 @@ release {
     }
 }
 
-task build {
+tasks.named('build') {
     dependsOn('ai.np-compiler-plugin:build')
     dependsOn('ai.np-ballerina:build')
     dependsOn('ai.np-compiler-plugin-tests:test')
