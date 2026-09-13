@@ -233,7 +233,7 @@ public class CodeGenerationTest {
     }
 
     @AfterSuite
-    void tearDown() throws Exception {
+    void tearDown() throws IOException {
         server.shutdown();
     }
 
