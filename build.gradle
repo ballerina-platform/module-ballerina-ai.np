@@ -116,9 +116,20 @@ release {
     }
 }
 
-task build {
-    dependsOn('ai.np-compiler-plugin:build')
-    dependsOn('ai.np-ballerina:build')
-    dependsOn('ai.np-compiler-plugin-tests:test')
-    dependsOn('ai.np-ballerina-tests:test')
+if (tasks.names.contains('build')) {
+    tasks.named('build') {
+        dependsOn('ai.np-compiler-plugin:build')
+        dependsOn('ai.np-ballerina:build')
+        dependsOn('ai.np-compiler-plugin-tests:test')
+        dependsOn('ai.np-ballerina-tests:test')
+
+    }
+} else {
+    tasks.register('build') {
+        dependsOn('ai.np-compiler-plugin:build')
+        dependsOn('ai.np-ballerina:build')
+        dependsOn('ai.np-compiler-plugin-tests:test')
+        dependsOn('ai.np-ballerina-tests:test')
+
+    }
 }

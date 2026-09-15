@@ -50,6 +50,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static io.ballerina.projects.util.ProjectConstants.BALLERINA_HOME;
@@ -233,13 +234,22 @@ public class CodeGenerationTest {
     }
 
     @AfterSuite
-    void tearDown() throws Exception {
+    void tearDown() throws IOException {
         server.shutdown();
+    }
+
+    private static JvmTarget getJvmTarget() {
+        String runtimeCode = "java" + Runtime.version().feature();
+        return Arrays.stream(JvmTarget.values())
+                .filter(target -> target.code().equals(runtimeCode))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "cannot find a compatible JvmTarget for the runtime version: " + runtimeCode));
     }
 
     private static String buildAndRunExecutable(Project project, Path jarPath) throws IOException {
         JBallerinaBackend jBallerinaBackend =
-                JBallerinaBackend.from(project.currentPackage().getCompilation(), JvmTarget.JAVA_21);
+                JBallerinaBackend.from(project.currentPackage().getCompilation(), getJvmTarget());
         DiagnosticResult diagnosticResult = jBallerinaBackend.diagnosticResult();
         Assert.assertFalse(diagnosticResult.hasErrors(),
                 String.format("Expected no compilation errors, found: [%s]", diagnosticResult.errors()));
