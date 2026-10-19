@@ -1,0 +1,5 @@
+# ballerinax/mysql:1 is a false positive here: the MySQL client is created from the `dbConfig` configurable
+# (`configurable DbConfig dbConfig = ?;`), so the password has no default in the source and must be supplied by the
+# user at deployment time. No weak or hardcoded database password exists in the code.
+[rule]
+exclude = ["ballerinax/mysql:1"]
