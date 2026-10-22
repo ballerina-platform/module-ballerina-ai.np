@@ -1,5 +1,8 @@
 # ballerinax/mysql:1 is a false positive here: the MySQL client is created from the `dbConfig` configurable
 # (`configurable DbConfig dbConfig = ?;`), so the password has no default in the source and must be supplied by the
 # user at deployment time. No weak or hardcoded database password exists in the code.
+# TODO: replace this rule exclusion with a targeted scan suppression (with a reason) once `bal scan` supports it
+# (planned for v0.13.0), and fix the false positives on the scan tool side: a secret-named identifier should only be
+# reported when it is assigned a fixed value.
 [rule]
 exclude = ["ballerinax/mysql:1"]
